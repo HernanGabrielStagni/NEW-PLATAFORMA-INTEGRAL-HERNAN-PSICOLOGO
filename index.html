@@ -2745,7 +2745,7 @@
                           whiteSpace: "nowrap",
                         }}
                       >
-                        Semana actual
+                        SEMANA ACTUAL
                       </button>
                       <button
                         onClick={nextWeek}
@@ -2961,11 +2961,11 @@
         { v: "otro", l: "Otro", icon: "✏️" },
       ];
       const ESTADO_ICONS = {
-        asistio:      "✅",
-        cancelo:      "❌",
+        asistio: "✅",
+        cancelo: "❌",
         inasistencia: "🚫",
-        pendiente:    "⏳",
-        reprogramo:   "🔄",
+        pendiente: "⏳",
+        reprogramo: "🔄",
       };
 
       /* Helper: detecta si un turno tiene pendientes de cobro/orden */
@@ -2975,11 +2975,17 @@
         if (s.tipo === "reserva_personal") return false;
         // Cobro por cancelación / reprogramación / inasistencia pendiente
         if (
-          (s.estado === "cancelo" || s.estado === "reprogramo" || s.estado === "inasistencia") &&
+          (s.estado === "cancelo" ||
+            s.estado === "reprogramo" ||
+            s.estado === "inasistencia") &&
           s.cobroCancel
         ) {
           // Esquema nuevo (campos independientes v2)
-          if (s.cancelCoseguro !== undefined || s.cancelOrdenOS !== undefined || s.cancelParticularMonto !== undefined) {
+          if (
+            s.cancelCoseguro !== undefined ||
+            s.cancelOrdenOS !== undefined ||
+            s.cancelParticularMonto !== undefined
+          ) {
             if (s.cancelCoseguro && !s.cancelCoseguroPagado) return true;
             if (s.cancelOrdenOS && !s.cancelOrdenEmitida) return true;
             const mPart = Number(s.cancelParticularMonto) || 0;
@@ -2990,8 +2996,10 @@
           if (s.cancelEfectivo && !s.cancelAbonado) return true;
           if (s.cancelOrden && !s.cancelOrdenSaldada) return true;
           if (!s.cancelEfectivo && !s.cancelOrden) {
-            if (s.cancelMetodo === "orden_os" && !s.cancelOrdenSaldada) return true;
-            if (s.cancelMetodo === "efectivo_transfer" && !s.cancelAbonado) return true;
+            if (s.cancelMetodo === "orden_os" && !s.cancelOrdenSaldada)
+              return true;
+            if (s.cancelMetodo === "efectivo_transfer" && !s.cancelAbonado)
+              return true;
             return true; // cobroCancel sin detalles → pendiente por defecto
           }
         }
@@ -3036,14 +3044,23 @@
         const items = [];
         // Cancelación / reprogramación / inasistencia con cobro pendiente
         if (
-          (s.estado === "cancelo" || s.estado === "reprogramo" || s.estado === "inasistencia") &&
+          (s.estado === "cancelo" ||
+            s.estado === "reprogramo" ||
+            s.estado === "inasistencia") &&
           s.cobroCancel
         ) {
-          const te = s.estado === "cancelo" ? "cancelación"
-            : s.estado === "inasistencia" ? "inasistencia"
-            : "reprogramación";
+          const te =
+            s.estado === "cancelo"
+              ? "cancelación"
+              : s.estado === "inasistencia"
+                ? "inasistencia"
+                : "reprogramación";
           // Esquema nuevo v2 (campos independientes)
-          if (s.cancelCoseguro !== undefined || s.cancelOrdenOS !== undefined || s.cancelParticularMonto !== undefined) {
+          if (
+            s.cancelCoseguro !== undefined ||
+            s.cancelOrdenOS !== undefined ||
+            s.cancelParticularMonto !== undefined
+          ) {
             if (s.cancelCoseguro && !s.cancelCoseguroPagado) {
               const m = Number(s.cancelCoseguroMonto) || 0;
               items.push({
@@ -3081,12 +3098,24 @@
             }
             if (!s.cancelEfectivo && !s.cancelOrden) {
               if (s.cancelMetodo === "orden_os" && !s.cancelOrdenSaldada)
-                items.push({ texto: `Orden OS por ${te} · pendiente de token`, campo: "cancelOrdenSaldada" });
-              else if (s.cancelMetodo === "efectivo_transfer" && !s.cancelAbonado) {
+                items.push({
+                  texto: `Orden OS por ${te} · pendiente de token`,
+                  campo: "cancelOrdenSaldada",
+                });
+              else if (
+                s.cancelMetodo === "efectivo_transfer" &&
+                !s.cancelAbonado
+              ) {
                 const m = Number(s.montoCancel) || 0;
-                items.push({ texto: `Cobro por ${te} pendiente${m ? ` ($${m.toLocaleString("es-AR")})` : ""}`, campo: "cancelAbonado" });
+                items.push({
+                  texto: `Cobro por ${te} pendiente${m ? ` ($${m.toLocaleString("es-AR")})` : ""}`,
+                  campo: "cancelAbonado",
+                });
               } else {
-                items.push({ texto: `Cobro por ${te} · pendiente de detallar`, campo: "cobroCancel" });
+                items.push({
+                  texto: `Cobro por ${te} · pendiente de detallar`,
+                  campo: "cobroCancel",
+                });
               }
             }
           }
@@ -3395,78 +3424,229 @@
       /* ═══════════════════════════════════════ */
       function PanelDia({ fecha, sesiones, pacientes, onClose, onEditar }) {
         const ESTADOS_LABEL = {
-          pendiente:    { label: "Pendiente",    bg: "#7A5200", color: "#FDEAAA" },
-          asistio:      { label: "Asistió",      bg: "#1E3D2B", color: "#A8DDB8" },
-          cancelo:      { label: "Canceló",      bg: "#7A2800", color: "#FFD0B8" },
-          inasistencia: { label: "Inasistencia", bg: "#6B1515", color: "#FFD0D0" },
-          reprogramo:   { label: "Reprogramó",   bg: "#3A4A7A", color: "#C8D8FF" },
+          pendiente: { label: "Pendiente", bg: "#7A5200", color: "#FDEAAA" },
+          asistio: { label: "Asistió", bg: "#1E3D2B", color: "#A8DDB8" },
+          cancelo: { label: "Canceló", bg: "#7A2800", color: "#FFD0B8" },
+          inasistencia: {
+            label: "Inasistencia",
+            bg: "#6B1515",
+            color: "#FFD0D0",
+          },
+          reprogramo: { label: "Reprogramó", bg: "#3A4A7A", color: "#C8D8FF" },
         };
 
         const fechaDate = new Date(fecha + "T12:00");
         const titulo = fechaDate.toLocaleDateString("es-AR", {
-          weekday: "long", day: "2-digit", month: "2-digit", year: "numeric",
+          weekday: "long",
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
         });
         const tituloFmt = titulo.charAt(0).toUpperCase() + titulo.slice(1);
 
         const daySes = sesiones
           .filter((s) => s.fecha === fecha && s.tipo !== "reserva_personal")
-          .sort((a, b) => (a.horaInicio || "").localeCompare(b.horaInicio || ""));
+          .sort((a, b) =>
+            (a.horaInicio || "").localeCompare(b.horaInicio || ""),
+          );
 
         return ReactDOM.createPortal(
-          <div style={{
-            position: "fixed", inset: 0, background: "rgba(30,61,43,.55)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            zIndex: 1200,
-          }} onClick={onClose}>
-            <div style={{
-              background: "var(--vd)", border: "2px solid var(--vm)",
-              borderRadius: "var(--r)", width: "min(680px,95vw)", maxHeight: "80vh",
-              display: "flex", flexDirection: "column", overflow: "hidden",
-            }} onClick={(e) => e.stopPropagation()}>
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(30,61,43,.55)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 1200,
+            }}
+            onClick={onClose}
+          >
+            <div
+              style={{
+                background: "var(--vd)",
+                border: "2px solid var(--vm)",
+                borderRadius: "var(--r)",
+                width: "min(680px,95vw)",
+                maxHeight: "80vh",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
               {/* barra dorada */}
-              <div style={{ height: "4px", background: "linear-gradient(90deg,var(--do),#E8B84B)", flexShrink: 0 }} />
+              <div
+                style={{
+                  height: "4px",
+                  background: "linear-gradient(90deg,var(--do),#E8B84B)",
+                  flexShrink: 0,
+                }}
+              />
               {/* header */}
-              <div style={{ padding: "18px 22px 12px", borderBottom: "1px solid rgba(200,146,42,.2)", flexShrink: 0 }}>
-                <div style={{ fontFamily: "var(--serif)", fontSize: "18px", color: "var(--do)", fontWeight: 700 }}>
+              <div
+                style={{
+                  padding: "18px 22px 12px",
+                  borderBottom: "1px solid rgba(200,146,42,.2)",
+                  flexShrink: 0,
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "var(--serif)",
+                    fontSize: "18px",
+                    color: "var(--do)",
+                    fontWeight: 700,
+                  }}
+                >
                   📅 Turnos del {tituloFmt}
                 </div>
               </div>
               {/* cuerpo */}
               <div style={{ overflowY: "auto", padding: "12px 22px", flex: 1 }}>
                 {daySes.length === 0 ? (
-                  <div style={{ color: "rgba(255,255,255,.5)", fontFamily: "var(--sans)", fontSize: "14px", padding: "20px 0", textAlign: "center" }}>
+                  <div
+                    style={{
+                      color: "rgba(255,255,255,.5)",
+                      fontFamily: "var(--sans)",
+                      fontSize: "14px",
+                      padding: "20px 0",
+                      textAlign: "center",
+                    }}
+                  >
                     Sin turnos registrados para este día.
                   </div>
                 ) : (
                   <table style={{ width: "100%", borderCollapse: "collapse" }}>
                     <thead>
                       <tr style={{ background: "rgba(255,255,255,.06)" }}>
-                        {["Hora", "Paciente", "Tipo", "Estado", "Monto", ""].map((h) => (
-                          <th key={h} style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.45)", textTransform: "uppercase", letterSpacing: ".07em", padding: "7px 8px", textAlign: "left", fontWeight: 600 }}>{h}</th>
+                        {[
+                          "Hora",
+                          "Paciente",
+                          "Tipo",
+                          "Estado",
+                          "Monto",
+                          "",
+                        ].map((h) => (
+                          <th
+                            key={h}
+                            style={{
+                              fontFamily: "var(--mono)",
+                              fontSize: "10px",
+                              color: "rgba(255,255,255,.45)",
+                              textTransform: "uppercase",
+                              letterSpacing: ".07em",
+                              padding: "7px 8px",
+                              textAlign: "left",
+                              fontWeight: 600,
+                            }}
+                          >
+                            {h}
+                          </th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {daySes.map((s) => {
-                        const pac = pacientes.find((p) => p.id === s.pacienteId);
-                        const nombre = pac ? `${pac.nombre} ${pac.apellido}` : "—";
-                        const est = ESTADOS_LABEL[s.estado] || ESTADOS_LABEL.pendiente;
-                        const monto = s.montoCobrado ? `$${Number(s.montoCobrado).toLocaleString("es-AR")}` : (s.montoParticular ? `$${Number(s.montoParticular).toLocaleString("es-AR")}` : "—");
+                        const pac = pacientes.find(
+                          (p) => p.id === s.pacienteId,
+                        );
+                        const nombre = pac
+                          ? `${pac.nombre} ${pac.apellido}`
+                          : "—";
+                        const est =
+                          ESTADOS_LABEL[s.estado] || ESTADOS_LABEL.pendiente;
+                        const monto = s.montoCobrado
+                          ? `$${Number(s.montoCobrado).toLocaleString("es-AR")}`
+                          : s.montoParticular
+                            ? `$${Number(s.montoParticular).toLocaleString("es-AR")}`
+                            : "—";
                         return (
-                          <tr key={s.id} style={{ borderBottom: "1px solid rgba(255,255,255,.07)" }}>
-                            <td style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "rgba(255,255,255,.7)", padding: "8px 8px", whiteSpace: "nowrap" }}>
+                          <tr
+                            key={s.id}
+                            style={{
+                              borderBottom: "1px solid rgba(255,255,255,.07)",
+                            }}
+                          >
+                            <td
+                              style={{
+                                fontFamily: "var(--mono)",
+                                fontSize: "12px",
+                                color: "rgba(255,255,255,.7)",
+                                padding: "8px 8px",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
                               {s.horaInicio || "?"} – {s.horaFin || "?"}
                             </td>
-                            <td style={{ fontFamily: "var(--sans)", fontSize: "13px", color: "var(--do)", padding: "8px 8px", fontWeight: 600 }}>{nombre}</td>
-                            <td style={{ fontFamily: "var(--sans)", fontSize: "12px", color: "rgba(255,255,255,.6)", padding: "8px 8px", textTransform: "capitalize" }}>{s.tipo || "—"}</td>
+                            <td
+                              style={{
+                                fontFamily: "var(--sans)",
+                                fontSize: "13px",
+                                color: "var(--do)",
+                                padding: "8px 8px",
+                                fontWeight: 600,
+                              }}
+                            >
+                              {nombre}
+                            </td>
+                            <td
+                              style={{
+                                fontFamily: "var(--sans)",
+                                fontSize: "12px",
+                                color: "rgba(255,255,255,.6)",
+                                padding: "8px 8px",
+                                textTransform: "capitalize",
+                              }}
+                            >
+                              {s.tipo || "—"}
+                            </td>
                             <td style={{ padding: "8px 8px" }}>
-                              <span style={{ background: est.bg, color: est.color, borderRadius: "50px", padding: "3px 10px", fontSize: "11px", fontWeight: 700, fontFamily: "var(--sans)", whiteSpace: "nowrap" }}>
+                              <span
+                                style={{
+                                  background: est.bg,
+                                  color: est.color,
+                                  borderRadius: "50px",
+                                  padding: "3px 10px",
+                                  fontSize: "11px",
+                                  fontWeight: 700,
+                                  fontFamily: "var(--sans)",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
                                 {est.label}
                               </span>
                             </td>
-                            <td style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "rgba(255,255,255,.7)", padding: "8px 8px", whiteSpace: "nowrap" }}>{monto}</td>
+                            <td
+                              style={{
+                                fontFamily: "var(--mono)",
+                                fontSize: "12px",
+                                color: "rgba(255,255,255,.7)",
+                                padding: "8px 8px",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {monto}
+                            </td>
                             <td style={{ padding: "8px 4px" }}>
-                              <button onClick={() => { onClose(); onEditar(s); }} style={{ background: "rgba(200,146,42,.15)", border: "1px solid rgba(200,146,42,.3)", borderRadius: "50px", color: "var(--do)", fontSize: "12px", padding: "4px 12px", cursor: "pointer", fontFamily: "var(--sans)", fontWeight: 600 }}>
+                              <button
+                                onClick={() => {
+                                  onClose();
+                                  onEditar(s);
+                                }}
+                                style={{
+                                  background: "rgba(200,146,42,.15)",
+                                  border: "1px solid rgba(200,146,42,.3)",
+                                  borderRadius: "50px",
+                                  color: "var(--do)",
+                                  fontSize: "12px",
+                                  padding: "4px 12px",
+                                  cursor: "pointer",
+                                  fontFamily: "var(--sans)",
+                                  fontWeight: 600,
+                                }}
+                              >
                                 ✏️ Editar
                               </button>
                             </td>
@@ -3478,102 +3658,268 @@
                 )}
               </div>
               {/* pie */}
-              <div style={{ padding: "12px 22px", borderTop: "1px solid rgba(200,146,42,.2)", display: "flex", justifyContent: "flex-end", flexShrink: 0 }}>
-                <button onClick={onClose} style={{ background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.15)", borderRadius: "50px", color: "rgba(255,255,255,.8)", fontSize: "13px", padding: "7px 20px", cursor: "pointer", fontFamily: "var(--sans)", fontWeight: 600 }}>
+              <div
+                style={{
+                  padding: "12px 22px",
+                  borderTop: "1px solid rgba(200,146,42,.2)",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  flexShrink: 0,
+                }}
+              >
+                <button
+                  onClick={onClose}
+                  style={{
+                    background: "rgba(255,255,255,.08)",
+                    border: "1px solid rgba(255,255,255,.15)",
+                    borderRadius: "50px",
+                    color: "rgba(255,255,255,.8)",
+                    fontSize: "13px",
+                    padding: "7px 20px",
+                    cursor: "pointer",
+                    fontFamily: "var(--sans)",
+                    fontWeight: 600,
+                  }}
+                >
                   Cerrar
                 </button>
               </div>
             </div>
           </div>,
-          document.body
+          document.body,
         );
       }
 
       /* ═══════════════════════════════════════════ */
       /* PANEL ANOMALÍAS — turnos fuera de rango    */
       /* ═══════════════════════════════════════════ */
-      function PanelAnomalias({ fecha, sesiones, pacientes, onClose, onEditar, onEliminar }) {
+      function PanelAnomalias({
+        fecha,
+        sesiones,
+        pacientes,
+        onClose,
+        onEditar,
+        onEliminar,
+      }) {
         const fechaDate = new Date(fecha + "T12:00");
         const titulo = fechaDate.toLocaleDateString("es-AR", {
-          weekday: "long", day: "2-digit", month: "2-digit",
+          weekday: "long",
+          day: "2-digit",
+          month: "2-digit",
         });
         const tituloFmt = titulo.charAt(0).toUpperCase() + titulo.slice(1);
 
         const anomalas = sesiones
-          .filter((s) => s.fecha === fecha && (
-            (s.horaInicio && s.horaInicio < "07:00") ||
-            (s.horaFin && s.horaFin > "22:00")
-          ))
-          .sort((a, b) => (a.horaInicio || "").localeCompare(b.horaInicio || ""));
+          .filter(
+            (s) =>
+              s.fecha === fecha &&
+              ((s.horaInicio && s.horaInicio < "07:00") ||
+                (s.horaFin && s.horaFin > "22:00")),
+          )
+          .sort((a, b) =>
+            (a.horaInicio || "").localeCompare(b.horaInicio || ""),
+          );
 
         const [confirmarId, setConfirmarId] = React.useState(null);
 
         return ReactDOM.createPortal(
-          <div style={{
-            position: "fixed", inset: 0, background: "rgba(30,61,43,.55)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            zIndex: 1300,
-          }} onClick={onClose}>
-            <div style={{
-              background: "var(--vd)", border: "2px solid #C05020",
-              borderRadius: "var(--r)", width: "min(600px,95vw)", maxHeight: "70vh",
-              display: "flex", flexDirection: "column", overflow: "hidden",
-            }} onClick={(e) => e.stopPropagation()}>
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(30,61,43,.55)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 1300,
+            }}
+            onClick={onClose}
+          >
+            <div
+              style={{
+                background: "var(--vd)",
+                border: "2px solid #C05020",
+                borderRadius: "var(--r)",
+                width: "min(600px,95vw)",
+                maxHeight: "70vh",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
               {/* barra naranja */}
-              <div style={{ height: "4px", background: "linear-gradient(90deg,#E07030,#F0A060)", flexShrink: 0 }} />
+              <div
+                style={{
+                  height: "4px",
+                  background: "linear-gradient(90deg,#E07030,#F0A060)",
+                  flexShrink: 0,
+                }}
+              />
               {/* header */}
-              <div style={{ padding: "16px 22px 10px", borderBottom: "1px solid rgba(200,80,32,.25)", flexShrink: 0 }}>
-                <div style={{ fontFamily: "var(--serif)", fontSize: "17px", color: "#F0A060", fontWeight: 700 }}>
+              <div
+                style={{
+                  padding: "16px 22px 10px",
+                  borderBottom: "1px solid rgba(200,80,32,.25)",
+                  flexShrink: 0,
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "var(--serif)",
+                    fontSize: "17px",
+                    color: "#F0A060",
+                    fontWeight: 700,
+                  }}
+                >
                   ⚠️ Turnos fuera de rango — {tituloFmt}
                 </div>
-                <div style={{ fontFamily: "var(--sans)", fontSize: "12px", color: "rgba(255,255,255,.45)", marginTop: "3px" }}>
-                  Estos turnos tienen horarios fuera del rango permitido (07:00 – 22:00)
+                <div
+                  style={{
+                    fontFamily: "var(--sans)",
+                    fontSize: "12px",
+                    color: "rgba(255,255,255,.45)",
+                    marginTop: "3px",
+                  }}
+                >
+                  Estos turnos tienen horarios fuera del rango permitido (07:00
+                  – 22:00)
                 </div>
               </div>
               {/* lista */}
               <div style={{ overflowY: "auto", padding: "12px 22px", flex: 1 }}>
                 {anomalas.map((s) => {
                   const pac = pacientes.find((p) => p.id === s.pacienteId);
-                  const nombre = pac ? `${pac.nombre} ${pac.apellido}` : "Paciente desconocido";
+                  const nombre = pac
+                    ? `${pac.nombre} ${pac.apellido}`
+                    : "Paciente desconocido";
                   return (
-                    <div key={s.id} style={{
-                      background: "rgba(200,80,32,.12)", border: "1px solid rgba(200,80,32,.3)",
-                      borderRadius: "12px", padding: "12px 16px", marginBottom: "10px",
-                      display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap",
-                    }}>
+                    <div
+                      key={s.id}
+                      style={{
+                        background: "rgba(200,80,32,.12)",
+                        border: "1px solid rgba(200,80,32,.3)",
+                        borderRadius: "12px",
+                        padding: "12px 16px",
+                        marginBottom: "10px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        flexWrap: "wrap",
+                      }}
+                    >
                       <div style={{ flex: 1, minWidth: "120px" }}>
-                        <div style={{ fontFamily: "var(--sans)", fontSize: "13px", color: "var(--do)", fontWeight: 700 }}>{nombre}</div>
-                        <div style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "rgba(255,255,255,.6)", marginTop: "2px" }}>
+                        <div
+                          style={{
+                            fontFamily: "var(--sans)",
+                            fontSize: "13px",
+                            color: "var(--do)",
+                            fontWeight: 700,
+                          }}
+                        >
+                          {nombre}
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: "var(--mono)",
+                            fontSize: "12px",
+                            color: "rgba(255,255,255,.6)",
+                            marginTop: "2px",
+                          }}
+                        >
                           {s.horaInicio || "?"} – {s.horaFin || "?"}
-                          {s.horaInicio && s.horaInicio < "07:00" && <span style={{ color: "#F0A060", marginLeft: "8px" }}>inicio antes de 07:00</span>}
-                          {s.horaFin && s.horaFin > "22:00" && <span style={{ color: "#F0A060", marginLeft: "8px" }}>fin después de 22:00</span>}
+                          {s.horaInicio && s.horaInicio < "07:00" && (
+                            <span
+                              style={{ color: "#F0A060", marginLeft: "8px" }}
+                            >
+                              inicio antes de 07:00
+                            </span>
+                          )}
+                          {s.horaFin && s.horaFin > "22:00" && (
+                            <span
+                              style={{ color: "#F0A060", marginLeft: "8px" }}
+                            >
+                              fin después de 22:00
+                            </span>
+                          )}
                         </div>
                       </div>
-                      <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
-                        <button onClick={() => { onClose(); onEditar(s); }} style={{
-                          background: "rgba(200,146,42,.15)", border: "1px solid rgba(200,146,42,.35)",
-                          borderRadius: "50px", color: "var(--do)", fontSize: "12px",
-                          padding: "5px 14px", cursor: "pointer", fontFamily: "var(--sans)", fontWeight: 600,
-                        }}>✏️ Editar</button>
+                      <div
+                        style={{ display: "flex", gap: "8px", flexShrink: 0 }}
+                      >
+                        <button
+                          onClick={() => {
+                            onClose();
+                            onEditar(s);
+                          }}
+                          style={{
+                            background: "rgba(200,146,42,.15)",
+                            border: "1px solid rgba(200,146,42,.35)",
+                            borderRadius: "50px",
+                            color: "var(--do)",
+                            fontSize: "12px",
+                            padding: "5px 14px",
+                            cursor: "pointer",
+                            fontFamily: "var(--sans)",
+                            fontWeight: 600,
+                          }}
+                        >
+                          ✏️ Editar
+                        </button>
                         {confirmarId === s.id ? (
                           <>
-                            <button onClick={() => { onEliminar(s); setConfirmarId(null); }} style={{
-                              background: "rgba(180,40,10,.35)", border: "1px solid rgba(220,80,40,.5)",
-                              borderRadius: "50px", color: "#FFD0B8", fontSize: "12px",
-                              padding: "5px 14px", cursor: "pointer", fontFamily: "var(--sans)", fontWeight: 700,
-                            }}>Confirmar</button>
-                            <button onClick={() => setConfirmarId(null)} style={{
-                              background: "transparent", border: "1px solid rgba(255,255,255,.15)",
-                              borderRadius: "50px", color: "rgba(255,255,255,.5)", fontSize: "12px",
-                              padding: "5px 12px", cursor: "pointer", fontFamily: "var(--sans)",
-                            }}>No</button>
+                            <button
+                              onClick={() => {
+                                onEliminar(s);
+                                setConfirmarId(null);
+                              }}
+                              style={{
+                                background: "rgba(180,40,10,.35)",
+                                border: "1px solid rgba(220,80,40,.5)",
+                                borderRadius: "50px",
+                                color: "#FFD0B8",
+                                fontSize: "12px",
+                                padding: "5px 14px",
+                                cursor: "pointer",
+                                fontFamily: "var(--sans)",
+                                fontWeight: 700,
+                              }}
+                            >
+                              Confirmar
+                            </button>
+                            <button
+                              onClick={() => setConfirmarId(null)}
+                              style={{
+                                background: "transparent",
+                                border: "1px solid rgba(255,255,255,.15)",
+                                borderRadius: "50px",
+                                color: "rgba(255,255,255,.5)",
+                                fontSize: "12px",
+                                padding: "5px 12px",
+                                cursor: "pointer",
+                                fontFamily: "var(--sans)",
+                              }}
+                            >
+                              No
+                            </button>
                           </>
                         ) : (
-                          <button onClick={() => setConfirmarId(s.id)} style={{
-                            background: "transparent", border: "1px solid rgba(200,80,32,.4)",
-                            borderRadius: "50px", color: "#F09080", fontSize: "12px",
-                            padding: "5px 14px", cursor: "pointer", fontFamily: "var(--sans)", fontWeight: 600,
-                          }}>🗑 Eliminar</button>
+                          <button
+                            onClick={() => setConfirmarId(s.id)}
+                            style={{
+                              background: "transparent",
+                              border: "1px solid rgba(200,80,32,.4)",
+                              borderRadius: "50px",
+                              color: "#F09080",
+                              fontSize: "12px",
+                              padding: "5px 14px",
+                              cursor: "pointer",
+                              fontFamily: "var(--sans)",
+                              fontWeight: 600,
+                            }}
+                          >
+                            🗑 Eliminar
+                          </button>
                         )}
                       </div>
                     </div>
@@ -3581,16 +3927,35 @@
                 })}
               </div>
               {/* pie */}
-              <div style={{ padding: "10px 22px", borderTop: "1px solid rgba(200,80,32,.2)", display: "flex", justifyContent: "flex-end", flexShrink: 0 }}>
-                <button onClick={onClose} style={{
-                  background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.15)",
-                  borderRadius: "50px", color: "rgba(255,255,255,.8)", fontSize: "13px",
-                  padding: "7px 20px", cursor: "pointer", fontFamily: "var(--sans)", fontWeight: 600,
-                }}>Cerrar</button>
+              <div
+                style={{
+                  padding: "10px 22px",
+                  borderTop: "1px solid rgba(200,80,32,.2)",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  flexShrink: 0,
+                }}
+              >
+                <button
+                  onClick={onClose}
+                  style={{
+                    background: "rgba(255,255,255,.08)",
+                    border: "1px solid rgba(255,255,255,.15)",
+                    borderRadius: "50px",
+                    color: "rgba(255,255,255,.8)",
+                    fontSize: "13px",
+                    padding: "7px 20px",
+                    cursor: "pointer",
+                    fontFamily: "var(--sans)",
+                    fontWeight: 600,
+                  }}
+                >
+                  Cerrar
+                </button>
               </div>
             </div>
           </div>,
-          document.body
+          document.body,
         );
       }
 
@@ -3670,22 +4035,38 @@
                     <div className="ag-day-mes">
                       {MESES_CORTO[d.getMonth()]}
                     </div>
-                    {anomaliasPorDia && anomaliasPorDia[ds] && anomaliasPorDia[ds].length > 0 && (
-                      <span
-                        title={`${anomaliasPorDia[ds].length} turno(s) fuera de rango horario`}
-                        onClick={(e) => { e.stopPropagation(); onAnomaliaClick && onAnomaliaClick(ds); }}
-                        style={{
-                          position: "absolute", top: "4px", right: "4px",
-                          background: "#E07030", color: "#fff",
-                          borderRadius: "50%", width: "16px", height: "16px",
-                          fontSize: "10px", fontWeight: 700,
-                          display: "inline-flex", alignItems: "center", justifyContent: "center",
-                          cursor: "pointer", fontFamily: "var(--sans)",
-                          boxShadow: "0 0 0 2px rgba(224,112,48,.35)",
-                          zIndex: 5,
-                        }}
-                      >!</span>
-                    )}
+                    {anomaliasPorDia &&
+                      anomaliasPorDia[ds] &&
+                      anomaliasPorDia[ds].length > 0 && (
+                        <span
+                          title={`${anomaliasPorDia[ds].length} turno(s) fuera de rango horario`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onAnomaliaClick && onAnomaliaClick(ds);
+                          }}
+                          style={{
+                            position: "absolute",
+                            top: "4px",
+                            right: "4px",
+                            background: "#E07030",
+                            color: "#fff",
+                            borderRadius: "50%",
+                            width: "16px",
+                            height: "16px",
+                            fontSize: "10px",
+                            fontWeight: 700,
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            cursor: "pointer",
+                            fontFamily: "var(--sans)",
+                            boxShadow: "0 0 0 2px rgba(224,112,48,.35)",
+                            zIndex: 5,
+                          }}
+                        >
+                          !
+                        </span>
+                      )}
                   </div>
                 );
               })}
@@ -3916,7 +4297,11 @@
                     </span>
                   </div>
                   {(dailyTotals || []).map((t, i) => {
-                    const nada = t.ordenes === 0 && t.efectivo === 0 && t.transferencia === 0 && t.pendiente === 0;
+                    const nada =
+                      t.ordenes === 0 &&
+                      t.efectivo === 0 &&
+                      t.transferencia === 0 &&
+                      t.pendiente === 0;
                     return (
                       <div
                         key={i}
@@ -3937,26 +4322,72 @@
                         }}
                       >
                         {nada ? (
-                          <span style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "var(--tx3)", width: "100%", textAlign: "center" }}>—</span>
+                          <span
+                            style={{
+                              fontFamily: "var(--mono)",
+                              fontSize: "12px",
+                              color: "var(--tx3)",
+                              width: "100%",
+                              textAlign: "center",
+                            }}
+                          >
+                            —
+                          </span>
                         ) : (
                           <>
                             {t.ordenes > 0 && (
-                              <span title="Órdenes OS emitidas" style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "var(--tx2)", whiteSpace: "nowrap", cursor: "help" }}>
+                              <span
+                                title="Órdenes OS emitidas"
+                                style={{
+                                  fontFamily: "var(--mono)",
+                                  fontSize: "12px",
+                                  color: "var(--tx2)",
+                                  whiteSpace: "nowrap",
+                                  cursor: "help",
+                                }}
+                              >
                                 📋 ${t.ordenes.toLocaleString("es-AR")}
                               </span>
                             )}
                             {t.efectivo > 0 && (
-                              <span title="Cobrado en efectivo" style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "#2D6A3F", whiteSpace: "nowrap", cursor: "help" }}>
+                              <span
+                                title="Cobrado en efectivo"
+                                style={{
+                                  fontFamily: "var(--mono)",
+                                  fontSize: "12px",
+                                  color: "#2D6A3F",
+                                  whiteSpace: "nowrap",
+                                  cursor: "help",
+                                }}
+                              >
                                 💵 ${t.efectivo.toLocaleString("es-AR")}
                               </span>
                             )}
                             {t.transferencia > 0 && (
-                              <span title="Cobrado por transferencia" style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "#1A5276", whiteSpace: "nowrap", cursor: "help" }}>
+                              <span
+                                title="Cobrado por transferencia"
+                                style={{
+                                  fontFamily: "var(--mono)",
+                                  fontSize: "12px",
+                                  color: "#1A5276",
+                                  whiteSpace: "nowrap",
+                                  cursor: "help",
+                                }}
+                              >
                                 📱 ${t.transferencia.toLocaleString("es-AR")}
                               </span>
                             )}
                             {t.pendiente > 0 && (
-                              <span title="Pendiente de cobro" style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "#C8922A", whiteSpace: "nowrap", cursor: "help" }}>
+                              <span
+                                title="Pendiente de cobro"
+                                style={{
+                                  fontFamily: "var(--mono)",
+                                  fontSize: "12px",
+                                  color: "#C8922A",
+                                  whiteSpace: "nowrap",
+                                  cursor: "help",
+                                }}
+                              >
                                 ⏳ ${t.pendiente.toLocaleString("es-AR")}
                               </span>
                             )}
@@ -4273,15 +4704,34 @@
             ordenFirmada: sesData?.ordenFirmada ?? false,
             cobroCancel: sesData?.cobroCancel ?? false,
             /* Esquema nuevo — con compat. legado */
-            cancelParticularMonto: sesData?.cancelParticularMonto ?? sesData?.montoCancel ?? "",
-            cancelParticularMetodo: sesData?.cancelParticularMetodo ?? sesData?.metodoCancelEfectivo ?? "efectivo",
-            cancelParticularAbonado: sesData?.cancelParticularAbonado ?? (sesData?.cancelAbonado ?? false),
-            cancelCoseguro: sesData?.cancelCoseguro ?? (sesData?.cancelEfectivo ?? false),
-            cancelCoseguroMonto: sesData?.cancelCoseguroMonto ?? sesData?.montoCancel ?? "",
-            cancelCoseguroMetodo: sesData?.cancelCoseguroMetodo ?? sesData?.metodoCancelEfectivo ?? "efectivo",
-            cancelCoseguroPagado: sesData?.cancelCoseguroPagado ?? (sesData?.cancelAbonado ?? false),
-            cancelOrdenOS: sesData?.cancelOrdenOS ?? (sesData?.cancelOrden ?? (sesData?.cancelMetodo === "orden_os" ? true : false)),
-            cancelOrdenEmitida: sesData?.cancelOrdenEmitida ?? (sesData?.cancelOrdenSaldada ?? false),
+            cancelParticularMonto:
+              sesData?.cancelParticularMonto ?? sesData?.montoCancel ?? "",
+            cancelParticularMetodo:
+              sesData?.cancelParticularMetodo ??
+              sesData?.metodoCancelEfectivo ??
+              "efectivo",
+            cancelParticularAbonado:
+              sesData?.cancelParticularAbonado ??
+              sesData?.cancelAbonado ??
+              false,
+            cancelCoseguro:
+              sesData?.cancelCoseguro ?? sesData?.cancelEfectivo ?? false,
+            cancelCoseguroMonto:
+              sesData?.cancelCoseguroMonto ?? sesData?.montoCancel ?? "",
+            cancelCoseguroMetodo:
+              sesData?.cancelCoseguroMetodo ??
+              sesData?.metodoCancelEfectivo ??
+              "efectivo",
+            cancelCoseguroPagado:
+              sesData?.cancelCoseguroPagado ?? sesData?.cancelAbonado ?? false,
+            cancelOrdenOS:
+              sesData?.cancelOrdenOS ??
+              sesData?.cancelOrden ??
+              (sesData?.cancelMetodo === "orden_os" ? true : false),
+            cancelOrdenEmitida:
+              sesData?.cancelOrdenEmitida ??
+              sesData?.cancelOrdenSaldada ??
+              false,
           };
         }
 
@@ -4524,11 +4974,11 @@
           pacSel.obraSocial.toLowerCase() !== "ninguna"
         );
         const ESTADOS = [
-          { v: "pendiente",    l: "⏳ Pendiente" },
-          { v: "asistio",      l: "✅ Asistió" },
-          { v: "cancelo",      l: "❌ Canceló" },
+          { v: "pendiente", l: "⏳ Pendiente" },
+          { v: "asistio", l: "✅ Asistió" },
+          { v: "cancelo", l: "❌ Canceló" },
           { v: "inasistencia", l: "🚫 Inasistencia" },
-          { v: "reprogramo",   l: "🔄 Reprogramó" },
+          { v: "reprogramo", l: "🔄 Reprogramó" },
         ];
         const TIPOS = [
           { v: "individual", l: "👤 Individual" },
@@ -4556,7 +5006,11 @@
 
         const cobroCmpleto = (() => {
           if (f.tipo === "AT") return true;
-          if (f.estado === "cancelo" || f.estado === "reprogramo" || f.estado === "inasistencia") {
+          if (
+            f.estado === "cancelo" ||
+            f.estado === "reprogramo" ||
+            f.estado === "inasistencia"
+          ) {
             if (!f.cobroCancel) return true;
             // Nuevo esquema: verificar según tipo de paciente
             if (pacienteConOS) {
@@ -4565,7 +5019,11 @@
               return cosOk && osOk;
             } else {
               // Particular: monto 0 sin abono = ok (no se cobra); monto > 0 debe estar abonado
-              if (!f.cancelParticularMonto || Number(f.cancelParticularMonto) === 0) return true;
+              if (
+                !f.cancelParticularMonto ||
+                Number(f.cancelParticularMonto) === 0
+              )
+                return true;
               return !!f.cancelParticularAbonado;
             }
           }
@@ -4597,15 +5055,26 @@
 
         const cobroResumen = (() => {
           if (f.tipo === "AT") return "AT — sin cobro directo";
-          if (f.estado === "cancelo" || f.estado === "reprogramo" || f.estado === "inasistencia") {
+          if (
+            f.estado === "cancelo" ||
+            f.estado === "reprogramo" ||
+            f.estado === "inasistencia"
+          ) {
             if (!f.cobroCancel) return "Sin cobro";
             if (pacienteConOS) {
               const parts = [];
-              if (f.cancelCoseguro) parts.push(f.cancelCoseguroPagado ? "Coseguro ✓" : "Coseguro ⏳");
-              if (f.cancelOrdenOS) parts.push(f.cancelOrdenEmitida ? "Orden ✓" : "Orden ⏳");
+              if (f.cancelCoseguro)
+                parts.push(
+                  f.cancelCoseguroPagado ? "Coseguro ✓" : "Coseguro ⏳",
+                );
+              if (f.cancelOrdenOS)
+                parts.push(f.cancelOrdenEmitida ? "Orden ✓" : "Orden ⏳");
               return parts.length ? parts.join(" · ") : "Pendiente de cobro";
             } else {
-              if (!f.cancelParticularMonto || Number(f.cancelParticularMonto) === 0)
+              if (
+                !f.cancelParticularMonto ||
+                Number(f.cancelParticularMonto) === 0
+              )
                 return "Sin cobro ($ 0)";
               return f.cancelParticularAbonado
                 ? `Abonado ✓ · $${Number(f.cancelParticularMonto).toLocaleString("es-AR")}`
@@ -4819,15 +5288,31 @@
                 <div className="mt-always-row">
                   <div style={{ minWidth: 0, textAlign: "center" }}>
                     {/* Label = día de la semana, reactivo al cambiar la fecha */}
-                    <div className="modal-label" style={{ color: "var(--do)", textTransform: "capitalize", letterSpacing: ".03em", fontSize: "20px" }}>
+                    <div
+                      className="modal-label"
+                      style={{
+                        color: "var(--do)",
+                        textTransform: "capitalize",
+                        letterSpacing: ".03em",
+                        fontSize: "20px",
+                      }}
+                    >
                       {f.fecha
-                        ? new Date(f.fecha + "T12:00").toLocaleDateString("es-AR", { weekday: "long" })
+                        ? new Date(f.fecha + "T12:00").toLocaleDateString(
+                            "es-AR",
+                            { weekday: "long" },
+                          )
                         : "Fecha"}
                     </div>
                     <input
                       className="modal-input"
                       type="date"
-                      style={{ fontFamily: "var(--mono)", width: "100%", boxSizing: "border-box", textAlign: "center" }}
+                      style={{
+                        fontFamily: "var(--mono)",
+                        width: "100%",
+                        boxSizing: "border-box",
+                        textAlign: "center",
+                      }}
                       value={f.fecha || ""}
                       onChange={(e) => {
                         const nuevaFecha = e.target.value;
@@ -4846,7 +5331,12 @@
                     />
                   </div>
                   <div style={{ textAlign: "center" }}>
-                    <div className="modal-label" style={{ textAlign: "center" }}>Inicio</div>
+                    <div
+                      className="modal-label"
+                      style={{ textAlign: "center" }}
+                    >
+                      Inicio
+                    </div>
                     <input
                       className="modal-input"
                       type="time"
@@ -4861,7 +5351,12 @@
                     />
                   </div>
                   <div style={{ textAlign: "center" }}>
-                    <div className="modal-label" style={{ textAlign: "center" }}>Fin</div>
+                    <div
+                      className="modal-label"
+                      style={{ textAlign: "center" }}
+                    >
+                      Fin
+                    </div>
                     <input
                       className="modal-input"
                       type="time"
@@ -4874,8 +5369,17 @@
                   </div>
                 </div>
                 {horaFueraDeRango && (
-                  <div style={{ color: "#E07050", fontFamily: "var(--sans)", fontSize: "12px", marginTop: "4px", paddingLeft: "8px" }}>
-                    ⚠️ El horario debe estar entre 07:00 y 22:00, y la hora de fin debe ser posterior al inicio.
+                  <div
+                    style={{
+                      color: "#E07050",
+                      fontFamily: "var(--sans)",
+                      fontSize: "12px",
+                      marginTop: "4px",
+                      paddingLeft: "8px",
+                    }}
+                  >
+                    ⚠️ El horario debe estar entre 07:00 y 22:00, y la hora de
+                    fin debe ser posterior al inicio.
                   </div>
                 )}
 
@@ -5051,7 +5555,9 @@
                 )}
 
                 {/* ─── 3. FORMA DE COBRO ─── */}
-                {(f.tipo !== "AT" || f.estado === "cancelo" || f.estado === "inasistencia") && (
+                {(f.tipo !== "AT" ||
+                  f.estado === "cancelo" ||
+                  f.estado === "inasistencia") && (
                   <div className="acc-row">
                     <div
                       className="acc-head"
@@ -5082,178 +5588,381 @@
                               {f.estado === "cancelo"
                                 ? "❌ Cobro por cancelación"
                                 : f.estado === "inasistencia"
-                                ? "🚫 Cobro por inasistencia"
-                                : "🔄 Cobro por reprogramación"}
+                                  ? "🚫 Cobro por inasistencia"
+                                  : "🔄 Cobro por reprogramación"}
                             </div>
 
                             {/* Toggle principal: ¿se cobra? */}
                             <div
                               className={`cobro-chk-row ${f.cobroCancel ? "chk-activo" : ""}`}
-                              style={{ marginBottom: f.cobroCancel ? "12px" : 0 }}
+                              style={{
+                                marginBottom: f.cobroCancel ? "12px" : 0,
+                              }}
                               onClick={() => upd("cobroCancel", !f.cobroCancel)}
                             >
-                              <div className={`cobro-chk-box ${f.cobroCancel ? "on" : ""}`}>
+                              <div
+                                className={`cobro-chk-box ${f.cobroCancel ? "on" : ""}`}
+                              >
                                 {f.cobroCancel ? "✓" : ""}
                               </div>
-                              <span className={`cobro-chk-label ${f.cobroCancel ? "on" : ""}`}>
-                                {f.cobroCancel ? "Se cobra esta sesión" : "Registrar cobro por esta cancelación"}
+                              <span
+                                className={`cobro-chk-label ${f.cobroCancel ? "on" : ""}`}
+                              >
+                                {f.cobroCancel
+                                  ? "Se cobra esta sesión"
+                                  : "Registrar cobro por esta cancelación"}
                               </span>
                             </div>
 
                             {f.cobroCancel && (
-                              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: "6px",
+                                }}
+                              >
                                 {/* ── FILA COSEGURO (solo con OS) ── */}
-                                {pacienteConOS && (() => {
-                                  const activo = f.cancelCoseguro;
-                                  return (
-                                    <div style={{
-                                      display: "flex", alignItems: "center", gap: "8px",
-                                      padding: "8px 12px", borderRadius: "12px",
-                                      background: "rgba(255,255,255,.05)",
-                                      border: `1.5px solid ${activo ? "var(--do)" : "rgba(200,146,42,.2)"}`,
-                                      opacity: activo ? 1 : 0.55,
-                                      transition: "all .15s",
-                                    }}>
-                                      {/* Check izq: ¿se cobra? */}
+                                {pacienteConOS &&
+                                  (() => {
+                                    const activo = f.cancelCoseguro;
+                                    return (
                                       <div
-                                        className={`cobro-chk-box ${activo ? "on" : ""}`}
-                                        style={{ cursor: "pointer", flexShrink: 0 }}
-                                        onClick={() => upd("cancelCoseguro", !activo)}
+                                        style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "8px",
+                                          padding: "8px 12px",
+                                          borderRadius: "12px",
+                                          background: "rgba(255,255,255,.05)",
+                                          border: `1.5px solid ${activo ? "var(--do)" : "rgba(200,146,42,.2)"}`,
+                                          opacity: activo ? 1 : 0.55,
+                                          transition: "all .15s",
+                                        }}
                                       >
-                                        {activo ? "✓" : ""}
-                                      </div>
-                                      {/* Centro */}
-                                      <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-                                        <span style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.85)", whiteSpace: "nowrap" }}>
-                                          💵 Coseguro
-                                        </span>
-                                        <input
-                                          type="number"
-                                          className="modal-input"
-                                          style={{ width: "80px", marginBottom: 0, fontFamily: "var(--mono)", fontSize: "12px", padding: "4px 8px" }}
-                                          placeholder="0"
-                                          value={f.cancelCoseguroMonto ?? ""}
-                                          onChange={(e) => upd("cancelCoseguroMonto", e.target.value)}
-                                          disabled={!activo}
-                                        />
-                                        <select
-                                          className="modal-select"
-                                          style={{ width: "110px", marginBottom: 0, fontSize: "11px", padding: "4px 8px" }}
-                                          value={f.cancelCoseguroMetodo || "efectivo"}
-                                          onChange={(e) => upd("cancelCoseguroMetodo", e.target.value)}
-                                          disabled={!activo}
+                                        {/* Check izq: ¿se cobra? */}
+                                        <div
+                                          className={`cobro-chk-box ${activo ? "on" : ""}`}
+                                          style={{
+                                            cursor: "pointer",
+                                            flexShrink: 0,
+                                          }}
+                                          onClick={() =>
+                                            upd("cancelCoseguro", !activo)
+                                          }
                                         >
-                                          <option value="efectivo">💵 Efectivo</option>
-                                          <option value="transferencia">📱 Transfer.</option>
-                                        </select>
+                                          {activo ? "✓" : ""}
+                                        </div>
+                                        {/* Centro */}
+                                        <div
+                                          style={{
+                                            flex: 1,
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "6px",
+                                            flexWrap: "wrap",
+                                          }}
+                                        >
+                                          <span
+                                            style={{
+                                              fontFamily: "var(--mono)",
+                                              fontSize: "11px",
+                                              color: "rgba(255,255,255,.85)",
+                                              whiteSpace: "nowrap",
+                                            }}
+                                          >
+                                            💵 Coseguro
+                                          </span>
+                                          <input
+                                            type="number"
+                                            className="modal-input"
+                                            style={{
+                                              width: "80px",
+                                              marginBottom: 0,
+                                              fontFamily: "var(--mono)",
+                                              fontSize: "12px",
+                                              padding: "4px 8px",
+                                            }}
+                                            placeholder="0"
+                                            value={f.cancelCoseguroMonto ?? ""}
+                                            onChange={(e) =>
+                                              upd(
+                                                "cancelCoseguroMonto",
+                                                e.target.value,
+                                              )
+                                            }
+                                            disabled={!activo}
+                                          />
+                                          <select
+                                            className="modal-select"
+                                            style={{
+                                              width: "110px",
+                                              marginBottom: 0,
+                                              fontSize: "11px",
+                                              padding: "4px 8px",
+                                            }}
+                                            value={
+                                              f.cancelCoseguroMetodo ||
+                                              "efectivo"
+                                            }
+                                            onChange={(e) =>
+                                              upd(
+                                                "cancelCoseguroMetodo",
+                                                e.target.value,
+                                              )
+                                            }
+                                            disabled={!activo}
+                                          >
+                                            <option value="efectivo">
+                                              💵 Efectivo
+                                            </option>
+                                            <option value="transferencia">
+                                              📱 Transfer.
+                                            </option>
+                                          </select>
+                                        </div>
+                                        {/* Check der: ¿cobrado? */}
+                                        <div
+                                          className={`cobro-chk-box ${f.cancelCoseguroPagado ? "on" : ""}`}
+                                          style={{
+                                            cursor: activo
+                                              ? "pointer"
+                                              : "default",
+                                            flexShrink: 0,
+                                          }}
+                                          onClick={() =>
+                                            activo &&
+                                            upd(
+                                              "cancelCoseguroPagado",
+                                              !f.cancelCoseguroPagado,
+                                            )
+                                          }
+                                        >
+                                          {f.cancelCoseguroPagado ? "✓" : ""}
+                                        </div>
+                                        <span
+                                          style={{
+                                            fontFamily: "var(--mono)",
+                                            fontSize: "10px",
+                                            color: f.cancelCoseguroPagado
+                                              ? "var(--do)"
+                                              : "rgba(255,255,255,.4)",
+                                            whiteSpace: "nowrap",
+                                          }}
+                                        >
+                                          {f.cancelCoseguroPagado ? "✅" : "⏳"}
+                                        </span>
                                       </div>
-                                      {/* Check der: ¿cobrado? */}
-                                      <div
-                                        className={`cobro-chk-box ${f.cancelCoseguroPagado ? "on" : ""}`}
-                                        style={{ cursor: activo ? "pointer" : "default", flexShrink: 0 }}
-                                        onClick={() => activo && upd("cancelCoseguroPagado", !f.cancelCoseguroPagado)}
-                                      >
-                                        {f.cancelCoseguroPagado ? "✓" : ""}
-                                      </div>
-                                      <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: f.cancelCoseguroPagado ? "var(--do)" : "rgba(255,255,255,.4)", whiteSpace: "nowrap" }}>
-                                        {f.cancelCoseguroPagado ? "✅" : "⏳"}
-                                      </span>
-                                    </div>
-                                  );
-                                })()}
+                                    );
+                                  })()}
 
                                 {/* ── FILA ORDEN OS (solo con OS) ── */}
-                                {pacienteConOS && (() => {
-                                  const activo = f.cancelOrdenOS;
-                                  return (
-                                    <div style={{
-                                      display: "flex", alignItems: "center", gap: "8px",
-                                      padding: "8px 12px", borderRadius: "12px",
-                                      background: "rgba(255,255,255,.05)",
-                                      border: `1.5px solid ${activo ? "var(--do)" : "rgba(200,146,42,.2)"}`,
-                                      opacity: activo ? 1 : 0.55,
-                                      transition: "all .15s",
-                                    }}>
-                                      {/* Check izq */}
+                                {pacienteConOS &&
+                                  (() => {
+                                    const activo = f.cancelOrdenOS;
+                                    return (
                                       <div
-                                        className={`cobro-chk-box ${activo ? "on" : ""}`}
-                                        style={{ cursor: "pointer", flexShrink: 0 }}
-                                        onClick={() => upd("cancelOrdenOS", !activo)}
+                                        style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "8px",
+                                          padding: "8px 12px",
+                                          borderRadius: "12px",
+                                          background: "rgba(255,255,255,.05)",
+                                          border: `1.5px solid ${activo ? "var(--do)" : "rgba(200,146,42,.2)"}`,
+                                          opacity: activo ? 1 : 0.55,
+                                          transition: "all .15s",
+                                        }}
                                       >
-                                        {activo ? "✓" : ""}
-                                      </div>
-                                      {/* Centro */}
-                                      <div style={{ flex: 1 }}>
-                                        <span style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.85)" }}>
-                                          🏥 Orden Obra Social
+                                        {/* Check izq */}
+                                        <div
+                                          className={`cobro-chk-box ${activo ? "on" : ""}`}
+                                          style={{
+                                            cursor: "pointer",
+                                            flexShrink: 0,
+                                          }}
+                                          onClick={() =>
+                                            upd("cancelOrdenOS", !activo)
+                                          }
+                                        >
+                                          {activo ? "✓" : ""}
+                                        </div>
+                                        {/* Centro */}
+                                        <div style={{ flex: 1 }}>
+                                          <span
+                                            style={{
+                                              fontFamily: "var(--mono)",
+                                              fontSize: "11px",
+                                              color: "rgba(255,255,255,.85)",
+                                            }}
+                                          >
+                                            🏥 Orden Obra Social
+                                          </span>
+                                        </div>
+                                        {/* Check der: ¿emitida? */}
+                                        <div
+                                          className={`cobro-chk-box ${f.cancelOrdenEmitida ? "on" : ""}`}
+                                          style={{
+                                            cursor: activo
+                                              ? "pointer"
+                                              : "default",
+                                            flexShrink: 0,
+                                          }}
+                                          onClick={() =>
+                                            activo &&
+                                            upd(
+                                              "cancelOrdenEmitida",
+                                              !f.cancelOrdenEmitida,
+                                            )
+                                          }
+                                        >
+                                          {f.cancelOrdenEmitida ? "✓" : ""}
+                                        </div>
+                                        <span
+                                          style={{
+                                            fontFamily: "var(--mono)",
+                                            fontSize: "10px",
+                                            color: f.cancelOrdenEmitida
+                                              ? "var(--do)"
+                                              : "rgba(255,255,255,.4)",
+                                            whiteSpace: "nowrap",
+                                          }}
+                                        >
+                                          {f.cancelOrdenEmitida ? "✅" : "⏳"}
                                         </span>
                                       </div>
-                                      {/* Check der: ¿emitida? */}
-                                      <div
-                                        className={`cobro-chk-box ${f.cancelOrdenEmitida ? "on" : ""}`}
-                                        style={{ cursor: activo ? "pointer" : "default", flexShrink: 0 }}
-                                        onClick={() => activo && upd("cancelOrdenEmitida", !f.cancelOrdenEmitida)}
-                                      >
-                                        {f.cancelOrdenEmitida ? "✓" : ""}
-                                      </div>
-                                      <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: f.cancelOrdenEmitida ? "var(--do)" : "rgba(255,255,255,.4)", whiteSpace: "nowrap" }}>
-                                        {f.cancelOrdenEmitida ? "✅" : "⏳"}
-                                      </span>
-                                    </div>
-                                  );
-                                })()}
+                                    );
+                                  })()}
 
                                 {/* ── FILA PARTICULAR (solo sin OS) ── */}
-                                {!pacienteConOS && (() => {
-                                  const monto = Number(f.cancelParticularMonto) || 0;
-                                  const sinCobro = monto === 0;
-                                  return (
-                                    <div style={{
-                                      display: "flex", alignItems: "center", gap: "8px",
-                                      padding: "8px 12px", borderRadius: "12px",
-                                      background: "rgba(255,255,255,.05)",
-                                      border: "1.5px solid rgba(200,146,42,.35)",
-                                      transition: "all .15s",
-                                    }}>
-                                      {/* Centro */}
-                                      <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-                                        <span style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.85)", whiteSpace: "nowrap" }}>
-                                          💵 Cobro
-                                        </span>
-                                        <input
-                                          type="number"
-                                          className="modal-input"
-                                          style={{ width: "80px", marginBottom: 0, fontFamily: "var(--mono)", fontSize: "12px", padding: "4px 8px" }}
-                                          placeholder="0"
-                                          value={f.cancelParticularMonto ?? ""}
-                                          onChange={(e) => upd("cancelParticularMonto", e.target.value)}
-                                        />
-                                        <select
-                                          className="modal-select"
-                                          style={{ width: "110px", marginBottom: 0, fontSize: "11px", padding: "4px 8px" }}
-                                          value={f.cancelParticularMetodo || "efectivo"}
-                                          onChange={(e) => upd("cancelParticularMetodo", e.target.value)}
-                                        >
-                                          <option value="efectivo">💵 Efectivo</option>
-                                          <option value="transferencia">📱 Transfer.</option>
-                                        </select>
-                                      </div>
-                                      {/* Check der: ¿cobrado? */}
+                                {!pacienteConOS &&
+                                  (() => {
+                                    const monto =
+                                      Number(f.cancelParticularMonto) || 0;
+                                    const sinCobro = monto === 0;
+                                    return (
                                       <div
-                                        className={`cobro-chk-box ${f.cancelParticularAbonado ? "on" : ""}`}
-                                        style={{ cursor: sinCobro ? "default" : "pointer", flexShrink: 0, opacity: sinCobro ? 0.35 : 1 }}
-                                        onClick={() => !sinCobro && upd("cancelParticularAbonado", !f.cancelParticularAbonado)}
+                                        style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "8px",
+                                          padding: "8px 12px",
+                                          borderRadius: "12px",
+                                          background: "rgba(255,255,255,.05)",
+                                          border:
+                                            "1.5px solid rgba(200,146,42,.35)",
+                                          transition: "all .15s",
+                                        }}
                                       >
-                                        {f.cancelParticularAbonado ? "✓" : ""}
+                                        {/* Centro */}
+                                        <div
+                                          style={{
+                                            flex: 1,
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "6px",
+                                            flexWrap: "wrap",
+                                          }}
+                                        >
+                                          <span
+                                            style={{
+                                              fontFamily: "var(--mono)",
+                                              fontSize: "11px",
+                                              color: "rgba(255,255,255,.85)",
+                                              whiteSpace: "nowrap",
+                                            }}
+                                          >
+                                            💵 Cobro
+                                          </span>
+                                          <input
+                                            type="number"
+                                            className="modal-input"
+                                            style={{
+                                              width: "80px",
+                                              marginBottom: 0,
+                                              fontFamily: "var(--mono)",
+                                              fontSize: "12px",
+                                              padding: "4px 8px",
+                                            }}
+                                            placeholder="0"
+                                            value={
+                                              f.cancelParticularMonto ?? ""
+                                            }
+                                            onChange={(e) =>
+                                              upd(
+                                                "cancelParticularMonto",
+                                                e.target.value,
+                                              )
+                                            }
+                                          />
+                                          <select
+                                            className="modal-select"
+                                            style={{
+                                              width: "110px",
+                                              marginBottom: 0,
+                                              fontSize: "11px",
+                                              padding: "4px 8px",
+                                            }}
+                                            value={
+                                              f.cancelParticularMetodo ||
+                                              "efectivo"
+                                            }
+                                            onChange={(e) =>
+                                              upd(
+                                                "cancelParticularMetodo",
+                                                e.target.value,
+                                              )
+                                            }
+                                          >
+                                            <option value="efectivo">
+                                              💵 Efectivo
+                                            </option>
+                                            <option value="transferencia">
+                                              📱 Transfer.
+                                            </option>
+                                          </select>
+                                        </div>
+                                        {/* Check der: ¿cobrado? */}
+                                        <div
+                                          className={`cobro-chk-box ${f.cancelParticularAbonado ? "on" : ""}`}
+                                          style={{
+                                            cursor: sinCobro
+                                              ? "default"
+                                              : "pointer",
+                                            flexShrink: 0,
+                                            opacity: sinCobro ? 0.35 : 1,
+                                          }}
+                                          onClick={() =>
+                                            !sinCobro &&
+                                            upd(
+                                              "cancelParticularAbonado",
+                                              !f.cancelParticularAbonado,
+                                            )
+                                          }
+                                        >
+                                          {f.cancelParticularAbonado ? "✓" : ""}
+                                        </div>
+                                        <span
+                                          style={{
+                                            fontFamily: "var(--mono)",
+                                            fontSize: "10px",
+                                            color: sinCobro
+                                              ? "rgba(255,255,255,.25)"
+                                              : f.cancelParticularAbonado
+                                                ? "var(--do)"
+                                                : "rgba(255,255,255,.4)",
+                                            whiteSpace: "nowrap",
+                                          }}
+                                        >
+                                          {sinCobro
+                                            ? "$ 0"
+                                            : f.cancelParticularAbonado
+                                              ? "✅"
+                                              : "⏳"}
+                                        </span>
                                       </div>
-                                      <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: sinCobro ? "rgba(255,255,255,.25)" : f.cancelParticularAbonado ? "var(--do)" : "rgba(255,255,255,.4)", whiteSpace: "nowrap" }}>
-                                        {sinCobro ? "$ 0" : f.cancelParticularAbonado ? "✅" : "⏳"}
-                                      </span>
-                                    </div>
-                                  );
-                                })()}
-
+                                    );
+                                  })()}
                               </div>
                             )}
                           </div>
@@ -5975,7 +6684,11 @@
                       className="btn btn-g"
                       onClick={handleSave}
                       disabled={horaFueraDeRango}
-                      style={horaFueraDeRango ? { opacity: 0.45, cursor: "not-allowed" } : {}}
+                      style={
+                        horaFueraDeRango
+                          ? { opacity: 0.45, cursor: "not-allowed" }
+                          : {}
+                      }
                     >
                       {isEditar ? "Actualizar" : "Crear turno"}
                     </button>
@@ -6488,7 +7201,7 @@
         const [config, setConfig] = useState(
           () => getData("hgsp_config") || {},
         );
-        const [diaPanel, setDiaPanel] = useState(null);       // fecha "YYYY-MM-DD" del PanelDia abierto
+        const [diaPanel, setDiaPanel] = useState(null); // fecha "YYYY-MM-DD" del PanelDia abierto
         const [anomaliaPanel, setAnomaliaPanel] = useState(null); // fecha "YYYY-MM-DD" del PanelAnomalias
 
         function loadData() {
@@ -6525,13 +7238,25 @@
             if (s.modalidadPago === "obra_social" && s.coseguroAbonado)
               t += Number(s.coseguroMonto) || 0;
             // Cobro cancelación — esquema v2
-            if (s.cobroCancel && (s.cancelCoseguro !== undefined || s.cancelParticularMonto !== undefined)) {
-              if (s.cancelCoseguro && s.cancelCoseguroPagado) t += Number(s.cancelCoseguroMonto) || 0;
-              if (s.cancelParticularAbonado) t += Number(s.cancelParticularMonto) || 0;
+            if (
+              s.cobroCancel &&
+              (s.cancelCoseguro !== undefined ||
+                s.cancelParticularMonto !== undefined)
+            ) {
+              if (s.cancelCoseguro && s.cancelCoseguroPagado)
+                t += Number(s.cancelCoseguroMonto) || 0;
+              if (s.cancelParticularAbonado)
+                t += Number(s.cancelParticularMonto) || 0;
             } else if (s.cobroCancel) {
               // Cobro cancelación — esquema legado v1
-              if (s.cancelEfectivo && s.cancelAbonado) t += Number(s.montoCancel) || 0;
-              if (!s.cancelEfectivo && !s.cancelOrden && s.cancelAbonado && s.cancelMetodo !== "orden_os")
+              if (s.cancelEfectivo && s.cancelAbonado)
+                t += Number(s.montoCancel) || 0;
+              if (
+                !s.cancelEfectivo &&
+                !s.cancelOrden &&
+                s.cancelAbonado &&
+                s.cancelMetodo !== "orden_os"
+              )
                 t += Number(s.montoCancel) || 0;
             }
             return sum + t;
@@ -6549,14 +7274,25 @@
                 t += Number(s.coseguroMonto) || 0;
             }
             // Cobro cancelación — esquema v2
-            if (s.cobroCancel && (s.cancelCoseguro !== undefined || s.cancelParticularMonto !== undefined)) {
-              if (s.cancelCoseguro && !s.cancelCoseguroPagado) t += Number(s.cancelCoseguroMonto) || 0;
+            if (
+              s.cobroCancel &&
+              (s.cancelCoseguro !== undefined ||
+                s.cancelParticularMonto !== undefined)
+            ) {
+              if (s.cancelCoseguro && !s.cancelCoseguroPagado)
+                t += Number(s.cancelCoseguroMonto) || 0;
               const mPart = Number(s.cancelParticularMonto) || 0;
               if (mPart > 0 && !s.cancelParticularAbonado) t += mPart;
             } else if (s.cobroCancel) {
               // Esquema legado v1
-              if (s.cancelEfectivo && !s.cancelAbonado) t += Number(s.montoCancel) || 0;
-              if (!s.cancelEfectivo && !s.cancelOrden && !s.cancelAbonado && s.cancelMetodo !== "orden_os")
+              if (s.cancelEfectivo && !s.cancelAbonado)
+                t += Number(s.montoCancel) || 0;
+              if (
+                !s.cancelEfectivo &&
+                !s.cancelOrden &&
+                !s.cancelAbonado &&
+                s.cancelMetodo !== "orden_os"
+              )
                 t += Number(s.montoCancel) || 0;
             }
             return sum + t;
@@ -6602,8 +7338,10 @@
         const anomaliasPorDia = visibleDatesForGrid.reduce((acc, d) => {
           const ds = dateStr(d);
           acc[ds] = sesiones.filter(
-            (s) => s.fecha === ds &&
-              ((s.horaInicio && s.horaInicio < "07:00") || (s.horaFin && s.horaFin > "22:00"))
+            (s) =>
+              s.fecha === ds &&
+              ((s.horaInicio && s.horaInicio < "07:00") ||
+                (s.horaFin && s.horaFin > "22:00")),
           );
           return acc;
         }, {});
@@ -6611,25 +7349,39 @@
         const dailyTotals = visibleDatesForGrid.map((d) => {
           const ds = dateStr(d);
           const daySes = sesiones.filter(
-            (s) => s.fecha === ds && s.tipo !== "reserva_personal" && s.tipo !== "AT",
+            (s) =>
+              s.fecha === ds &&
+              s.tipo !== "reserva_personal" &&
+              s.tipo !== "AT",
           );
-          let efectivo = 0, transferencia = 0, ordenes = 0, pendiente = 0;
+          let efectivo = 0,
+            transferencia = 0,
+            ordenes = 0,
+            pendiente = 0;
           const addCobro = (monto, metodo, pagado) => {
             if (!monto || monto <= 0) return;
-            if (!pagado) { pendiente += monto; return; }
+            if (!pagado) {
+              pendiente += monto;
+              return;
+            }
             if (metodo === "transferencia") transferencia += monto;
             else efectivo += monto;
           };
           daySes.forEach((s) => {
             const pac = pacientes.find((p) => p.id === s.pacienteId);
-            const tieneOS = !!(pac?.obraSocial && pac.obraSocial !== "" && pac.obraSocial.toLowerCase() !== "ninguna");
-            const coseguroMonto = tieneOS ? (pac?.coseguro || 0) : 0;
+            const tieneOS = !!(
+              pac?.obraSocial &&
+              pac.obraSocial !== "" &&
+              pac.obraSocial.toLowerCase() !== "ninguna"
+            );
+            const coseguroMonto = tieneOS ? pac?.coseguro || 0 : 0;
 
             if (s.estado === "asistio") {
               if (tieneOS) {
                 const ord = valorOrdenDe(s);
                 if (ord > 0) ordenes += ord;
-                if (coseguroMonto > 0) addCobro(coseguroMonto, s.metodoPago, s.cobrado);
+                if (coseguroMonto > 0)
+                  addCobro(coseguroMonto, s.metodoPago, s.cobrado);
               } else {
                 const monto = valorParticularDe(s);
                 addCobro(monto, s.metodoPago, s.cobrado);
@@ -6638,7 +7390,11 @@
               if (tieneOS) {
                 // V2: coseguro de cancelación
                 if (s.cancelCoseguro && (s.cancelCoseguroMonto || 0) > 0) {
-                  addCobro(s.cancelCoseguroMonto, s.cancelCoseguroMetodo, s.cancelCoseguroPagado);
+                  addCobro(
+                    s.cancelCoseguroMonto,
+                    s.cancelCoseguroMetodo,
+                    s.cancelCoseguroPagado,
+                  );
                 }
                 // V2: orden OS en cancelación
                 if (s.cancelOrdenOS && s.cancelOrdenEmitida) {
@@ -6648,7 +7404,11 @@
               } else {
                 // V2: particular cancelación
                 if ((s.cancelParticularMonto || 0) > 0) {
-                  addCobro(s.cancelParticularMonto, s.cancelParticularMetodo, s.cancelParticularAbonado);
+                  addCobro(
+                    s.cancelParticularMonto,
+                    s.cancelParticularMetodo,
+                    s.cancelParticularAbonado,
+                  );
                 } else if ((s.montoCancel || 0) > 0) {
                   // V1 legado
                   addCobro(s.montoCancel, "efectivo", s.cancelAbonado);
@@ -6663,7 +7423,9 @@
           (s) => s.estado === "pendiente" && s.tipo !== "reserva_personal",
         ).length;
         const cancelSem = weekSes.filter(
-          (s) => (s.estado === "cancelo" || s.estado === "inasistencia") && s.tipo !== "reserva_personal",
+          (s) =>
+            (s.estado === "cancelo" || s.estado === "inasistencia") &&
+            s.tipo !== "reserva_personal",
         ).length;
 
         /* Novedades: sesiones con pendientes de cobro/orden/notas esta semana */
@@ -6703,23 +7465,27 @@
           });
 
         /* Órdenes OS pendientes de emitir — históricas (all-time) */
-        const ordenesHistPendientes = sesiones.filter(
-          (s) =>
-            s.cobroCancel &&
-            s.cancelOrdenOS &&
-            !s.cancelOrdenEmitida &&
-            (s.estado === "cancelo" || s.estado === "reprogramo" || s.estado === "inasistencia"),
-        ).map((s) => {
-          const pac = pacientes.find((p) => p.id === s.pacienteId);
-          return {
-            sesionId: s.id,
-            pacNombre: pac ? `${pac.nombre} ${pac.apellido}` : "Paciente",
-            obraSocial: pac?.obraSocial || "",
-            fecha: s.fecha,
-            hora: s.horaInicio,
-            estado: s.estado,
-          };
-        });
+        const ordenesHistPendientes = sesiones
+          .filter(
+            (s) =>
+              s.cobroCancel &&
+              s.cancelOrdenOS &&
+              !s.cancelOrdenEmitida &&
+              (s.estado === "cancelo" ||
+                s.estado === "reprogramo" ||
+                s.estado === "inasistencia"),
+          )
+          .map((s) => {
+            const pac = pacientes.find((p) => p.id === s.pacienteId);
+            return {
+              sesionId: s.id,
+              pacNombre: pac ? `${pac.nombre} ${pac.apellido}` : "Paciente",
+              obraSocial: pac?.obraSocial || "",
+              fecha: s.fecha,
+              hora: s.horaInicio,
+              estado: s.estado,
+            };
+          });
 
         /* ── label semana ── */
         const weekLabel = (() => {
@@ -7908,14 +8674,20 @@
                   transition: "all .2s",
                   whiteSpace: "nowrap",
                   boxShadow:
-                    novedadesItems.length + recordatoriosActivos.length + ordenesHistPendientes.length > 0
+                    novedadesItems.length +
+                      recordatoriosActivos.length +
+                      ordenesHistPendientes.length >
+                    0
                       ? "0 0 0 3px rgba(200,146,42,.18)"
                       : "none",
                 }}
               >
                 Novedades de la semana
                 <span style={{ fontSize: "16px", lineHeight: 1 }}>
-                  {novedadesItems.length + recordatoriosActivos.length + ordenesHistPendientes.length > 0
+                  {novedadesItems.length +
+                    recordatoriosActivos.length +
+                    ordenesHistPendientes.length >
+                  0
                     ? "❗"
                     : "✓"}
                 </span>
@@ -7949,7 +8721,10 @@
               <div className="novedades-panel" style={{ marginTop: "10px" }}>
                 <div className="novedades-title">
                   ⚠️ Novedades de la semana
-                  {novedadesItems.length + recordatoriosActivos.length + ordenesHistPendientes.length === 0 ? (
+                  {novedadesItems.length +
+                    recordatoriosActivos.length +
+                    ordenesHistPendientes.length ===
+                  0 ? (
                     <span
                       style={{
                         fontFamily: "var(--mono)",
@@ -7971,9 +8746,15 @@
                         fontWeight: 400,
                       }}
                     >
-                      · {novedadesItems.length + recordatoriosActivos.length + ordenesHistPendientes.length}{" "}
+                      ·{" "}
+                      {novedadesItems.length +
+                        recordatoriosActivos.length +
+                        ordenesHistPendientes.length}{" "}
                       pendiente
-                      {novedadesItems.length + recordatoriosActivos.length + ordenesHistPendientes.length > 1
+                      {novedadesItems.length +
+                        recordatoriosActivos.length +
+                        ordenesHistPendientes.length >
+                      1
                         ? "s"
                         : ""}{" "}
                       a resolver
@@ -8014,8 +8795,8 @@
                           : n.estado === "reprogramo"
                             ? "Reprogramó"
                             : n.estado === "pendiente"
-                            ? "Sin confirmar"
-                            : "Asistió";
+                              ? "Sin confirmar"
+                              : "Asistió";
                     return (
                       <div
                         key={i}
@@ -8268,7 +9049,11 @@
                 {ordenesHistPendientes.length > 0 && (
                   <div
                     style={{
-                      marginTop: novedadesItems.length > 0 || recordatoriosActivos.length > 0 ? "14px" : "0",
+                      marginTop:
+                        novedadesItems.length > 0 ||
+                        recordatoriosActivos.length > 0
+                          ? "14px"
+                          : "0",
                     }}
                   >
                     <div
@@ -8287,9 +9072,11 @@
                     {ordenesHistPendientes.map((o, i) => {
                       const sesObj = sesiones.find((s) => s.id === o.sesionId);
                       const estadoIcon =
-                        o.estado === "cancelo" ? "❌"
-                        : o.estado === "inasistencia" ? "🚫"
-                        : "🔄";
+                        o.estado === "cancelo"
+                          ? "❌"
+                          : o.estado === "inasistencia"
+                            ? "🚫"
+                            : "🔄";
                       return (
                         <div
                           key={o.sesionId}
@@ -8921,7 +9708,12 @@
                 pacientes={pacientes}
                 onClose={() => setDiaPanel(null)}
                 onEditar={(s) => {
-                  setModalTurno({ mode: "editar", sesion: s, fecha: s.fecha, hora: s.horaInicio });
+                  setModalTurno({
+                    mode: "editar",
+                    sesion: s,
+                    fecha: s.fecha,
+                    hora: s.horaInicio,
+                  });
                 }}
               />
             )}
@@ -8934,10 +9726,17 @@
                 pacientes={pacientes}
                 onClose={() => setAnomaliaPanel(null)}
                 onEditar={(s) => {
-                  setModalTurno({ mode: "editar", sesion: s, fecha: s.fecha, hora: s.horaInicio });
+                  setModalTurno({
+                    mode: "editar",
+                    sesion: s,
+                    fecha: s.fecha,
+                    hora: s.horaInicio,
+                  });
                 }}
                 onEliminar={(s) => {
-                  const all = getData("hgsp_sesiones").filter((x) => x.id !== s.id);
+                  const all = getData("hgsp_sesiones").filter(
+                    (x) => x.id !== s.id,
+                  );
                   setData("hgsp_sesiones", all);
                   loadData();
                   showToast("🗑 Turno eliminado");
@@ -10995,133 +11794,217 @@
               )}
 
               {/* SESIONES */}
-              {tab === "sesiones" && (() => {
-                /* ── Helpers de columna ── */
-                const DIAS_ABREV = ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"];
-                function cobroCell(s) {
-                  if (s.estado === "asistio") {
-                    if (s.modalidadPago === "particular") {
-                      const m = Number(s.montoParticular) || 0;
+              {tab === "sesiones" &&
+                (() => {
+                  /* ── Helpers de columna ── */
+                  const DIAS_ABREV = ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"];
+                  function cobroCell(s) {
+                    if (s.estado === "asistio") {
+                      if (s.modalidadPago === "particular") {
+                        const m = Number(s.montoParticular) || 0;
+                        return m > 0 ? `$${m.toLocaleString("es-AR")}` : "—";
+                      }
+                      if (s.modalidadPago === "obra_social") {
+                        const m = Number(s.coseguroMonto) || 0;
+                        return m > 0 ? `$${m.toLocaleString("es-AR")}` : "OS";
+                      }
+                      const m = Number(s.montoCobrado) || 0;
                       return m > 0 ? `$${m.toLocaleString("es-AR")}` : "—";
                     }
-                    if (s.modalidadPago === "obra_social") {
-                      const m = Number(s.coseguroMonto) || 0;
-                      return m > 0 ? `$${m.toLocaleString("es-AR")}` : "OS";
+                    if (
+                      (s.estado === "cancelo" ||
+                        s.estado === "inasistencia" ||
+                        s.estado === "reprogramo") &&
+                      s.cobroCancel
+                    ) {
+                      if (
+                        s.cancelCoseguro !== undefined ||
+                        s.cancelParticularMonto !== undefined
+                      ) {
+                        const parts = [];
+                        if (s.cancelCoseguro)
+                          parts.push(
+                            `$${(Number(s.cancelCoseguroMonto) || 0).toLocaleString("es-AR")}`,
+                          );
+                        if (s.cancelOrdenOS) parts.push("Ord");
+                        const mP = Number(s.cancelParticularMonto) || 0;
+                        if (mP > 0 && !s.cancelCoseguro)
+                          parts.push(`$${mP.toLocaleString("es-AR")}`);
+                        return parts.join("+") || "—";
+                      }
+                      const m = Number(s.montoCancel) || 0;
+                      return m > 0 ? `$${m.toLocaleString("es-AR")}` : "—";
                     }
-                    const m = Number(s.montoCobrado) || 0;
-                    return m > 0 ? `$${m.toLocaleString("es-AR")}` : "—";
+                    return "—";
                   }
-                  if ((s.estado === "cancelo" || s.estado === "inasistencia" || s.estado === "reprogramo") && s.cobroCancel) {
-                    if (s.cancelCoseguro !== undefined || s.cancelParticularMonto !== undefined) {
-                      const parts = [];
-                      if (s.cancelCoseguro) parts.push(`$${(Number(s.cancelCoseguroMonto) || 0).toLocaleString("es-AR")}`);
-                      if (s.cancelOrdenOS) parts.push("Ord");
-                      const mP = Number(s.cancelParticularMonto) || 0;
-                      if (mP > 0 && !s.cancelCoseguro) parts.push(`$${mP.toLocaleString("es-AR")}`);
-                      return parts.join("+") || "—";
-                    }
-                    const m = Number(s.montoCancel) || 0;
-                    return m > 0 ? `$${m.toLocaleString("es-AR")}` : "—";
-                  }
-                  return "—";
-                }
-                function pendienteCell(s) {
-                  if (s.estado === "asistio") {
-                    if (s.modalidadPago === "particular" && !s.particularAbonado) return "⏳";
-                    if (s.modalidadPago === "obra_social" && (!s.coseguroAbonado || !s.ordenEmitida || !s.ordenFirmada)) return "⏳";
-                    if (s.modalidadPago == null && s.cobrado === false) return "⏳";
-                    return "✅";
-                  }
-                  if ((s.estado === "cancelo" || s.estado === "inasistencia" || s.estado === "reprogramo") && s.cobroCancel) {
-                    if (s.cancelCoseguro !== undefined || s.cancelParticularMonto !== undefined) {
-                      if (s.cancelCoseguro && !s.cancelCoseguroPagado) return "⏳";
-                      if (s.cancelOrdenOS && !s.cancelOrdenEmitida) return "⏳";
-                      if ((Number(s.cancelParticularMonto) || 0) > 0 && !s.cancelParticularAbonado) return "⏳";
+                  function pendienteCell(s) {
+                    if (s.estado === "asistio") {
+                      if (
+                        s.modalidadPago === "particular" &&
+                        !s.particularAbonado
+                      )
+                        return "⏳";
+                      if (
+                        s.modalidadPago === "obra_social" &&
+                        (!s.coseguroAbonado ||
+                          !s.ordenEmitida ||
+                          !s.ordenFirmada)
+                      )
+                        return "⏳";
+                      if (s.modalidadPago == null && s.cobrado === false)
+                        return "⏳";
                       return "✅";
                     }
-                    if (s.cancelEfectivo && !s.cancelAbonado) return "⏳";
-                    if (s.cancelOrden && !s.cancelOrdenSaldada) return "⏳";
-                    return "✅";
+                    if (
+                      (s.estado === "cancelo" ||
+                        s.estado === "inasistencia" ||
+                        s.estado === "reprogramo") &&
+                      s.cobroCancel
+                    ) {
+                      if (
+                        s.cancelCoseguro !== undefined ||
+                        s.cancelParticularMonto !== undefined
+                      ) {
+                        if (s.cancelCoseguro && !s.cancelCoseguroPagado)
+                          return "⏳";
+                        if (s.cancelOrdenOS && !s.cancelOrdenEmitida)
+                          return "⏳";
+                        if (
+                          (Number(s.cancelParticularMonto) || 0) > 0 &&
+                          !s.cancelParticularAbonado
+                        )
+                          return "⏳";
+                        return "✅";
+                      }
+                      if (s.cancelEfectivo && !s.cancelAbonado) return "⏳";
+                      if (s.cancelOrden && !s.cancelOrdenSaldada) return "⏳";
+                      return "✅";
+                    }
+                    return "—";
                   }
-                  return "—";
-                }
-                const tasaAsistencia = (asistidas + canceladas) > 0
-                  ? Math.round((asistidas / (asistidas + canceladas)) * 100) + "%"
-                  : "—";
+                  const tasaAsistencia =
+                    asistidas + canceladas > 0
+                      ? Math.round(
+                          (asistidas / (asistidas + canceladas)) * 100,
+                        ) + "%"
+                      : "—";
 
-                return (
-                  <div>
-                    <div className="stats-grid">
-                      <StatCard label="Total sesiones" value={totalSesiones} />
-                      <StatCard label="Asistidas" value={asistidas} />
-                      <StatCard label="Canceladas" value={canceladas} />
-                      <StatCard label="Pendientes" value={pendientes} />
-                      <StatCard label="Asistencia" value={tasaAsistencia} />
-                    </div>
-                    <div className="tbl-wrap">
-                      <table className="tbl">
-                        <thead>
-                          <tr>
-                            <th>Fecha</th>
-                            <th>Estado</th>
-                            <th>Cobro</th>
-                            <th style={{ textAlign: "center" }}>¿Pend?</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {sesiones.length === 0 && (
+                  return (
+                    <div>
+                      <div className="stats-grid">
+                        <StatCard
+                          label="Total sesiones"
+                          value={totalSesiones}
+                        />
+                        <StatCard label="Asistidas" value={asistidas} />
+                        <StatCard label="Canceladas" value={canceladas} />
+                        <StatCard label="Pendientes" value={pendientes} />
+                        <StatCard label="Asistencia" value={tasaAsistencia} />
+                      </div>
+                      <div className="tbl-wrap">
+                        <table className="tbl">
+                          <thead>
                             <tr>
-                              <td colSpan={4} style={{ textAlign: "center", color: "var(--tx3)", padding: "20px" }}>
-                                Sin sesiones registradas
-                              </td>
+                              <th>Fecha</th>
+                              <th>Estado</th>
+                              <th>Cobro</th>
+                              <th style={{ textAlign: "center" }}>¿Pend?</th>
                             </tr>
-                          )}
-                          {sesiones.map((s) => {
-                            const pend = pendienteCell(s);
-                            const fechaObj = s.fecha ? new Date(s.fecha + "T12:00") : null;
-                            const diaAbrev = fechaObj ? DIAS_ABREV[fechaObj.getDay()] : "";
-                            const fechaFmt = fechaObj
-                              ? `${String(fechaObj.getDate()).padStart(2, "0")}/${String(fechaObj.getMonth() + 1).padStart(2, "0")}`
-                              : s.fecha;
-                            return (
-                              <tr
-                                key={s.id}
-                                style={{ background: pend === "⏳" ? "rgba(200,146,42,.06)" : undefined }}
-                              >
-                                <td style={{ fontFamily: "var(--mono)", fontSize: "11px", whiteSpace: "nowrap" }}>
-                                  {fechaFmt}
-                                  {diaAbrev && (
-                                    <span style={{ color: "var(--tx3)", marginLeft: "5px" }}>{diaAbrev}</span>
-                                  )}
-                                </td>
-                                <td>
-                                  <Badge
-                                    type={
-                                      s.estado === "asistio"
-                                        ? "ok"
-                                        : s.estado === "cancelo" || s.estado === "inasistencia"
-                                          ? "error"
-                                          : "warn"
-                                    }
-                                  >
-                                    {ESTADO_ICONS[s.estado] || "⏳"}
-                                  </Badge>
-                                </td>
-                                <td style={{ fontFamily: "var(--mono)", fontSize: "11px" }}>
-                                  {cobroCell(s)}
-                                </td>
-                                <td style={{ textAlign: "center", fontSize: "13px" }}>
-                                  {pend}
+                          </thead>
+                          <tbody>
+                            {sesiones.length === 0 && (
+                              <tr>
+                                <td
+                                  colSpan={4}
+                                  style={{
+                                    textAlign: "center",
+                                    color: "var(--tx3)",
+                                    padding: "20px",
+                                  }}
+                                >
+                                  Sin sesiones registradas
                                 </td>
                               </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+                            )}
+                            {sesiones.map((s) => {
+                              const pend = pendienteCell(s);
+                              const fechaObj = s.fecha
+                                ? new Date(s.fecha + "T12:00")
+                                : null;
+                              const diaAbrev = fechaObj
+                                ? DIAS_ABREV[fechaObj.getDay()]
+                                : "";
+                              const fechaFmt = fechaObj
+                                ? `${String(fechaObj.getDate()).padStart(2, "0")}/${String(fechaObj.getMonth() + 1).padStart(2, "0")}`
+                                : s.fecha;
+                              return (
+                                <tr
+                                  key={s.id}
+                                  style={{
+                                    background:
+                                      pend === "⏳"
+                                        ? "rgba(200,146,42,.06)"
+                                        : undefined,
+                                  }}
+                                >
+                                  <td
+                                    style={{
+                                      fontFamily: "var(--mono)",
+                                      fontSize: "11px",
+                                      whiteSpace: "nowrap",
+                                    }}
+                                  >
+                                    {fechaFmt}
+                                    {diaAbrev && (
+                                      <span
+                                        style={{
+                                          color: "var(--tx3)",
+                                          marginLeft: "5px",
+                                        }}
+                                      >
+                                        {diaAbrev}
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td>
+                                    <Badge
+                                      type={
+                                        s.estado === "asistio"
+                                          ? "ok"
+                                          : s.estado === "cancelo" ||
+                                              s.estado === "inasistencia"
+                                            ? "error"
+                                            : "warn"
+                                      }
+                                    >
+                                      {ESTADO_ICONS[s.estado] || "⏳"}
+                                    </Badge>
+                                  </td>
+                                  <td
+                                    style={{
+                                      fontFamily: "var(--mono)",
+                                      fontSize: "11px",
+                                    }}
+                                  >
+                                    {cobroCell(s)}
+                                  </td>
+                                  <td
+                                    style={{
+                                      textAlign: "center",
+                                      fontSize: "13px",
+                                    }}
+                                  >
+                                    {pend}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
-                  </div>
-                );
-              })()}
+                  );
+                })()}
 
               {/* COBROS */}
               {tab === "cobros" && (
@@ -11834,7 +12717,12 @@
         /* sesiones del mes, sin canceladas/inasistencias, con OS */
         const sesMes = sesiones.filter((s) => {
           const [y, m] = s.fecha.split("-").map(Number);
-          return y === anio && m === mes && s.estado !== "cancelo" && s.estado !== "inasistencia";
+          return (
+            y === anio &&
+            m === mes &&
+            s.estado !== "cancelo" &&
+            s.estado !== "inasistencia"
+          );
         });
 
         /* agrupar por OS */
@@ -14593,15 +15481,27 @@
         });
 
         /* ── Feriados locales ── */
-        const [extraFeriados, setExtraFeriados] = useState(() => getData("hgsp_feriados_extra"));
-        const [newFeriado, setNewFeriado] = useState({ fecha: "", nombre: "", trabaja: false });
+        const [extraFeriados, setExtraFeriados] = useState(() =>
+          getData("hgsp_feriados_extra"),
+        );
+        const [newFeriado, setNewFeriado] = useState({
+          fecha: "",
+          nombre: "",
+          trabaja: false,
+        });
         function addFeriadoCfg() {
           if (!newFeriado.fecha || !newFeriado.nombre.trim()) {
             showToast("⚠️ Ingresá fecha y nombre");
             return;
           }
           const all = getData("hgsp_feriados_extra");
-          all.push({ id: genId(), fecha: newFeriado.fecha, nombre: newFeriado.nombre.trim(), trabaja: newFeriado.trabaja, tipo: "local" });
+          all.push({
+            id: genId(),
+            fecha: newFeriado.fecha,
+            nombre: newFeriado.nombre.trim(),
+            trabaja: newFeriado.trabaja,
+            tipo: "local",
+          });
           setData("hgsp_feriados_extra", all);
           setExtraFeriados(all);
           setNewFeriado({ fecha: "", nombre: "", trabaja: false });
@@ -15421,13 +16321,33 @@
                   style={cfgBarStyle("feriados")}
                   onClick={() => toggle("feriados")}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
+                  >
                     <span style={{ fontSize: "18px" }}>📅</span>
                     <div>
-                      <div style={{ fontFamily: "var(--serif2)", fontWeight: 700, fontSize: "15px", color: cfgTitleColor("feriados") }}>
+                      <div
+                        style={{
+                          fontFamily: "var(--serif2)",
+                          fontWeight: 700,
+                          fontSize: "15px",
+                          color: cfgTitleColor("feriados"),
+                        }}
+                      >
                         Feriados locales / extra
                       </div>
-                      <div style={{ fontFamily: "var(--mono)", fontSize: "10px", marginTop: "1px", color: cfgSubColor("feriados") }}>
+                      <div
+                        style={{
+                          fontFamily: "var(--mono)",
+                          fontSize: "10px",
+                          marginTop: "1px",
+                          color: cfgSubColor("feriados"),
+                        }}
+                      >
                         {open.feriados
                           ? "Editá feriados locales"
                           : `${extraFeriados.length} feriado${extraFeriados.length !== 1 ? "s" : ""} cargado${extraFeriados.length !== 1 ? "s" : ""}`}
@@ -15438,54 +16358,137 @@
                 </div>
                 {open.feriados && (
                   <div style={cfgBody("feriados")}>
-                    <div style={{ marginBottom: "12px", fontSize: "13px", color: "var(--tx2)", lineHeight: 1.5 }}>
-                      Agregá feriados locales (provinciales, municipales, personales) que no están en el calendario nacional.
-                      Se usan para resaltar días en la agenda.
+                    <div
+                      style={{
+                        marginBottom: "12px",
+                        fontSize: "13px",
+                        color: "var(--tx2)",
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      Agregá feriados locales (provinciales, municipales,
+                      personales) que no están en el calendario nacional. Se
+                      usan para resaltar días en la agenda.
                     </div>
                     {/* Formulario agregar */}
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr auto auto", gap: "8px", alignItems: "center", marginBottom: "14px" }}>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 2fr auto auto",
+                        gap: "8px",
+                        alignItems: "center",
+                        marginBottom: "14px",
+                      }}
+                    >
                       <input
                         className="input-base"
                         type="date"
                         style={{ fontFamily: "var(--mono)" }}
                         value={newFeriado.fecha}
-                        onChange={(e) => setNewFeriado((p) => ({ ...p, fecha: e.target.value }))}
+                        onChange={(e) =>
+                          setNewFeriado((p) => ({
+                            ...p,
+                            fecha: e.target.value,
+                          }))
+                        }
                       />
                       <input
                         className="input-base"
                         placeholder="Nombre del feriado..."
                         value={newFeriado.nombre}
-                        onChange={(e) => setNewFeriado((p) => ({ ...p, nombre: e.target.value }))}
+                        onChange={(e) =>
+                          setNewFeriado((p) => ({
+                            ...p,
+                            nombre: e.target.value,
+                          }))
+                        }
                         onKeyDown={(e) => e.key === "Enter" && addFeriadoCfg()}
                       />
                       <div
                         className="chk-wrap"
                         title="¿Se trabaja igual?"
-                        onClick={() => setNewFeriado((p) => ({ ...p, trabaja: !p.trabaja }))}
+                        onClick={() =>
+                          setNewFeriado((p) => ({ ...p, trabaja: !p.trabaja }))
+                        }
                       >
-                        <div className={`chk-box ${newFeriado.trabaja ? "chk-on" : ""}`}>
+                        <div
+                          className={`chk-box ${newFeriado.trabaja ? "chk-on" : ""}`}
+                        >
                           {newFeriado.trabaja ? "✓" : ""}
                         </div>
-                        <span style={{ marginLeft: "6px", fontSize: "12px", color: "var(--tx2)" }}>Trabajo igual</span>
+                        <span
+                          style={{
+                            marginLeft: "6px",
+                            fontSize: "12px",
+                            color: "var(--tx2)",
+                          }}
+                        >
+                          Trabajo igual
+                        </span>
                       </div>
-                      <button className="btn btn-g" style={{ fontSize: "12px", padding: "6px 14px" }} onClick={addFeriadoCfg}>
+                      <button
+                        className="btn btn-g"
+                        style={{ fontSize: "12px", padding: "6px 14px" }}
+                        onClick={addFeriadoCfg}
+                      >
                         Agregar
                       </button>
                     </div>
                     {/* Lista */}
                     {extraFeriados.length > 0 ? (
-                      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "6px",
+                        }}
+                      >
                         {extraFeriados.map((f) => (
-                          <div key={f.id} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "6px 10px", background: "#F0EBE0", borderRadius: "50px" }}>
-                            <span style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "var(--tx2)" }}>{f.fecha}</span>
-                            <span style={{ flex: 1, fontSize: "13px" }}>{f.nombre}</span>
-                            {f.trabaja && <Badge type="warn">Trabajo igual</Badge>}
-                            <span className="act-link" style={{ color: "#C0392B" }} onClick={() => delFeriadoCfg(f.id)}>✕</span>
+                          <div
+                            key={f.id}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "10px",
+                              padding: "6px 10px",
+                              background: "#F0EBE0",
+                              borderRadius: "50px",
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontFamily: "var(--mono)",
+                                fontSize: "12px",
+                                color: "var(--tx2)",
+                              }}
+                            >
+                              {f.fecha}
+                            </span>
+                            <span style={{ flex: 1, fontSize: "13px" }}>
+                              {f.nombre}
+                            </span>
+                            {f.trabaja && (
+                              <Badge type="warn">Trabajo igual</Badge>
+                            )}
+                            <span
+                              className="act-link"
+                              style={{ color: "#C0392B" }}
+                              onClick={() => delFeriadoCfg(f.id)}
+                            >
+                              ✕
+                            </span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div style={{ color: "var(--tx3)", fontSize: "13px", textAlign: "center", padding: "12px" }}>
+                      <div
+                        style={{
+                          color: "var(--tx3)",
+                          fontSize: "13px",
+                          textAlign: "center",
+                          padding: "12px",
+                        }}
+                      >
                         Sin feriados locales extra agregados
                       </div>
                     )}
