@@ -4304,6 +4304,8 @@
                       t.efectivo === 0 &&
                       t.transferencia === 0 &&
                       t.pendiente === 0;
+                    const cobrado = t.efectivo + t.transferencia + t.ordenes;
+                    const saldoDia = cobrado + t.pendiente;
                     return (
                       <div
                         key={i}
@@ -4314,11 +4316,11 @@
                             i < dailyTotals.length - 1
                               ? "1px solid #DDD5C4"
                               : "none",
-                          padding: "5px 6px",
+                          padding: "6px 8px",
                           display: "flex",
                           flexDirection: "column",
                           alignItems: "flex-start",
-                          gap: "2px",
+                          gap: "3px",
                           minHeight: "44px",
                           justifyContent: "center",
                         }}
@@ -4327,7 +4329,7 @@
                           <span
                             style={{
                               fontFamily: "var(--mono)",
-                              fontSize: "12px",
+                              fontSize: "13px",
                               color: "var(--tx3)",
                               width: "100%",
                               textAlign: "center",
@@ -4342,7 +4344,7 @@
                                 title="Órdenes OS emitidas"
                                 style={{
                                   fontFamily: "var(--mono)",
-                                  fontSize: "12px",
+                                  fontSize: "13px",
                                   color: "var(--tx2)",
                                   whiteSpace: "nowrap",
                                   cursor: "help",
@@ -4356,7 +4358,7 @@
                                 title="Cobrado en efectivo"
                                 style={{
                                   fontFamily: "var(--mono)",
-                                  fontSize: "12px",
+                                  fontSize: "13px",
                                   color: "#2D6A3F",
                                   whiteSpace: "nowrap",
                                   cursor: "help",
@@ -4370,7 +4372,7 @@
                                 title="Cobrado por transferencia"
                                 style={{
                                   fontFamily: "var(--mono)",
-                                  fontSize: "12px",
+                                  fontSize: "13px",
                                   color: "#1A5276",
                                   whiteSpace: "nowrap",
                                   cursor: "help",
@@ -4384,7 +4386,7 @@
                                 title="Pendiente de cobro"
                                 style={{
                                   fontFamily: "var(--mono)",
-                                  fontSize: "12px",
+                                  fontSize: "13px",
                                   color: "#C8922A",
                                   whiteSpace: "nowrap",
                                   cursor: "help",
@@ -4393,6 +4395,28 @@
                                 ⏳ ${t.pendiente.toLocaleString("es-AR")}
                               </span>
                             )}
+                            {/* Separador + saldo total del día */}
+                            <div
+                              style={{
+                                width: "100%",
+                                borderTop: "1px solid rgba(200,146,42,.4)",
+                                marginTop: "2px",
+                                paddingTop: "3px",
+                              }}
+                            />
+                            <span
+                              title={`Saldo total del día: $${cobrado.toLocaleString("es-AR")} cobrado + $${t.pendiente.toLocaleString("es-AR")} pendiente`}
+                              style={{
+                                fontFamily: "var(--mono)",
+                                fontSize: "13px",
+                                fontWeight: "700",
+                                color: "var(--vd)",
+                                whiteSpace: "nowrap",
+                                cursor: "help",
+                              }}
+                            >
+                              ∑ ${saldoDia.toLocaleString("es-AR")}
+                            </span>
                           </>
                         )}
                       </div>
