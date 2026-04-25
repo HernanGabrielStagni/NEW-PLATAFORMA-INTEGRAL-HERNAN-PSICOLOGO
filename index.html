@@ -9516,54 +9516,6 @@
                 flexWrap: "wrap",
               }}
             >
-              <div className="agenda-primary-controls">
-                <div className="agenda-primary-controls-top">
-                  {/* Toggle vista (⟲) */}
-                  <button
-                    className="agenda-primary-view"
-                    onClick={() =>
-                      setVista((v) => (v === "semanal" ? "mensual" : "semanal"))
-                    }
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "6px",
-                      padding: "8px 16px",
-                      borderRadius: "50px",
-                      border: "1px solid #2d5a3d",
-                      background: vista === "semanal" ? "var(--vd)" : "#f4efe5",
-                      color: vista === "semanal" ? "var(--bl)" : "var(--tx2)",
-                      fontFamily: "var(--sans)",
-                      fontSize: "13px",
-                      fontWeight: 700,
-                      cursor: "pointer",
-                      transition: "all .2s",
-                      width: "100%",
-                      boxShadow:
-                        vista === "semanal"
-                          ? "0 2px 6px rgba(30,61,43,.25)"
-                          : "inset 0 1px 0 rgba(255,255,255,.55)",
-                    }}
-                  >
-                    <span
-                      style={{
-                        display: "inline-block",
-                        transition: "transform .35s",
-                        transform:
-                          vista === "mensual"
-                            ? "rotate(180deg)"
-                            : "rotate(0deg)",
-                        fontSize: "15px",
-                        lineHeight: 1,
-                      }}
-                    >
-                      ⟲
-                    </span>
-                    {vista === "semanal" ? "📅 Semanal" : "🗓️ Mensual"}
-                  </button>
-                </div>
-              </div>
 
               {vista === "semanal" && (
                 <>
@@ -9796,6 +9748,43 @@
                 </div>
               </details>
             </div>
+
+            {/* PESTAÑA SELECTOR DE VISTA — sobre LUN+MAR */}
+            <div style={{ paddingLeft: "56px", marginBottom: "-2px", position: "relative", zIndex: 10 }}>
+              <div style={{
+                display: "inline-flex",
+                alignItems: "center",
+                background: "var(--vd)",
+                borderRadius: "14px 14px 0 0",
+                padding: "3px",
+                border: "1.5px solid rgba(200,146,42,.4)",
+                borderBottom: "2px solid var(--vd)",
+                boxShadow: "0 -3px 10px rgba(30,61,43,.18)",
+                gap: "1px",
+              }}>
+                {[["semanal","📅","Semanal"],["mensual","🗓️","Mensual"]].map(([v, icon, lbl]) => (
+                  <button key={v} onClick={() => setVista(v)} style={{
+                    padding: "4px 16px",
+                    borderRadius: "50px",
+                    border: "none",
+                    background: vista === v ? "var(--do)" : "transparent",
+                    color: vista === v ? "var(--vd)" : "rgba(255,255,255,.52)",
+                    fontFamily: "var(--mono)",
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    transition: "all .18s",
+                    textTransform: "uppercase",
+                    letterSpacing: ".06em",
+                    whiteSpace: "nowrap",
+                    lineHeight: 1,
+                  }}>
+                    {icon} {lbl}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* GRILLA SEMANAL */}
             {vista === "semanal" && (
               <AgendaGridSemanal
