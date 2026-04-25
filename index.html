@@ -4304,8 +4304,8 @@
                       t.efectivo === 0 &&
                       t.transferencia === 0 &&
                       t.pendiente === 0;
-                    const cobrado = t.efectivo + t.transferencia + t.ordenes;
-                    const saldoDia = cobrado + t.pendiente;
+                    const cobrado = Number(t.efectivo) + Number(t.transferencia) + Number(t.ordenes);
+                    const saldoDia = cobrado + Number(t.pendiente);
                     return (
                       <div
                         key={i}
@@ -7385,13 +7385,14 @@
             ordenes = 0,
             pendiente = 0;
           const addCobro = (monto, metodo, pagado) => {
-            if (!monto || monto <= 0) return;
+            const n = Number(monto) || 0;
+            if (n <= 0) return;
             if (!pagado) {
-              pendiente += monto;
+              pendiente += n;
               return;
             }
-            if (metodo === "transferencia") transferencia += monto;
-            else efectivo += monto;
+            if (metodo === "transferencia") transferencia += n;
+            else efectivo += n;
           };
           daySes.forEach((s) => {
             const pac = pacientes.find((p) => p.id === s.pacienteId);
@@ -7400,11 +7401,11 @@
               pac.obraSocial !== "" &&
               pac.obraSocial.toLowerCase() !== "ninguna"
             );
-            const coseguroMonto = tieneOS ? pac?.coseguro || 0 : 0;
+            const coseguroMonto = tieneOS ? Number(pac?.coseguro) || 0 : 0;
 
             if (s.estado === "asistio") {
               if (tieneOS) {
-                const ord = valorOrdenDe(s);
+                const ord = Number(valorOrdenDe(s)) || 0;
                 if (ord > 0) ordenes += ord;
                 if (coseguroMonto > 0)
                   addCobro(coseguroMonto, s.metodoPago, s.cobrado);
@@ -7424,7 +7425,7 @@
                 }
                 // V2: orden OS en cancelación
                 if (s.cancelOrdenOS && s.cancelOrdenEmitida) {
-                  const ord = valorOrdenDe(s);
+                  const ord = Number(valorOrdenDe(s)) || 0;
                   if (ord > 0) ordenes += ord;
                 }
               } else {
