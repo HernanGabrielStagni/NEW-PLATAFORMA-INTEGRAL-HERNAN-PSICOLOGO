@@ -1827,7 +1827,7 @@
       }
       .ag-day-hd {
         background: var(--vd);
-        padding: 10px 6px;
+        padding: 14px 6px;
         text-align: center;
         border-right: 1px solid rgba(255, 255, 255, 0.08);
         position: relative;
@@ -1858,17 +1858,17 @@
       }
       .ag-feriado-badge .ag-day-abbr {
         color: rgba(255, 255, 255, 0.75);
-        font-size: 8px;
+        font-size: 16px;
       }
       .ag-feriado-badge .ag-day-num {
         color: #fff;
-        font-size: 20px;
+        font-size: 40px;
         font-weight: 700;
         line-height: 1.1;
       }
       .ag-feriado-badge .feriado-nombre {
         font-family: var(--mono);
-        font-size: 7px;
+        font-size: 14px;
         color: var(--do);
         text-transform: uppercase;
         letter-spacing: 0.04em;
@@ -1891,7 +1891,7 @@
       }
       .ag-day-num {
         font-family: var(--serif);
-        font-size: 18px;
+        font-size: 36px;
         font-weight: 700;
         color: rgba(255, 255, 255, 0.9);
         line-height: 1.1;
@@ -1912,11 +1912,11 @@
       }
       .ag-today-badge .ag-day-abbr {
         color: rgba(255, 255, 255, 0.75);
-        font-size: 8px;
+        font-size: 16px;
       }
       .ag-today-badge .ag-day-num {
         color: #fff;
-        font-size: 20px;
+        font-size: 40px;
         font-weight: 700;
         line-height: 1.1;
       }
@@ -1926,14 +1926,14 @@
       }
       .ag-day-abbr {
         font-family: var(--mono);
-        font-size: 9px;
+        font-size: 18px;
         color: rgba(255, 255, 255, 0.45);
         text-transform: uppercase;
         letter-spacing: 0.06em;
       }
       .ag-day-mes {
         font-family: var(--mono);
-        font-size: 9px;
+        font-size: 18px;
         color: rgba(255, 255, 255, 0.3);
       }
       .ag-body {
@@ -3973,7 +3973,9 @@
         onDayClick,
         onAnomaliaClick,
         anomaliasPorDia,
+        onToggleWeekend,
       }) {
+        const isWeekendShowing = weekDates.length > 5;
         function getPac(id) {
           return pacientes.find((p) => p.id === id);
         }
@@ -3995,7 +3997,7 @@
             <div
               className="ag-grid"
               style={{
-                gridTemplateColumns: `56px repeat(${weekDates.length}, 1fr)`,
+                gridTemplateColumns: `56px repeat(${weekDates.length}, 1fr) 38px`,
               }}
             >
               {/* ── CABECERA ── */}
@@ -4073,11 +4075,57 @@
                 );
               })}
 
+              {/* ── PESTAÑA FIN DE SEMANA ── */}
+              <div
+                onClick={onToggleWeekend}
+                title={
+                  isWeekendShowing
+                    ? "Ocultar sábado y domingo"
+                    : "Mostrar sábado y domingo"
+                }
+                style={{
+                  background: isWeekendShowing
+                    ? "rgba(200,146,42,.10)"
+                    : "var(--vd)",
+                  borderLeft: "2px solid rgba(200,146,42,.45)",
+                  borderBottom: isWeekendShowing
+                    ? "2px solid rgba(200,146,42,.35)"
+                    : "none",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "background .2s",
+                  borderRadius: "0 var(--r) 0 0",
+                }}
+              >
+                <span
+                  style={{
+                    writingMode: "vertical-rl",
+                    transform: "rotate(180deg)",
+                    fontFamily: "var(--mono)",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                    color: isWeekendShowing
+                      ? "rgba(200,146,42,.65)"
+                      : "var(--do)",
+                    letterSpacing: ".07em",
+                    whiteSpace: "nowrap",
+                    textTransform: "uppercase",
+                    padding: "6px 0",
+                    userSelect: "none",
+                  }}
+                >
+                  {isWeekendShowing ? "◂ cerrar" : "Sáb Dom ▸"}
+                </span>
+              </div>
+
               {/* ── CUERPO ── */}
               <div
                 className="ag-body"
                 style={{
                   gridTemplateColumns: `56px repeat(${weekDates.length}, 1fr)`,
+                  gridColumn: `1 / -2`,
                 }}
               >
                 {/* columna de tiempo */}
@@ -4271,6 +4319,17 @@
                 })}
               </div>
 
+              {/* ── FILLER columna estrecha (al lado del cuerpo) ── */}
+              <div
+                style={{
+                  background: isWeekendShowing
+                    ? "rgba(200,146,42,.04)"
+                    : "rgba(200,146,42,.06)",
+                  borderLeft: "2px solid rgba(200,146,42,.22)",
+                  borderTop: "none",
+                }}
+              />
+
               {/* ── FOOTER: totales estimados por día ── */}
               {dailyTotals && (
                 <>
@@ -4287,7 +4346,7 @@
                     <span
                       style={{
                         fontFamily: "var(--mono)",
-                        fontSize: "10px",
+                        fontSize: "20px",
                         color: "rgba(255,255,255,.3)",
                         textTransform: "uppercase",
                         letterSpacing: ".05em",
@@ -4304,7 +4363,10 @@
                       t.efectivo === 0 &&
                       t.transferencia === 0 &&
                       t.pendiente === 0;
-                    const cobrado = Number(t.efectivo) + Number(t.transferencia) + Number(t.ordenes);
+                    const cobrado =
+                      Number(t.efectivo) +
+                      Number(t.transferencia) +
+                      Number(t.ordenes);
                     const saldoDia = cobrado + Number(t.pendiente);
                     return (
                       <div
@@ -4329,7 +4391,7 @@
                           <span
                             style={{
                               fontFamily: "var(--mono)",
-                              fontSize: "13px",
+                              fontSize: "16px",
                               color: "var(--tx3)",
                               width: "100%",
                               textAlign: "center",
@@ -4344,7 +4406,7 @@
                                 title="Órdenes OS emitidas"
                                 style={{
                                   fontFamily: "var(--mono)",
-                                  fontSize: "13px",
+                                  fontSize: "16px",
                                   color: "var(--tx2)",
                                   whiteSpace: "nowrap",
                                   cursor: "help",
@@ -4358,7 +4420,7 @@
                                 title="Cobrado en efectivo"
                                 style={{
                                   fontFamily: "var(--mono)",
-                                  fontSize: "13px",
+                                  fontSize: "16px",
                                   color: "#2D6A3F",
                                   whiteSpace: "nowrap",
                                   cursor: "help",
@@ -4372,7 +4434,7 @@
                                 title="Cobrado por transferencia"
                                 style={{
                                   fontFamily: "var(--mono)",
-                                  fontSize: "13px",
+                                  fontSize: "16px",
                                   color: "#1A5276",
                                   whiteSpace: "nowrap",
                                   cursor: "help",
@@ -4386,7 +4448,7 @@
                                 title="Pendiente de cobro"
                                 style={{
                                   fontFamily: "var(--mono)",
-                                  fontSize: "13px",
+                                  fontSize: "16px",
                                   color: "#C8922A",
                                   whiteSpace: "nowrap",
                                   cursor: "help",
@@ -4408,7 +4470,7 @@
                               title={`Saldo total del día: $${cobrado.toLocaleString("es-AR")} cobrado + $${t.pendiente.toLocaleString("es-AR")} pendiente`}
                               style={{
                                 fontFamily: "var(--mono)",
-                                fontSize: "13px",
+                                fontSize: "23px",
                                 fontWeight: "700",
                                 color: "var(--vd)",
                                 whiteSpace: "nowrap",
@@ -4422,6 +4484,14 @@
                       </div>
                     );
                   })}
+                  {/* celda estrecha footer */}
+                  <div
+                    style={{
+                      background: "#EDE8DC",
+                      borderTop: "2px solid rgba(200,146,42,.25)",
+                      borderLeft: "2px solid rgba(200,146,42,.22)",
+                    }}
+                  />
                 </>
               )}
             </div>
@@ -9412,40 +9482,6 @@
                     </span>
                     {vista === "semanal" ? "📅 Semanal" : "🗓️ Mensual"}
                   </button>
-
-                  {/* Fin de semana toggle */}
-                  {vista === "semanal" && (
-                    <button
-                      className="agenda-primary-weekend"
-                      onClick={() => setShowWeekend((v) => !v)}
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: "50px",
-                        padding: "8px 16px",
-                        fontFamily: "var(--sans)",
-                        fontWeight: 700,
-                        fontSize: "13px",
-                        border: showWeekend
-                          ? "1px solid #b79e68"
-                          : "1px solid #cfc4ae",
-                        background: showWeekend ? "#ece1c7" : "#f4efe5",
-                        color: showWeekend ? "var(--wc)" : "var(--tx2)",
-                        cursor: "pointer",
-                        transition: "all .18s",
-                        width: "100%",
-                        boxShadow: "inset 0 1px 0 rgba(255,255,255,.55)",
-                      }}
-                      title={
-                        showWeekend
-                          ? "Ocultar fin de semana"
-                          : "Mostrar fin de semana"
-                      }
-                    >
-                      {showWeekend ? "🗓️ Fin de semana" : "🗓️ Fin de semana"}
-                    </button>
-                  )}
                 </div>
               </div>
 
@@ -9710,6 +9746,7 @@
                 onDayClick={(ds) => setDiaPanel(ds)}
                 onAnomaliaClick={(ds) => setAnomaliaPanel(ds)}
                 anomaliasPorDia={anomaliasPorDia}
+                onToggleWeekend={() => setShowWeekend((v) => !v)}
               />
             )}
 
