@@ -4368,6 +4368,14 @@
                       Number(t.transferencia) +
                       Number(t.ordenes);
                     const saldoDia = cobrado + Number(t.pendiente);
+                    /* fila con altura fija para alinear todas las celdas */
+                    const ROW_H = "22px";
+                    const filaStyle = {
+                      height: ROW_H,
+                      display: "flex",
+                      alignItems: "center",
+                      overflow: "hidden",
+                    };
                     return (
                       <div
                         key={i}
@@ -4382,105 +4390,55 @@
                           display: "flex",
                           flexDirection: "column",
                           alignItems: "flex-start",
-                          gap: "3px",
-                          minHeight: "44px",
-                          justifyContent: "center",
                         }}
                       >
-                        {nada ? (
-                          <span
-                            style={{
-                              fontFamily: "var(--mono)",
-                              fontSize: "16px",
-                              color: "var(--tx3)",
-                              width: "100%",
-                              textAlign: "center",
-                            }}
-                          >
-                            —
-                          </span>
-                        ) : (
-                          <>
-                            {t.ordenes > 0 && (
-                              <span
-                                title="Órdenes OS emitidas"
-                                style={{
-                                  fontFamily: "var(--mono)",
-                                  fontSize: "16px",
-                                  color: "var(--tx2)",
-                                  whiteSpace: "nowrap",
-                                  cursor: "help",
-                                }}
-                              >
-                                📋 ${t.ordenes.toLocaleString("es-AR")}
-                              </span>
-                            )}
-                            {t.efectivo > 0 && (
-                              <span
-                                title="Cobrado en efectivo"
-                                style={{
-                                  fontFamily: "var(--mono)",
-                                  fontSize: "16px",
-                                  color: "#2D6A3F",
-                                  whiteSpace: "nowrap",
-                                  cursor: "help",
-                                }}
-                              >
-                                💵 ${t.efectivo.toLocaleString("es-AR")}
-                              </span>
-                            )}
-                            {t.transferencia > 0 && (
-                              <span
-                                title="Cobrado por transferencia"
-                                style={{
-                                  fontFamily: "var(--mono)",
-                                  fontSize: "16px",
-                                  color: "#1A5276",
-                                  whiteSpace: "nowrap",
-                                  cursor: "help",
-                                }}
-                              >
-                                📱 ${t.transferencia.toLocaleString("es-AR")}
-                              </span>
-                            )}
-                            {t.pendiente > 0 && (
-                              <span
-                                title="Pendiente de cobro"
-                                style={{
-                                  fontFamily: "var(--mono)",
-                                  fontSize: "16px",
-                                  color: "#C8922A",
-                                  whiteSpace: "nowrap",
-                                  cursor: "help",
-                                }}
-                              >
-                                ⏳ ${t.pendiente.toLocaleString("es-AR")}
-                              </span>
-                            )}
-                            {/* Separador + saldo total del día */}
-                            <div
-                              style={{
-                                width: "100%",
-                                borderTop: "1px solid rgba(200,146,42,.4)",
-                                marginTop: "2px",
-                                paddingTop: "3px",
-                              }}
-                            />
+                        {/* fila 1: órdenes */}
+                        <div style={filaStyle}>
+                          {t.ordenes > 0 && (
+                            <span title="Órdenes OS emitidas" style={{ fontFamily: "var(--mono)", fontSize: "13px", color: "var(--tx2)", whiteSpace: "nowrap", cursor: "help" }}>
+                              📋 ${Number(t.ordenes).toLocaleString("es-AR")}
+                            </span>
+                          )}
+                        </div>
+                        {/* fila 2: efectivo */}
+                        <div style={filaStyle}>
+                          {t.efectivo > 0 && (
+                            <span title="Cobrado en efectivo" style={{ fontFamily: "var(--mono)", fontSize: "13px", color: "#2D6A3F", whiteSpace: "nowrap", cursor: "help" }}>
+                              💵 ${Number(t.efectivo).toLocaleString("es-AR")}
+                            </span>
+                          )}
+                        </div>
+                        {/* fila 3: transferencia */}
+                        <div style={filaStyle}>
+                          {t.transferencia > 0 && (
+                            <span title="Cobrado por transferencia" style={{ fontFamily: "var(--mono)", fontSize: "13px", color: "#1A5276", whiteSpace: "nowrap", cursor: "help" }}>
+                              📱 ${Number(t.transferencia).toLocaleString("es-AR")}
+                            </span>
+                          )}
+                        </div>
+                        {/* fila 4: pendiente */}
+                        <div style={filaStyle}>
+                          {t.pendiente > 0 && (
+                            <span title="Pendiente de cobro" style={{ fontFamily: "var(--mono)", fontSize: "13px", color: "#C8922A", whiteSpace: "nowrap", cursor: "help" }}>
+                              ⏳ ${Number(t.pendiente).toLocaleString("es-AR")}
+                            </span>
+                          )}
+                        </div>
+                        {/* separador siempre a la misma altura */}
+                        <div style={{ width: "100%", borderTop: "1px solid rgba(200,146,42,.4)", margin: "4px 0 3px" }} />
+                        {/* total del día */}
+                        <div style={{ height: "28px", display: "flex", alignItems: "center", width: "100%" }}>
+                          {nada ? (
+                            <span style={{ fontFamily: "var(--mono)", fontSize: "13px", color: "var(--tx3)", width: "100%", textAlign: "center" }}>—</span>
+                          ) : (
                             <span
-                              title={`Saldo total del día: $${cobrado.toLocaleString("es-AR")} cobrado + $${t.pendiente.toLocaleString("es-AR")} pendiente`}
-                              style={{
-                                fontFamily: "var(--mono)",
-                                fontSize: "23px",
-                                fontWeight: "700",
-                                color: "var(--vd)",
-                                whiteSpace: "nowrap",
-                                cursor: "help",
-                              }}
+                              title={`Saldo total del día: $${cobrado.toLocaleString("es-AR")} cobrado + $${Number(t.pendiente).toLocaleString("es-AR")} pendiente`}
+                              style={{ fontFamily: "var(--mono)", fontSize: "18px", fontWeight: "700", color: "var(--vd)", whiteSpace: "nowrap", cursor: "help" }}
                             >
                               ∑ ${saldoDia.toLocaleString("es-AR")}
                             </span>
-                          </>
-                        )}
+                          )}
+                        </div>
                       </div>
                     );
                   })}
@@ -4492,6 +4450,128 @@
                       borderLeft: "2px solid rgba(200,146,42,.22)",
                     }}
                   />
+
+                  {/* ── FILA RESUMEN SEMANAL ── */}
+                  {(() => {
+                    const semOrdenes = dailyTotals.reduce((s, t) => s + Number(t.ordenes), 0);
+                    const semEfectivo = dailyTotals.reduce((s, t) => s + Number(t.efectivo), 0);
+                    const semTransferencia = dailyTotals.reduce((s, t) => s + Number(t.transferencia), 0);
+                    const semPendiente = dailyTotals.reduce((s, t) => s + Number(t.pendiente), 0);
+                    const semTotal = semOrdenes + semEfectivo + semTransferencia + semPendiente;
+                    if (semTotal === 0) return null;
+                    const DIV = <div style={{ width: "1px", alignSelf: "stretch", background: "rgba(200,146,42,.3)", flexShrink: 0, margin: "0 4px" }} />;
+                    const metricas = [
+                      semOrdenes > 0      && { label: "Órdenes OS",    value: semOrdenes,      icon: "📋", color: "rgba(200,230,210,.9)", title: "Total órdenes OS emitidas" },
+                      semEfectivo > 0     && { label: "Efectivo",       value: semEfectivo,     icon: "💵", color: "#7DCC90",             title: "Total cobrado en efectivo" },
+                      semTransferencia > 0 && { label: "Transferencia", value: semTransferencia, icon: "📱", color: "#7AB8E0",            title: "Total cobrado por transferencia" },
+                      semPendiente > 0    && { label: "Pendiente",      value: semPendiente,    icon: "⏳", color: "#F0C860",             title: "Total pendiente de cobro" },
+                    ].filter(Boolean);
+                    return (
+                      <div
+                        style={{
+                          gridColumn: "1 / -1",
+                          background: "var(--vd)",
+                          borderTop: "3px solid var(--do)",
+                          padding: "10px 20px",
+                          display: "flex",
+                          alignItems: "stretch",
+                          gap: "0",
+                          flexWrap: "wrap",
+                          rowGap: "8px",
+                          borderRadius: "0 0 var(--r) var(--r)",
+                        }}
+                      >
+                        {/* label semana */}
+                        <div style={{ display: "flex", alignItems: "center", paddingRight: "16px", flexShrink: 0 }}>
+                          <span style={{
+                            fontFamily: "var(--mono)",
+                            fontSize: "12px",
+                            color: "rgba(255,255,255,.35)",
+                            textTransform: "uppercase",
+                            letterSpacing: ".09em",
+                            whiteSpace: "nowrap",
+                          }}>
+                            Semana
+                          </span>
+                        </div>
+
+                        {/* métricas con divisores entre ellas */}
+                        {metricas.map((m, i) => (
+                          <React.Fragment key={i}>
+                            {DIV}
+                            <div
+                              title={m.title}
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "center",
+                                gap: "3px",
+                                padding: "2px 20px",
+                                cursor: "help",
+                                flexShrink: 0,
+                              }}
+                            >
+                              <span style={{
+                                fontFamily: "var(--mono)",
+                                fontSize: "11px",
+                                color: "rgba(255,255,255,.3)",
+                                textTransform: "uppercase",
+                                letterSpacing: ".07em",
+                              }}>
+                                {m.label}
+                              </span>
+                              <span style={{
+                                fontFamily: "var(--mono)",
+                                fontSize: "20px",
+                                fontWeight: 600,
+                                color: m.color,
+                                whiteSpace: "nowrap",
+                                lineHeight: 1.2,
+                              }}>
+                                {m.icon} ${m.value.toLocaleString("es-AR")}
+                              </span>
+                            </div>
+                          </React.Fragment>
+                        ))}
+
+                        {/* empuja el total al extremo derecho */}
+                        <div style={{ flex: "1 1 auto" }} />
+
+                        {/* Gran total */}
+                        {DIV}
+                        <div style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "flex-end",
+                          justifyContent: "center",
+                          gap: "3px",
+                          paddingLeft: "20px",
+                          flexShrink: 0,
+                        }}>
+                          <span style={{
+                            fontFamily: "var(--mono)",
+                            fontSize: "11px",
+                            color: "rgba(200,146,42,.6)",
+                            textTransform: "uppercase",
+                            letterSpacing: ".09em",
+                          }}>
+                            Total producido semana
+                          </span>
+                          <span style={{
+                            fontFamily: "var(--serif)",
+                            fontSize: "36px",
+                            fontWeight: 800,
+                            color: "var(--do)",
+                            whiteSpace: "nowrap",
+                            lineHeight: 1.1,
+                            textShadow: "0 2px 10px rgba(200,146,42,.4)",
+                          }}>
+                            ${semTotal.toLocaleString("es-AR")}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </>
               )}
             </div>
