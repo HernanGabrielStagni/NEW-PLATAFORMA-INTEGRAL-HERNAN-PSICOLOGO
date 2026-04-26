@@ -2604,16 +2604,21 @@
         const topbarRef = useRef(null);
         const [showReservaMenu, setShowReservaMenu] = React.useState(false);
         const menuRef = useRef(null);
+        const [showConfigMenu, setShowConfigMenu] = React.useState(false);
+        const configMenuRef = useRef(null);
 
         useEffect(() => {
-          if (!showReservaMenu) return;
           function handleClick(e) {
-            if (menuRef.current && !menuRef.current.contains(e.target))
+            if (showReservaMenu && menuRef.current && !menuRef.current.contains(e.target)) {
               setShowReservaMenu(false);
+            }
+            if (showConfigMenu && configMenuRef.current && !configMenuRef.current.contains(e.target)) {
+              setShowConfigMenu(false);
+            }
           }
           document.addEventListener("mousedown", handleClick);
           return () => document.removeEventListener("mousedown", handleClick);
-        }, [showReservaMenu]);
+        }, [showReservaMenu, showConfigMenu]);
 
         useEffect(() => {
           const root = document.documentElement;
@@ -2701,21 +2706,73 @@
                   {vista === "semanal" && (
                     <>
                     {/* ⚙️ Botón configuración — a la izquierda del nav */}
-                    <button
-                      onClick={onCargarTurnosFijos}
-                      title="Cargar turnos fijos en la semana"
-                      style={{
-                        display: "inline-flex", alignItems: "center", gap: "5px",
-                        padding: "6px 13px", borderRadius: "50px",
-                        border: "1.5px solid rgba(200,146,42,.5)",
-                        background: "rgba(200,146,42,.1)",
-                        color: "var(--do)",
-                        fontFamily: "var(--sans)", fontSize: "12px", fontWeight: 700,
-                        cursor: "pointer", whiteSpace: "nowrap",
-                      }}
-                    >
-                      ⚙️ Semana
-                    </button>
+                    <div style={{ position: "relative" }} ref={configMenuRef}>
+                      <button
+                        onClick={() => setShowConfigMenu(!showConfigMenu)}
+                        title="Configuración de la semana"
+                        style={{
+                          display: "inline-flex", alignItems: "center", gap: "6px",
+                          padding: "6px 14px", borderRadius: "50px",
+                          border: "1.5px solid rgba(200,146,42,.5)",
+                          background: showConfigMenu ? "rgba(200,146,42,.25)" : "rgba(200,146,42,.1)",
+                          color: "var(--do)",
+                          fontFamily: "var(--sans)", fontSize: "12px", fontWeight: 700,
+                          cursor: "pointer", whiteSpace: "nowrap",
+                          transition: "all .2s"
+                        }}
+                      >
+                        <span style={{ fontSize: "16px", lineHeight: 1 }}>⚙️</span> Semana
+                      </button>
+
+                      {/* Dropdown de configuración de semana */}
+                      {showConfigMenu && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "100%",
+                            left: 0,
+                            marginTop: "8px",
+                            background: "var(--vd)",
+                            border: "1.5px solid rgba(200,146,42,.3)",
+                            borderRadius: "12px",
+                            padding: "6px",
+                            minWidth: "220px",
+                            boxShadow: "0 8px 24px rgba(0,0,0,.4)",
+                            zIndex: 100,
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "2px",
+                          }}
+                        >
+                          <button
+                            onClick={() => {
+                              onCargarTurnosFijos();
+                              setShowConfigMenu(false);
+                            }}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              padding: "10px 12px",
+                              background: "transparent",
+                              border: "none",
+                              color: "rgba(255,255,255,.9)",
+                              fontFamily: "var(--sans)",
+                              fontSize: "13px",
+                              fontWeight: 600,
+                              cursor: "pointer",
+                              borderRadius: "8px",
+                              textAlign: "left",
+                              transition: "background .15s",
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,.06)")}
+                            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                          >
+                            <span style={{ fontSize: "15px" }}>🔃</span> Transferir turnos fijos
+                          </button>
+                        </div>
+                      )}
+                    </div>
                     <div
                       style={{
                         display: "inline-flex",
@@ -7375,7 +7432,7 @@
         const [showStats, setShowStats] = useState(false);
         const [showObjPanel, setShowObjPanel] = useState(false);
         const [showCoord, setShowCoord] = useState(false);
-        const [showSubNovedades, setShowSubNovedades] = useState(true);
+        const [showSubNovedades, setShowSubNovedades] = useState(false);
         const [showSubRecordatorios, setShowSubRecordatorios] = useState(false);
         const [showSubCoordinar, setShowSubCoordinar] = useState(false);
         const [coordManuales, setCoordManuales] = useState([]);
@@ -7390,6 +7447,7 @@
           obj1EvaluarEn: "turno",
           obj2EvaluarEn: "turno",
         });
+        const [pinActivar, setPinActivar] = useState("");
         const [recordatoriosSemana, setRecordatoriosSemana] = useState([]);
         const [modalNuevoRec, setModalNuevoRec] = useState(false);
         const [modalEditRec, setModalEditRec] = useState(null);
@@ -8960,53 +9018,88 @@
               )}
             </div>
 
-            {/* ═══ NOVEDADES DE LA SEMANA — contenedor unificado con 3 sub-bloques ═══ */}
-            <div style={{ margin: "14px 0 0" }}>
-
-              {/* PESTAÑA PRINCIPAL — estilo Excel tab */}
+            {/* ═══ ALERTAS DE LA SEMANA — contenedor unificado con 3 sub-bloques ═══ */}
+            <div
+              style={{
+                background: "var(--vd)",
+                border: "2px solid var(--vm)",
+                borderLeft: "5px solid var(--do)",
+                borderRadius: "var(--r)",
+                padding: "20px 24px",
+                marginBottom: "18px",
+                position: "relative",
+                overflow: "hidden",
+                marginTop: "14px"
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: "3px",
+                  background: "linear-gradient(90deg,var(--do),#E8B84B)",
+                }}
+              />
               <button
                 onClick={() => setShowNovedades((v) => !v)}
                 style={{
-                  display: "inline-flex", alignItems: "center", gap: "6px",
-                  padding: showNovedades ? "8px 18px" : "6px 14px",
-                  borderRadius: showNovedades ? "14px 14px 0 0" : "50px",
-                  border: `2px solid ${totalPendientes > 0 ? "var(--do)" : "rgba(200,146,42,.45)"}`,
-                  borderBottom: showNovedades ? `2px solid #1a3a27` : `2px solid ${totalPendientes > 0 ? "var(--do)" : "rgba(200,146,42,.45)"}`,
-                  background: showNovedades ? "#1a3a27" : "var(--vd)",
-                  color: "var(--do)",
-                  fontFamily: "var(--sans)", fontSize: showNovedades ? "13px" : "12px", fontWeight: 700,
-                  cursor: "pointer", transition: "all .15s", whiteSpace: "nowrap",
-                  boxShadow: totalPendientes > 0 && !showNovedades ? "0 0 0 3px rgba(200,146,42,.18)" : "none",
-                  position: "relative", zIndex: 2,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "100%",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: "0",
+                  marginBottom: showNovedades ? "16px" : "0",
+                  textAlign: "left",
+                  position: "relative",
+                  zIndex: 2,
                 }}
               >
-                📋 {showNovedades ? "Alertas" : "Alertas de la semana"}
-                {totalPendientes > 0 ? (
-                  <span style={{ background: "var(--do)", color: "var(--vd)", borderRadius: "10px", padding: "1px 6px", fontSize: "10px", fontWeight: 800, marginLeft: "2px" }}>
-                    {totalPendientes}
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div
+                    style={{
+                      fontFamily: "var(--serif2)",
+                      fontSize: "22px",
+                      fontWeight: 700,
+                      color: "var(--do)",
+                      lineHeight: 1.1,
+                      textShadow: "0 1px 4px rgba(0,0,0,.4)",
+                    }}
+                  >
+                    📋 Alertas de la semana
+                  </div>
+                  {totalPendientes > 0 ? (
+                    <span style={{ background: "var(--do)", color: "var(--vd)", borderRadius: "10px", padding: "1px 6px", fontSize: "12px", fontWeight: 800 }}>
+                      {totalPendientes}
+                    </span>
+                  ) : (
+                    <span style={{ color: "#7DCC90", fontSize: "16px", lineHeight: 1 }}>✓</span>
+                  )}
+                </div>
+                <span
+                  style={{
+                    fontFamily: "var(--mono)",
+                    fontSize: "11px",
+                    color: "rgba(200,146,42,.5)",
+                    fontWeight: 400,
+                    flexShrink: 0,
+                  }}
+                >
+                  <span style={{ fontSize: "18px", lineHeight: 1 }}>
+                    {showNovedades ? "▲" : "▼"}
                   </span>
-                ) : (
-                  <span style={{ fontSize: "13px", lineHeight: 1, opacity: .7 }}>✓</span>
-                )}
+                </span>
               </button>
 
-              {/* PANEL EXPANDIBLE — conectado a la pestaña */}
+              {/* PANEL EXPANDIBLE */}
               {showNovedades && (
-                <div className="novedades-panel" style={{ marginTop: 0, borderRadius: "0 14px 14px 14px", borderTop: "none", position: "relative", zIndex: 1 }}>
+                <div style={{ position: "relative", zIndex: 1 }}>
 
-                  {/* Título del panel */}
-                  <div className="novedades-title" style={{ fontSize: "17px", marginBottom: "14px", paddingBottom: "10px", borderBottom: "1px solid rgba(200,146,42,.2)" }}>
-                    📋 Alertas de la semana
-                    <span style={{
-                      fontFamily: "var(--mono)", fontSize: "12px",
-                      color: totalPendientes > 0 ? "var(--do)" : "#7DCC90",
-                      marginLeft: "10px", fontWeight: 400,
-                    }}>
-                      {totalPendientes === 0
-                        ? "· Todo al día ✓"
-                        : `· ${totalPendientes} pendiente${totalPendientes > 1 ? "s" : ""} a resolver`}
-                    </span>
-                  </div>
+
 
                   {/* ── SUB-BLOQUE 1: NOVEDADES ── */}
                   <div style={{ marginBottom: "6px" }}>
@@ -9621,7 +9714,7 @@
               ReactDOM.createPortal(
                 <div
                   className="modal-overlay"
-                  onClick={() => setModalConfirmActivar(false)}
+                  onClick={() => { setModalConfirmActivar(false); setPinActivar(""); }}
                 >
                   <div
                     className="modal-card"
@@ -9639,7 +9732,7 @@
                       <span className="modal-title">Activar semana</span>
                       <button
                         className="modal-icon-btn"
-                        onClick={() => setModalConfirmActivar(false)}
+                        onClick={() => { setModalConfirmActivar(false); setPinActivar(""); }}
                       >
                         ✕
                       </button>
@@ -9687,6 +9780,22 @@
                           horario.
                         </div>
                       </div>
+
+                      <div style={{ marginBottom: "20px" }}>
+                        <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.6)", marginBottom: "8px", textTransform: "uppercase", letterSpacing: ".05em" }}>
+                          Confirmación de seguridad
+                        </div>
+                        <input
+                          type="text"
+                          className="modal-input"
+                          placeholder="Escribe 123 para confirmar"
+                          value={pinActivar}
+                          onChange={(e) => setPinActivar(e.target.value)}
+                          style={{ width: "100%", boxSizing: "border-box", textAlign: "center", letterSpacing: "2px", fontWeight: "bold" }}
+                          autoFocus
+                        />
+                      </div>
+
                       <div
                         style={{
                           display: "flex",
@@ -9696,7 +9805,7 @@
                       >
                         <button
                           className="btn btn-sec"
-                          onClick={() => setModalConfirmActivar(false)}
+                          onClick={() => { setModalConfirmActivar(false); setPinActivar(""); }}
                         >
                           Cancelar
                         </button>
@@ -9704,7 +9813,13 @@
                           className="btn btn-g"
                           onClick={() => {
                             setModalConfirmActivar(false);
+                            setPinActivar("");
                             activarSemana();
+                          }}
+                          disabled={pinActivar !== "123"}
+                          style={{
+                             opacity: pinActivar === "123" ? 1 : 0.5,
+                             cursor: pinActivar === "123" ? "pointer" : "not-allowed"
                           }}
                         >
                           ✓ Confirmar
