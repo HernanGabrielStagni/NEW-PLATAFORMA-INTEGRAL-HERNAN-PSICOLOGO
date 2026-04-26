@@ -5496,43 +5496,32 @@
           >
             <div className="modal-card" style={{ maxWidth: "520px" }}>
               <div className="modal-bar" />
-              <div className="modal-header">
-                <span className="modal-title">
-                  {isEditar ? "Edición de turno" : "Creación de turno"}
-                </span>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "6px",
-                    alignItems: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  {isEditar && (
-                    <button
-                      className="modal-icon-btn danger"
-                      onClick={() => onDelete(f)}
-                      title="Eliminar"
-                    >
-                      🗑️
-                    </button>
-                  )}
-                  <button
-                    className="modal-icon-btn"
-                    onClick={handleSave}
-                    title="Guardar"
-                  >
-                    💾
-                  </button>
-                  <button
-                    className="modal-icon-btn"
-                    onClick={tryClose}
-                    title="Cerrar"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
+               <div className="modal-header">
+                 {confirmCancel ? (
+                   <>
+                     <span style={{ color: "rgba(255,255,255,.85)", fontSize: "13px", fontFamily: "var(--sans)", flex: 1 }}>
+                       ¿Salir sin guardar los cambios?
+                     </span>
+                     <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+                       <button className="btn btn-danger" style={{ padding: "5px 14px", fontSize: "13px" }} onClick={doClose}>S&#237;, salir</button>
+                       <button className="btn btn-sec" style={{ padding: "5px 14px", fontSize: "13px" }} onClick={() => setConfirmCancel(false)}>No, quedarme</button>
+                     </div>
+                   </>
+                 ) : (
+                   <>
+                     <span className="modal-title">
+                       {isEditar ? "Edición de turno" : "Creación de turno"}
+                     </span>
+                     <div style={{ display: "flex", gap: "6px", alignItems: "center", flexShrink: 0 }}>
+                       {isEditar && (
+                         <button className="modal-icon-btn danger" onClick={() => onDelete(f)} title="Eliminar">&#128465;&#65039;</button>
+                       )}
+                       <button className="modal-icon-btn" onClick={handleSave} title="Guardar">&#128190;</button>
+                       <button className="modal-icon-btn" onClick={tryClose} title="Cerrar">✕</button>
+                     </div>
+                   </>
+                 )}
+               </div>
               <div className="modal-body">
                 {/* ─── 0. PACIENTE ─── */}
                 <div
@@ -7012,67 +7001,7 @@
                   </div>
                 )}
 
-                {/* ACCIONES */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    gap: "8px",
-                    marginTop: "6px",
-                  }}
-                >
-                  <div>
-                    {isEditar && (
-                      <button
-                        className="btn btn-danger"
-                        onClick={() => onDelete(f)}
-                      >
-                        🗑️ Eliminar
-                      </button>
-                    )}
-                  </div>
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <button className="btn btn-sec" onClick={tryClose}>
-                      Cancelar
-                    </button>
-                    <button
-                      className="btn btn-g"
-                      onClick={handleSave}
-                      disabled={horaFueraDeRango}
-                      style={
-                        horaFueraDeRango
-                          ? { opacity: 0.45, cursor: "not-allowed" }
-                          : {}
-                      }
-                    >
-                      {isEditar ? "Actualizar" : "Crear turno"}
-                    </button>
-                  </div>
-                </div>
               </div>
-              {confirmCancel && (
-                <div className="modal-confirm-cancel">
-                  <span className="modal-confirm-cancel-text">
-                    ¿Salir sin guardar los cambios?
-                  </span>
-                  <div className="modal-confirm-cancel-btns">
-                    <button
-                      className="btn btn-danger"
-                      style={{ padding: "5px 14px", fontSize: "13px" }}
-                      onClick={doClose}
-                    >
-                      Sí, salir
-                    </button>
-                    <button
-                      className="btn btn-sec"
-                      style={{ padding: "5px 14px", fontSize: "13px" }}
-                      onClick={() => setConfirmCancel(false)}
-                    >
-                      No, quedarme
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>,
           document.body,
@@ -7257,42 +7186,32 @@
           >
             <div className="modal-card" style={{ maxWidth: "440px" }}>
               <div className="modal-bar" />
-              <div className="modal-header">
-                <span className="modal-title">
-                  {isEditar ? "Editar reserva" : "Reservar horario"}
-                </span>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "6px",
-                    alignItems: "center",
-                  }}
-                >
-                  {isEditar && (
-                    <button
-                      className="modal-icon-btn danger"
-                      onClick={() => onDelete(f)}
-                      title="Eliminar"
-                    >
-                      🗑️
-                    </button>
-                  )}
-                  <button
-                    className="modal-icon-btn"
-                    onClick={handleSave}
-                    title="Guardar"
-                  >
-                    💾
-                  </button>
-                  <button
-                    className="modal-icon-btn"
-                    onClick={tryClose}
-                    title="Cerrar"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
+               <div className="modal-header">
+                 {confirmCancel ? (
+                   <>
+                     <span style={{ color: "rgba(255,255,255,.85)", fontSize: "13px", fontFamily: "var(--sans)", flex: 1 }}>
+                       ¿Salir sin guardar los cambios?
+                     </span>
+                     <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+                       <button className="btn btn-danger" style={{ padding: "5px 14px", fontSize: "13px" }} onClick={doClose}>S&#237;, salir</button>
+                       <button className="btn btn-sec" style={{ padding: "5px 14px", fontSize: "13px" }} onClick={() => setConfirmCancel(false)}>No, quedarme</button>
+                     </div>
+                   </>
+                 ) : (
+                   <>
+                     <span className="modal-title">
+                       {isEditar ? "Editar reserva" : "Reservar horario"}
+                     </span>
+                     <div style={{ display: "flex", gap: "6px", alignItems: "center", flexShrink: 0 }}>
+                       {isEditar && (
+                         <button className="modal-icon-btn danger" onClick={() => onDelete(f)} title="Eliminar">&#128465;&#65039;</button>
+                       )}
+                       <button className="modal-icon-btn" onClick={handleSave} title="Guardar">&#128190;</button>
+                       <button className="modal-icon-btn" onClick={tryClose} title="Cerrar">✕</button>
+                     </div>
+                   </>
+                 )}
+               </div>
               <div className="modal-body">
                 {/* COLOR DE ETIQUETA */}
                 <div style={{ marginBottom: "14px" }}>
@@ -7456,58 +7375,7 @@
                   placeholder="Observaciones..."
                 />
 
-                {/* ACCIONES */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    gap: "8px",
-                    marginTop: "6px",
-                  }}
-                >
-                  <div>
-                    {isEditar && (
-                      <button
-                        className="btn btn-danger"
-                        onClick={() => onDelete(f)}
-                      >
-                        🗑️ Eliminar
-                      </button>
-                    )}
-                  </div>
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <button className="btn btn-sec" onClick={tryClose}>
-                      Cancelar
-                    </button>
-                    <button className="btn btn-g" onClick={handleSave}>
-                      {isEditar ? "Actualizar" : "Reservar"}
-                    </button>
-                  </div>
-                </div>
               </div>
-              {confirmCancel && (
-                <div className="modal-confirm-cancel">
-                  <span className="modal-confirm-cancel-text">
-                    ¿Salir sin guardar los cambios?
-                  </span>
-                  <div className="modal-confirm-cancel-btns">
-                    <button
-                      className="btn btn-danger"
-                      style={{ padding: "5px 14px", fontSize: "13px" }}
-                      onClick={doClose}
-                    >
-                      Sí, salir
-                    </button>
-                    <button
-                      className="btn btn-sec"
-                      style={{ padding: "5px 14px", fontSize: "13px" }}
-                      onClick={() => setConfirmCancel(false)}
-                    >
-                      No, quedarme
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>,
           document.body,
