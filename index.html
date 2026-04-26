@@ -7878,10 +7878,11 @@
           const all = getData("hgsp_recordatorios_semana") || [];
           const idx = all.findIndex((r) => r.id === id);
           if (idx < 0) return;
-          all[idx] = { ...all[idx], resuelto: true };
+          const nuevoEstado = !all[idx].resuelto;
+          all[idx] = { ...all[idx], resuelto: nuevoEstado };
           setData("hgsp_recordatorios_semana", all);
           loadData();
-          showToast("✅ Recordatorio resuelto");
+          showToast(nuevoEstado ? "✅ Recordatorio resuelto" : "↩️ Desmarcado");
         }
 
         function eliminarRecordatorio(id, titulo) {
