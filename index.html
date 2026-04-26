@@ -1078,16 +1078,12 @@
         justify-content: center;
         width: 100%;
         gap: 6px;
-        min-height: 28px;
-        padding: 4px 12px;
+        min-height: 32px;
+        padding: 5px 14px;
         border-radius: 999px;
-        border: 1px solid rgba(200, 146, 42, 0.45);
-        background: linear-gradient(
-          180deg,
-          rgba(255, 248, 235, 0.98),
-          rgba(247, 239, 224, 0.96)
-        );
-        color: #6f5b36;
+        border: 1.5px solid rgba(200, 146, 42, 0.35);
+        background: var(--vd);
+        color: rgba(255, 255, 255, 0.7);
         cursor: pointer;
         user-select: none;
         overflow: hidden;
@@ -1098,23 +1094,15 @@
           transform 0.18s ease;
       }
       .agenda-legend-trigger:hover {
-        border-color: rgba(200, 146, 42, 0.72);
-        background: linear-gradient(
-          180deg,
-          rgba(255, 245, 222, 1),
-          rgba(245, 234, 210, 0.98)
-        );
-        box-shadow: 0 8px 18px rgba(200, 146, 42, 0.14);
+        border-color: rgba(200, 146, 42, 0.65);
+        background: var(--vm);
+        box-shadow: 0 4px 14px rgba(30, 61, 43, 0.35);
         transform: translateY(-1px);
       }
       .agenda-legend-dropdown[open] .agenda-legend-trigger {
-        border-color: rgba(200, 146, 42, 0.82);
-        background: linear-gradient(
-          180deg,
-          rgba(255, 243, 214, 1),
-          rgba(244, 231, 203, 0.98)
-        );
-        box-shadow: 0 10px 22px rgba(200, 146, 42, 0.18);
+        border-color: var(--do);
+        background: var(--vm);
+        box-shadow: 0 4px 14px rgba(200, 146, 42, 0.2);
       }
       .agenda-legend-icons {
         display: inline-flex;
@@ -1127,51 +1115,58 @@
         overflow: hidden;
       }
       .agenda-legend-dot {
-        width: 9px;
-        height: 9px;
+        width: 10px;
+        height: 10px;
         border-radius: 50%;
         flex-shrink: 0;
+        box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.12);
       }
       .agenda-legend-state-icon {
-        font-size: 13px;
+        font-size: 15px;
         line-height: 1;
         flex-shrink: 0;
+        filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
       }
       .agenda-legend-caret {
-        font-family: sans-serif;
-        font-size: 8px;
+        font-family: var(--mono);
+        font-size: 9px;
         line-height: 1;
-        color: rgba(111, 91, 54, 0.72);
+        color: rgba(200, 146, 42, 0.55);
         flex-shrink: 0;
         transition: transform 0.18s ease;
       }
       .agenda-legend-dropdown[open] .agenda-legend-caret {
         transform: rotate(180deg);
+        color: var(--do);
       }
       .agenda-legend-panel {
         position: absolute;
-        top: calc(100% + 8px);
+        top: calc(100% + 6px);
         left: 0;
-        min-width: 260px;
-        max-width: min(92vw, 420px);
-        padding: 12px 14px;
+        min-width: 240px;
+        max-width: min(92vw, 400px);
+        padding: 14px 16px;
         border-radius: 14px;
-        border: 1px solid rgba(184, 176, 160, 0.8);
-        background: rgba(255, 252, 247, 0.98);
-        box-shadow: 0 16px 34px rgba(72, 61, 47, 0.16);
+        border: 1.5px solid rgba(200, 146, 42, 0.3);
+        background: var(--vd);
+        box-shadow:
+          0 16px 36px rgba(0, 0, 0, 0.4),
+          0 0 0 1px rgba(200, 146, 42, 0.08),
+          inset 0 1px 0 rgba(255, 255, 255, 0.04);
         display: flex;
         flex-wrap: wrap;
-        gap: 10px 14px;
+        gap: 8px 16px;
         z-index: 20;
       }
       .agenda-legend-item {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 7px;
         font-family: var(--mono);
         font-size: 11px;
-        color: var(--tx3);
+        color: rgba(255, 255, 255, 0.6);
         white-space: nowrap;
+        letter-spacing: 0.03em;
       }
       .agenda-legend-item.warn {
         color: var(--do);
@@ -4335,8 +4330,8 @@
                 <>
                   <div
                     style={{
-                      background: "var(--vd)",
-                      borderTop: "2px solid rgba(200,146,42,.3)",
+                      background: "var(--vm)",
+                      borderTop: "3px solid rgba(200,146,42,.4)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -4346,10 +4341,11 @@
                     <span
                       style={{
                         fontFamily: "var(--mono)",
-                        fontSize: "20px",
-                        color: "rgba(255,255,255,.3)",
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        color: "rgba(200,146,42,.55)",
                         textTransform: "uppercase",
-                        letterSpacing: ".05em",
+                        letterSpacing: ".08em",
                         writingMode: "vertical-rl",
                         transform: "rotate(180deg)",
                       }}
@@ -4380,13 +4376,13 @@
                       <div
                         key={i}
                         style={{
-                          background: "#EDE8DC",
-                          borderTop: "2px solid rgba(200,146,42,.25)",
+                          background: "var(--vd)",
+                          borderTop: "3px solid rgba(200,146,42,.4)",
                           borderRight:
                             i < dailyTotals.length - 1
-                              ? "1px solid #DDD5C4"
+                              ? "1px solid rgba(255,255,255,.07)"
                               : "none",
-                          padding: "6px 8px",
+                          padding: "7px 10px",
                           display: "flex",
                           flexDirection: "column",
                           alignItems: "flex-start",
@@ -4395,7 +4391,7 @@
                         {/* fila 1: órdenes */}
                         <div style={filaStyle}>
                           {t.ordenes > 0 && (
-                            <span title="Órdenes OS emitidas" style={{ fontFamily: "var(--mono)", fontSize: "13px", color: "var(--tx2)", whiteSpace: "nowrap", cursor: "help" }}>
+                            <span title="Órdenes OS emitidas" style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "rgba(200,230,210,.85)", whiteSpace: "nowrap", cursor: "help" }}>
                               📋 ${Number(t.ordenes).toLocaleString("es-AR")}
                             </span>
                           )}
@@ -4403,7 +4399,7 @@
                         {/* fila 2: efectivo */}
                         <div style={filaStyle}>
                           {t.efectivo > 0 && (
-                            <span title="Cobrado en efectivo" style={{ fontFamily: "var(--mono)", fontSize: "13px", color: "#2D6A3F", whiteSpace: "nowrap", cursor: "help" }}>
+                            <span title="Cobrado en efectivo" style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "#7DCC90", whiteSpace: "nowrap", cursor: "help" }}>
                               💵 ${Number(t.efectivo).toLocaleString("es-AR")}
                             </span>
                           )}
@@ -4411,7 +4407,7 @@
                         {/* fila 3: transferencia */}
                         <div style={filaStyle}>
                           {t.transferencia > 0 && (
-                            <span title="Cobrado por transferencia" style={{ fontFamily: "var(--mono)", fontSize: "13px", color: "#1A5276", whiteSpace: "nowrap", cursor: "help" }}>
+                            <span title="Cobrado por transferencia" style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "#7AB8E0", whiteSpace: "nowrap", cursor: "help" }}>
                               📱 ${Number(t.transferencia).toLocaleString("es-AR")}
                             </span>
                           )}
@@ -4419,21 +4415,21 @@
                         {/* fila 4: pendiente */}
                         <div style={filaStyle}>
                           {t.pendiente > 0 && (
-                            <span title="Pendiente de cobro" style={{ fontFamily: "var(--mono)", fontSize: "13px", color: "#C8922A", whiteSpace: "nowrap", cursor: "help" }}>
+                            <span title="Pendiente de cobro" style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "#F0C860", whiteSpace: "nowrap", cursor: "help" }}>
                               ⏳ ${Number(t.pendiente).toLocaleString("es-AR")}
                             </span>
                           )}
                         </div>
                         {/* separador siempre a la misma altura */}
-                        <div style={{ width: "100%", borderTop: "1px solid rgba(200,146,42,.4)", margin: "4px 0 3px" }} />
+                        <div style={{ width: "100%", borderTop: "1px solid rgba(200,146,42,.3)", margin: "4px 0 3px" }} />
                         {/* total del día */}
                         <div style={{ height: "28px", display: "flex", alignItems: "center", width: "100%" }}>
                           {nada ? (
-                            <span style={{ fontFamily: "var(--mono)", fontSize: "13px", color: "var(--tx3)", width: "100%", textAlign: "center" }}>—</span>
+                            <span style={{ fontFamily: "var(--mono)", fontSize: "13px", color: "rgba(255,255,255,.18)", width: "100%", textAlign: "center" }}>—</span>
                           ) : (
                             <span
                               title={`Saldo total del día: $${cobrado.toLocaleString("es-AR")} cobrado + $${Number(t.pendiente).toLocaleString("es-AR")} pendiente`}
-                              style={{ fontFamily: "var(--mono)", fontSize: "18px", fontWeight: "700", color: "var(--vd)", whiteSpace: "nowrap", cursor: "help" }}
+                              style={{ fontFamily: "var(--mono)", fontSize: "17px", fontWeight: "700", color: "var(--do)", whiteSpace: "nowrap", cursor: "help", textShadow: "0 1px 6px rgba(200,146,42,.35)" }}
                             >
                               ∑ ${saldoDia.toLocaleString("es-AR")}
                             </span>
@@ -4445,9 +4441,9 @@
                   {/* celda estrecha footer */}
                   <div
                     style={{
-                      background: "#EDE8DC",
-                      borderTop: "2px solid rgba(200,146,42,.25)",
-                      borderLeft: "2px solid rgba(200,146,42,.22)",
+                      background: "var(--vm)",
+                      borderTop: "3px solid rgba(200,146,42,.4)",
+                      borderLeft: "2px solid rgba(200,146,42,.3)",
                     }}
                   />
 
