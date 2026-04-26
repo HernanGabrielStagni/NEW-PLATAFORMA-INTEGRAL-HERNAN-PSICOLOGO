@@ -7372,10 +7372,12 @@
         });
         const [recordatoriosSemana, setRecordatoriosSemana] = useState([]);
         const [modalNuevoRec, setModalNuevoRec] = useState(false);
-        const [recDraft, setRecDraft] = useState({
-          titulo: "",
-          descripcion: "",
-        });
+        const [modalEditRec, setModalEditRec] = useState(null);
+        const [recDraft, setRecDraft] = useState({ titulo: "", descripcion: "" });
+        const [recEditDraft, setRecEditDraft] = useState({ titulo: "", descripcion: "" });
+        const [modalEditCoord, setModalEditCoord] = useState(null);
+        const [coordEditDraft, setCoordEditDraft] = useState({ titulo: "", descripcion: "" });
+        const [showSemanaConfig, setShowSemanaConfig] = useState(false);
         const [config, setConfig] = useState(
           () => getData("hgsp_config") || {},
         );
@@ -7878,6 +7880,56 @@
           setData("hgsp_recordatorios_semana", all);
           loadData();
           showToast("✅ Recordatorio resuelto");
+        }
+
+        function eliminarRecordatorio(id) {
+          const all = (getData("hgsp_recordatorios_semana") || []).filter((r) => r.id !== id);
+          setData("hgsp_recordatorios_semana", all);
+          loadData();
+          showToast("🗑️ Recordatorio eliminado");
+        }
+
+        function abrirEditRec(r) {
+          setRecEditDraft({ titulo: r.titulo, descripcion: r.descripcion || "" });
+          setModalEditRec(r.id);
+        }
+
+        function guardarEditRec() {
+          if (!recEditDraft.titulo.trim()) return;
+          const all = getData("hgsp_recordatorios_semana") || [];
+          const idx = all.findIndex((r) => r.id === modalEditRec);
+          if (idx < 0) return;
+          all[idx] = { ...all[idx], titulo: recEditDraft.titulo.trim(), descripcion: recEditDraft.descripcion.trim() };
+          setData("hgsp_recordatorios_semana", all);
+          setModalEditRec(null);
+          loadData();
+          showToast("✏️ Recordatorio actualizado");
+        }
+
+        function eliminarCoordManual(id) {
+          const semKeyCoord = `hgsp_coord_manuales_${semanaKey}`;
+          const all = (getData(semKeyCoord) || []).filter((x) => x.id !== id);
+          setData(semKeyCoord, all);
+          setCoordManuales(all);
+          showToast("🗑️ Ítem eliminado");
+        }
+
+        function abrirEditCoord(m) {
+          setCoordEditDraft({ titulo: m.titulo, descripcion: m.descripcion || "" });
+          setModalEditCoord(m.id);
+        }
+
+        function guardarEditCoord() {
+          if (!coordEditDraft.titulo.trim()) return;
+          const semKeyCoord = `hgsp_coord_manuales_${semanaKey}`;
+          const all = getData(semKeyCoord) || [];
+          const idx = all.findIndex((x) => x.id === modalEditCoord);
+          if (idx < 0) return;
+          all[idx] = { ...all[idx], titulo: coordEditDraft.titulo.trim(), descripcion: coordEditDraft.descripcion.trim() };
+          setData(semKeyCoord, all);
+          setCoordManuales(all);
+          setModalEditCoord(null);
+          showToast("✏️ Ítem actualizado");
         }
 
         function guardarCoordManual() {
@@ -8864,33 +8916,40 @@
             {/* ═══ NOVEDADES DE LA SEMANA — contenedor unificado con 3 sub-bloques ═══ */}
             <div style={{ margin: "14px 0 0" }}>
 
-              {/* BOTÓN PRINCIPAL */}
+              {/* PESTAÑA PRINCIPAL — estilo Excel tab */}
               <button
                 onClick={() => setShowNovedades((v) => !v)}
                 style={{
                   display: "inline-flex", alignItems: "center", gap: "8px",
-                  padding: "9px 20px", borderRadius: "50px",
+                  padding: "10px 22px",
+                  borderRadius: showNovedades ? "14px 14px 0 0" : "50px",
                   border: `2px solid ${totalPendientes > 0 ? "var(--do)" : "rgba(200,146,42,.45)"}`,
-                  background: showNovedades ? "var(--do)" : "var(--vd)",
-                  color: showNovedades ? "var(--vd)" : "var(--do)",
-                  fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700,
-                  cursor: "pointer", transition: "all .2s", whiteSpace: "nowrap",
-                  boxShadow: totalPendientes > 0 ? "0 0 0 3px rgba(200,146,42,.18)" : "none",
+                  borderBottom: showNovedades ? `2px solid #1a3a27` : `2px solid ${totalPendientes > 0 ? "var(--do)" : "rgba(200,146,42,.45)"}`,
+                  background: showNovedades ? "#1a3a27" : "var(--vd)",
+                  color: "var(--do)",
+                  fontFamily: "var(--sans)", fontSize: "14px", fontWeight: 700,
+                  cursor: "pointer", transition: "border-radius .15s", whiteSpace: "nowrap",
+                  boxShadow: totalPendientes > 0 && !showNovedades ? "0 0 0 3px rgba(200,146,42,.18)" : "none",
+                  position: "relative", zIndex: 2,
                 }}
               >
-                Novedades de la semana
-                <span style={{ fontSize: "16px", lineHeight: 1 }}>
-                  {totalPendientes > 0 ? "❗" : "✓"}
-                </span>
+                📋 Novedades de la semana
+                {totalPendientes > 0 ? (
+                  <span style={{ background: "var(--do)", color: "var(--vd)", borderRadius: "10px", padding: "2px 8px", fontSize: "11px", fontWeight: 800, marginLeft: "2px" }}>
+                    {totalPendientes}
+                  </span>
+                ) : (
+                  <span style={{ fontSize: "15px", lineHeight: 1, opacity: .7 }}>✓</span>
+                )}
               </button>
 
-              {/* PANEL EXPANDIBLE */}
+              {/* PANEL EXPANDIBLE — conectado a la pestaña */}
               {showNovedades && (
-                <div className="novedades-panel" style={{ marginTop: "10px" }}>
+                <div className="novedades-panel" style={{ marginTop: 0, borderRadius: "0 14px 14px 14px", borderTop: "none", position: "relative", zIndex: 1 }}>
 
                   {/* Título del panel */}
-                  <div className="novedades-title">
-                    ⚠️ Novedades de la semana
+                  <div className="novedades-title" style={{ fontSize: "17px", marginBottom: "14px", paddingBottom: "10px", borderBottom: "1px solid rgba(200,146,42,.2)" }}>
+                    📋 Novedades de la semana
                     <span style={{
                       fontFamily: "var(--mono)", fontSize: "12px",
                       color: totalPendientes > 0 ? "var(--do)" : "#7DCC90",
@@ -9026,11 +9085,18 @@
                           </div>
                         ) : (
                           recordatoriosActivos.map((r) => (
-                            <div key={r.id} style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(200,146,42,.2)", borderLeft: "3px solid var(--vc)", borderRadius: "12px", padding: "10px 14px", marginBottom: "8px", display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                              <div onClick={() => resolverRecordatorio(r.id)} title="Marcar como resuelto" style={{ width: "18px", height: "18px", borderRadius: "5px", border: "2px solid var(--do)", background: "rgba(200,146,42,.1)", cursor: "pointer", flexShrink: 0, marginTop: "2px", display: "flex", alignItems: "center", justifyContent: "center" }} />
-                              <div style={{ flex: 1 }}>
+                            <div key={r.id} style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(200,146,42,.2)", borderLeft: "3px solid var(--vc)", borderRadius: "12px", padding: "10px 14px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "10px" }}>
+                              {/* Checkbox */}
+                              <div onClick={() => resolverRecordatorio(r.id)} title="Marcar como resuelto" style={{ width: "20px", height: "20px", borderRadius: "5px", border: "2.5px solid var(--do)", background: "rgba(200,146,42,.1)", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s" }} />
+                              {/* Contenido */}
+                              <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,.9)", lineHeight: 1.3 }}>{r.titulo}</div>
-                                {r.descripcion && <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.4)", marginTop: "3px", lineHeight: 1.4 }}>{r.descripcion}</div>}
+                                {r.descripcion && <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.4)", marginTop: "2px", lineHeight: 1.4 }}>{r.descripcion}</div>}
+                              </div>
+                              {/* Acciones */}
+                              <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
+                                <button onClick={() => abrirEditRec(r)} title="Editar recordatorio" style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1.5px solid rgba(200,146,42,.3)", background: "rgba(200,146,42,.08)", color: "var(--do)", cursor: "pointer", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center" }}>✏️</button>
+                                <button onClick={() => eliminarRecordatorio(r.id)} title="Eliminar recordatorio" style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1.5px solid rgba(200,80,80,.3)", background: "rgba(200,80,80,.08)", color: "#FF8888", cursor: "pointer", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center" }}>🗑️</button>
                               </div>
                             </div>
                           ))
@@ -9082,16 +9148,25 @@
                                       🔄 Turno flotante · {pac?.frecuencia || "—"} · {pac?.diasHorarios?.map((h) => h.dia).join(", ") || "sin horario fijo"}
                                     </div>
                                   </div>
-                                  <button onClick={() => resolverCoord(c.id)} style={{ padding: "6px 16px", borderRadius: "50px", border: "2px solid rgba(125,204,144,.4)", background: "rgba(125,204,144,.1)", color: "#7DCC90", fontFamily: "var(--sans)", fontSize: "12px", fontWeight: 700, cursor: "pointer", transition: "all .15s", flexShrink: 0 }} title="Marcar como coordinado">✓ Coordinado</button>
+                                  <div style={{ display: "flex", gap: "4px", flexShrink: 0, alignItems: "center" }}>
+                                    <div onClick={() => resolverCoord(c.id)} title="Marcar como coordinado" style={{ width: "20px", height: "20px", borderRadius: "5px", border: "2.5px solid #7DCC90", background: "rgba(125,204,144,.1)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s" }} />
+                                  </div>
                                 </div>
                               );
                             })}
                             {coordManuales.map((m) => (
-                              <div key={m.id} style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(200,146,42,.2)", borderLeft: "3px solid var(--vc)", borderRadius: "12px", padding: "10px 14px", marginBottom: "8px", display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                                <div onClick={() => resolverCoordManual(m.id)} title="Marcar como coordinado" style={{ width: "18px", height: "18px", borderRadius: "5px", border: "2px solid var(--do)", background: "rgba(200,146,42,.1)", cursor: "pointer", flexShrink: 0, marginTop: "2px", display: "flex", alignItems: "center", justifyContent: "center" }} />
-                                <div style={{ flex: 1 }}>
+                              <div key={m.id} style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(200,146,42,.2)", borderLeft: "3px solid var(--vc)", borderRadius: "12px", padding: "10px 14px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "10px" }}>
+                                {/* Checkbox coordinado */}
+                                <div onClick={() => resolverCoordManual(m.id)} title="Marcar como coordinado" style={{ width: "20px", height: "20px", borderRadius: "5px", border: "2.5px solid #7DCC90", background: "rgba(125,204,144,.1)", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s" }} />
+                                {/* Contenido */}
+                                <div style={{ flex: 1, minWidth: 0 }}>
                                   <div style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,.9)", lineHeight: 1.3 }}>{m.titulo}</div>
-                                  {m.descripcion && <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.4)", marginTop: "3px", lineHeight: 1.4 }}>{m.descripcion}</div>}
+                                  {m.descripcion && <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.4)", marginTop: "2px", lineHeight: 1.4 }}>{m.descripcion}</div>}
+                                </div>
+                                {/* Acciones */}
+                                <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
+                                  <button onClick={() => abrirEditCoord(m)} title="Editar" style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1.5px solid rgba(200,146,42,.3)", background: "rgba(200,146,42,.08)", color: "var(--do)", cursor: "pointer", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center" }}>✏️</button>
+                                  <button onClick={() => eliminarCoordManual(m.id)} title="Eliminar" style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1.5px solid rgba(200,80,80,.3)", background: "rgba(200,80,80,.08)", color: "#FF8888", cursor: "pointer", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center" }}>🗑️</button>
                                 </div>
                               </div>
                             ))}
@@ -9119,58 +9194,60 @@
 
               {vista === "semanal" && (
                 <>
-                  {/* Activar semana / Turnos fijos */}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                    }}
-                  >
-                    <button
-                      className="btn btn-g"
-                      onClick={() => setModalConfirmActivar(true)}
-                      title="Transfiere los turnos fijos a la agenda semanal. ⚠️ Precaución: borra registros que se superpongan"
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "6px",
-                      }}
-                    >
-                      🔃 Cargar Turnos Fijos
-                      {coordSemana.length > 0 && (
-                        <span
-                          style={{
-                            background: "var(--vd)",
-                            color: "var(--do)",
-                            fontFamily: "var(--mono)",
-                            fontSize: "10px",
-                            fontWeight: 700,
-                            borderRadius: "10px",
-                            padding: "1px 6px",
-                          }}
-                        >
-                          {coordSemana.length}
-                        </span>
-                      )}
-                    </button>
-
-                    {semanaActivada && (
-                      <span
+                  {/* ⚙️ Configuración de semana */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <div style={{ position: "relative" }}>
+                      <button
+                        onClick={() => setShowSemanaConfig((v) => !v)}
+                        title="Configuración de semana"
                         style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "5px",
-                          padding: "6px 14px",
-                          borderRadius: "50px",
-                          border: "2px solid rgba(125,204,144,.35)",
-                          background: "rgba(125,204,144,.08)",
-                          fontFamily: "var(--mono)",
-                          fontSize: "11px",
-                          color: "#7DCC90",
-                          fontWeight: 700,
+                          display: "inline-flex", alignItems: "center", gap: "6px",
+                          padding: "8px 16px", borderRadius: "50px",
+                          border: `2px solid ${showSemanaConfig ? "var(--do)" : "rgba(200,146,42,.4)"}`,
+                          background: showSemanaConfig ? "var(--do)" : "rgba(200,146,42,.08)",
+                          color: showSemanaConfig ? "var(--vd)" : "var(--do)",
+                          fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700,
+                          cursor: "pointer", transition: "all .2s",
                         }}
                       >
+                        ⚙️ Semana
+                        {coordSemana.length > 0 && (
+                          <span style={{ background: showSemanaConfig ? "var(--vd)" : "var(--do)", color: showSemanaConfig ? "var(--do)" : "var(--vd)", fontFamily: "var(--mono)", fontSize: "10px", fontWeight: 700, borderRadius: "10px", padding: "1px 6px" }}>
+                            {coordSemana.length}
+                          </span>
+                        )}
+                      </button>
+
+                      {/* Dropdown panel */}
+                      {showSemanaConfig && (
+                        <div style={{
+                          position: "absolute", top: "calc(100% + 8px)", left: 0, zIndex: 50,
+                          background: "var(--vd)", border: "2px solid var(--vm)",
+                          borderRadius: "16px", padding: "14px", minWidth: "240px",
+                          boxShadow: "0 8px 24px rgba(0,0,0,.35)",
+                        }}>
+                          <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(200,146,42,.7)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: "10px" }}>
+                            ⚙️ Configuración de semana
+                          </div>
+                          <button
+                            className="btn btn-g"
+                            onClick={() => { setModalConfirmActivar(true); setShowSemanaConfig(false); }}
+                            title="Transfiere los turnos fijos a la agenda semanal. ⚠️ Precaución: borra registros que se superpongan"
+                            style={{ display: "inline-flex", alignItems: "center", gap: "6px", width: "100%", justifyContent: "center" }}
+                          >
+                            🔃 Cargar Turnos Fijos
+                            {coordSemana.length > 0 && (
+                              <span style={{ background: "var(--vd)", color: "var(--do)", fontFamily: "var(--mono)", fontSize: "10px", fontWeight: 700, borderRadius: "10px", padding: "1px 6px" }}>
+                                {coordSemana.length}
+                              </span>
+                            )}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {semanaActivada && (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "6px 14px", borderRadius: "50px", border: "2px solid rgba(125,204,144,.35)", background: "rgba(125,204,144,.08)", fontFamily: "var(--mono)", fontSize: "11px", color: "#7DCC90", fontWeight: 700 }}>
                         ✓ Semana activada
                       </span>
                     )}
@@ -9768,6 +9845,108 @@
                         </button>
                         <button className="btn btn-g" onClick={guardarCoordManual}>
                           🔄 Crear
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>,
+                document.body,
+              )}
+
+            {/* MODAL EDITAR RECORDATORIO */}
+            {modalEditRec &&
+              ReactDOM.createPortal(
+                <div className="modal-overlay" onClick={() => setModalEditRec(null)}>
+                  <div
+                    className="modal-card"
+                    style={{ maxWidth: "420px" }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div style={{ height: "4px", background: "linear-gradient(90deg,var(--do),#E8B84B)", borderRadius: "var(--r) var(--r) 0 0" }} />
+                    <div className="modal-header">
+                      <span className="modal-title">✏️ Editar recordatorio</span>
+                      <button className="modal-icon-btn" onClick={() => setModalEditRec(null)}>✕</button>
+                    </div>
+                    <div style={{ padding: "20px 24px 24px" }}>
+                      <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "4px" }}>
+                        Título *
+                      </div>
+                      <input
+                        className="modal-input"
+                        style={{ width: "100%", boxSizing: "border-box", marginBottom: "14px" }}
+                        placeholder="Título del recordatorio"
+                        value={recEditDraft.titulo}
+                        onChange={(e) => setRecEditDraft((d) => ({ ...d, titulo: e.target.value }))}
+                        onKeyDown={(e) => e.key === "Enter" && guardarEditRec()}
+                        autoFocus
+                      />
+                      <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "4px" }}>
+                        Descripción (opcional)
+                      </div>
+                      <input
+                        className="modal-input"
+                        style={{ width: "100%", boxSizing: "border-box", marginBottom: "20px" }}
+                        placeholder="Detalles adicionales..."
+                        value={recEditDraft.descripcion}
+                        onChange={(e) => setRecEditDraft((d) => ({ ...d, descripcion: e.target.value }))}
+                      />
+                      <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+                        <button className="btn btn-sec" onClick={() => setModalEditRec(null)}>
+                          Cancelar
+                        </button>
+                        <button className="btn btn-g" onClick={guardarEditRec}>
+                          ✏️ Guardar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>,
+                document.body,
+              )}
+
+            {/* MODAL EDITAR COORDINACIÓN MANUAL */}
+            {modalEditCoord &&
+              ReactDOM.createPortal(
+                <div className="modal-overlay" onClick={() => setModalEditCoord(null)}>
+                  <div
+                    className="modal-card"
+                    style={{ maxWidth: "420px" }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div style={{ height: "4px", background: "linear-gradient(90deg,var(--do),#E8B84B)", borderRadius: "var(--r) var(--r) 0 0" }} />
+                    <div className="modal-header">
+                      <span className="modal-title">✏️ Editar ítem de coordinación</span>
+                      <button className="modal-icon-btn" onClick={() => setModalEditCoord(null)}>✕</button>
+                    </div>
+                    <div style={{ padding: "20px 24px 24px" }}>
+                      <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "4px" }}>
+                        Título *
+                      </div>
+                      <input
+                        className="modal-input"
+                        style={{ width: "100%", boxSizing: "border-box", marginBottom: "14px" }}
+                        placeholder="Título del ítem"
+                        value={coordEditDraft.titulo}
+                        onChange={(e) => setCoordEditDraft((d) => ({ ...d, titulo: e.target.value }))}
+                        onKeyDown={(e) => e.key === "Enter" && guardarEditCoord()}
+                        autoFocus
+                      />
+                      <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "4px" }}>
+                        Descripción (opcional)
+                      </div>
+                      <input
+                        className="modal-input"
+                        style={{ width: "100%", boxSizing: "border-box", marginBottom: "20px" }}
+                        placeholder="Detalles adicionales..."
+                        value={coordEditDraft.descripcion}
+                        onChange={(e) => setCoordEditDraft((d) => ({ ...d, descripcion: e.target.value }))}
+                      />
+                      <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+                        <button className="btn btn-sec" onClick={() => setModalEditCoord(null)}>
+                          Cancelar
+                        </button>
+                        <button className="btn btn-g" onClick={guardarEditCoord}>
+                          ✏️ Guardar
                         </button>
                       </div>
                     </div>
