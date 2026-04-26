@@ -7356,8 +7356,8 @@
         const [showObjPanel, setShowObjPanel] = useState(false);
         const [showCoord, setShowCoord] = useState(false);
         const [showSubNovedades, setShowSubNovedades] = useState(true);
-        const [showSubRecordatorios, setShowSubRecordatorios] = useState(true);
-        const [showSubCoordinar, setShowSubCoordinar] = useState(true);
+        const [showSubRecordatorios, setShowSubRecordatorios] = useState(false);
+        const [showSubCoordinar, setShowSubCoordinar] = useState(false);
         const [coordManuales, setCoordManuales] = useState([]);
         const [modalNuevoCoord, setModalNuevoCoord] = useState(false);
         const [coordDraft, setCoordDraft] = useState({ titulo: "", descripcion: "" });
@@ -7378,6 +7378,7 @@
         const [modalEditCoord, setModalEditCoord] = useState(null);
         const [coordEditDraft, setCoordEditDraft] = useState({ titulo: "", descripcion: "" });
         const [showSemanaConfig, setShowSemanaConfig] = useState(false);
+        const [confirmBorrar, setConfirmBorrar] = useState(null); // { fn, label }
         const [config, setConfig] = useState(
           () => getData("hgsp_config") || {},
         );
@@ -7755,12 +7756,13 @@
           (c) => c.semanaKey === semanaKey && !c.resuelta,
         );
 
+        const coordManualesPendientes = coordManuales.filter((m) => !m.coordinado);
         const totalPendientes =
           novedadesItems.length +
           recordatoriosActivos.length +
           ordenesHistPendientes.length +
           coordSemana.length +
-          coordManuales.length;
+          coordManualesPendientes.length;
 
         /* ── objetivos de la semana ── */
         const objActual =
@@ -7882,11 +7884,16 @@
           showToast("✅ Recordatorio resuelto");
         }
 
-        function eliminarRecordatorio(id) {
-          const all = (getData("hgsp_recordatorios_semana") || []).filter((r) => r.id !== id);
-          setData("hgsp_recordatorios_semana", all);
-          loadData();
-          showToast("🗑️ Recordatorio eliminado");
+        function eliminarRecordatorio(id, titulo) {
+          setConfirmBorrar({
+            label: `¿Eliminar el recordatorio "${titulo}"? Esta acción no se puede deshacer.`,
+            fn: () => {
+              const all = (getData("hgsp_recordatorios_semana") || []).filter((r) => r.id !== id);
+              setData("hgsp_recordatorios_semana", all);
+              loadData();
+              showToast("🗑️ Recordatorio eliminado");
+            },
+          });
         }
 
         function abrirEditRec(r) {
@@ -7906,12 +7913,29 @@
           showToast("✏️ Recordatorio actualizado");
         }
 
-        function eliminarCoordManual(id) {
-          const semKeyCoord = `hgsp_coord_manuales_${semanaKey}`;
-          const all = (getData(semKeyCoord) || []).filter((x) => x.id !== id);
-          setData(semKeyCoord, all);
-          setCoordManuales(all);
-          showToast("🗑️ Ítem eliminado");
+        function eliminarCoordManual(id, titulo) {
+          setConfirmBorrar({
+            label: `¿Eliminar el ítem de coordinación "${titulo}"? Esta acción no se puede deshacer.`,
+            fn: () => {
+              const semKeyCoord = `hgsp_coord_manuales_${semanaKey}`;
+              const all = (getData(semKeyCoord) || []).filter((x) => x.id !== id);
+              setData(semKeyCoord, all);
+              setCoordManuales(all);
+              showToast("🗑️ Ítem eliminado");
+            },
+          });
+        }
+
+        function eliminarCoordAuto(id, nombre) {
+          setConfirmBorrar({
+            label: `¿Eliminar la coordinación pendiente de "${nombre}"? Esta acción no se puede deshacer.`,
+            fn: () => {
+              const all = (getData("hgsp_coord_pendientes") || []).filter((c) => c.id !== id);
+              setData("hgsp_coord_pendientes", all);
+              loadData();
+              showToast("🗑️ Coordinación eliminada");
+            },
+          });
         }
 
         function abrirEditCoord(m) {
@@ -7952,10 +7976,13 @@
 
         function resolverCoordManual(id) {
           const semKeyCoord = `hgsp_coord_manuales_${semanaKey}`;
-          const all = (getData(semKeyCoord) || []).filter((x) => x.id !== id);
+          const all = getData(semKeyCoord) || [];
+          const idx = all.findIndex((x) => x.id === id);
+          if (idx < 0) return;
+          all[idx] = { ...all[idx], coordinado: !all[idx].coordinado };
           setData(semKeyCoord, all);
-          setCoordManuales(all);
-          showToast("✅ Ítem coordinado");
+          setCoordManuales([...all]);
+          showToast(all[idx].coordinado ? "✅ Marcado como coordinado" : "↩️ Desmarcado");
         }
 
         const pctBuenoGlobal =
@@ -8920,26 +8947,26 @@
               <button
                 onClick={() => setShowNovedades((v) => !v)}
                 style={{
-                  display: "inline-flex", alignItems: "center", gap: "8px",
-                  padding: "10px 22px",
+                  display: "inline-flex", alignItems: "center", gap: "6px",
+                  padding: showNovedades ? "8px 18px" : "6px 14px",
                   borderRadius: showNovedades ? "14px 14px 0 0" : "50px",
                   border: `2px solid ${totalPendientes > 0 ? "var(--do)" : "rgba(200,146,42,.45)"}`,
                   borderBottom: showNovedades ? `2px solid #1a3a27` : `2px solid ${totalPendientes > 0 ? "var(--do)" : "rgba(200,146,42,.45)"}`,
                   background: showNovedades ? "#1a3a27" : "var(--vd)",
                   color: "var(--do)",
-                  fontFamily: "var(--sans)", fontSize: "14px", fontWeight: 700,
-                  cursor: "pointer", transition: "border-radius .15s", whiteSpace: "nowrap",
+                  fontFamily: "var(--sans)", fontSize: showNovedades ? "13px" : "12px", fontWeight: 700,
+                  cursor: "pointer", transition: "all .15s", whiteSpace: "nowrap",
                   boxShadow: totalPendientes > 0 && !showNovedades ? "0 0 0 3px rgba(200,146,42,.18)" : "none",
                   position: "relative", zIndex: 2,
                 }}
               >
-                📋 Novedades de la semana
+                📋 {showNovedades ? "Alertas" : "Alertas de la semana"}
                 {totalPendientes > 0 ? (
-                  <span style={{ background: "var(--do)", color: "var(--vd)", borderRadius: "10px", padding: "2px 8px", fontSize: "11px", fontWeight: 800, marginLeft: "2px" }}>
+                  <span style={{ background: "var(--do)", color: "var(--vd)", borderRadius: "10px", padding: "1px 6px", fontSize: "10px", fontWeight: 800, marginLeft: "2px" }}>
                     {totalPendientes}
                   </span>
                 ) : (
-                  <span style={{ fontSize: "15px", lineHeight: 1, opacity: .7 }}>✓</span>
+                  <span style={{ fontSize: "13px", lineHeight: 1, opacity: .7 }}>✓</span>
                 )}
               </button>
 
@@ -8949,7 +8976,7 @@
 
                   {/* Título del panel */}
                   <div className="novedades-title" style={{ fontSize: "17px", marginBottom: "14px", paddingBottom: "10px", borderBottom: "1px solid rgba(200,146,42,.2)" }}>
-                    📋 Novedades de la semana
+                    📋 Alertas de la semana
                     <span style={{
                       fontFamily: "var(--mono)", fontSize: "12px",
                       color: totalPendientes > 0 ? "var(--do)" : "#7DCC90",
@@ -8962,108 +8989,125 @@
                   </div>
 
                   {/* ── SUB-BLOQUE 1: NOVEDADES ── */}
-                  <div style={{ marginBottom: "10px" }}>
+                  <div style={{ marginBottom: "6px" }}>
+                    {/* Tab header */}
                     <div
-                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 4px", cursor: "pointer" }}
-                      onClick={() => setShowSubNovedades((v) => !v)}
+                      onClick={() => { const next = !showSubNovedades; setShowSubNovedades(next); if (next) { setShowSubRecordatorios(false); setShowSubCoordinar(false); } }}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        padding: "9px 14px", cursor: "pointer", transition: "all .2s",
+                        borderRadius: showSubNovedades ? "12px 12px 0 0" : "12px",
+                        background: showSubNovedades ? "rgba(74,124,95,.3)" : "rgba(255,255,255,.04)",
+                        border: `1.5px solid ${showSubNovedades ? "rgba(74,124,95,.55)" : "rgba(255,255,255,.1)"}`,
+                        borderBottom: showSubNovedades ? "none" : undefined,
+                      }}
                     >
-                      <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(200,146,42,.75)", textTransform: "uppercase", letterSpacing: ".07em", display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: showSubNovedades ? "#A8DDB8" : "rgba(200,146,42,.75)", textTransform: "uppercase", letterSpacing: ".07em", display: "flex", alignItems: "center", gap: "6px", fontWeight: 700 }}>
                         {showSubNovedades ? "▼" : "▶"} ⚠️ Novedades
-                        {novedadesItems.length > 0 && (
+                        {(novedadesItems.length + ordenesHistPendientes.length) > 0 && (
                           <span style={{ background: "var(--do)", color: "var(--vd)", borderRadius: "10px", padding: "1px 6px", fontSize: "9px", fontWeight: 700 }}>
-                            {novedadesItems.length}
+                            {novedadesItems.length + ordenesHistPendientes.length}
                           </span>
                         )}
                       </span>
                     </div>
+                    {/* Content area — fondo verde más claro */}
                     {showSubNovedades && (
-                      <div style={{ paddingLeft: "4px" }}>
-                        {novedadesItems.length === 0 ? (
-                          <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.3)", padding: "6px 10px" }}>
+                      <div style={{ background: "rgba(42,77,56,.45)", border: "1.5px solid rgba(74,124,95,.55)", borderTop: "none", borderRadius: "0 0 12px 12px", padding: "12px" }}>
+                        {novedadesItems.length === 0 && ordenesHistPendientes.length === 0 ? (
+                          <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.3)", padding: "4px 6px" }}>
                             Sin novedades esta semana.
                           </div>
                         ) : (
-                          novedadesItems.map((n, i) => {
-                            const sesObj = weekSes.find((s) => s.id === n.sesionId);
-                            const estadoIcon =
-                              n.estado === "cancelo" ? "❌"
-                              : n.estado === "inasistencia" ? "🚫"
-                              : n.estado === "reprogramo" ? "🔄"
-                              : n.estado === "pendiente" ? "⏳" : "✅";
-                            const estadoLabel =
-                              n.estado === "cancelo" ? "Canceló"
-                              : n.estado === "inasistencia" ? "Inasistencia"
-                              : n.estado === "reprogramo" ? "Reprogramó"
-                              : n.estado === "pendiente" ? "Sin confirmar" : "Asistió";
-                            return (
-                              <div key={i} style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(200,146,42,.2)", borderLeft: "3px solid var(--do)", borderRadius: "12px", padding: "10px 14px", marginBottom: "8px" }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                                  <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(200,146,42,.2)", border: "1.5px solid rgba(200,146,42,.5)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--mono)", fontSize: "9px", color: "var(--do)", fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
-                                  <div style={{ flex: 1 }}>
-                                    <span style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,.9)" }}>{n.pacNombre}</span>
-                                    <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.35)", marginLeft: "8px" }}>{estadoIcon} {estadoLabel}</span>
-                                    <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.25)", marginLeft: "8px" }}>{n.fecha} {n.hora}</span>
-                                  </div>
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); sesObj && setModalTurno({ mode: "editar", sesion: sesObj, fecha: sesObj.fecha, hora: sesObj.horaInicio }); }}
-                                    style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.3)", padding: "2px 6px", borderRadius: "6px" }}
-                                    title="Abrir turno"
-                                  >Abrir →</button>
-                                </div>
-                                <div style={{ display: "flex", flexDirection: "column", gap: "5px", paddingLeft: "30px" }}>
-                                  {n.items.map((it, j) => (
-                                    <div key={j} style={{ display: "flex", alignItems: "center", gap: "8px" }} onClick={(e) => e.stopPropagation()}>
-                                      {it.campo !== null ? (
-                                        <div onClick={() => resolverItem(n.sesionId, it.campo)} title="Marcar como resuelto" style={{ width: "18px", height: "18px", borderRadius: "5px", border: "2px solid var(--do)", background: "rgba(200,146,42,.1)", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s" }} />
-                                      ) : (
-                                        <span style={{ fontSize: "11px", flexShrink: 0 }} title="Abrir turno para resolver">⚠️</span>
-                                      )}
-                                      <span style={{ fontFamily: "var(--mono)", fontSize: "11px", color: it.campo ? "var(--do)" : "rgba(255,200,80,.8)" }}>{it.texto}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          })
-                        )}
-                        {/* Órdenes OS históricas dentro del sub-bloque novedades */}
-                        {ordenesHistPendientes.length > 0 && (
-                          <div style={{ marginTop: novedadesItems.length > 0 ? "10px" : "0" }}>
-                            <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(200,146,42,.65)", textTransform: "uppercase", letterSpacing: ".07em", marginBottom: "8px", paddingLeft: "2px" }}>
-                              🏥 Órdenes OS pendientes de emitir
-                            </div>
-                            {ordenesHistPendientes.map((o, i) => {
-                              const sesObj = sesiones.find((s) => s.id === o.sesionId);
-                              const estadoIcon = o.estado === "cancelo" ? "❌" : o.estado === "inasistencia" ? "🚫" : "🔄";
+                          <>
+                            {novedadesItems.map((n, i) => {
+                              const sesObj = weekSes.find((s) => s.id === n.sesionId);
+                              const estadoIcon =
+                                n.estado === "cancelo" ? "❌"
+                                : n.estado === "inasistencia" ? "🚫"
+                                : n.estado === "reprogramo" ? "🔄"
+                                : n.estado === "pendiente" ? "⏳" : "✅";
+                              const estadoLabel =
+                                n.estado === "cancelo" ? "Canceló"
+                                : n.estado === "inasistencia" ? "Inasistencia"
+                                : n.estado === "reprogramo" ? "Reprogramó"
+                                : n.estado === "pendiente" ? "Sin confirmar" : "Asistió";
                               return (
-                                <div key={o.sesionId} style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(200,146,42,.2)", borderLeft: "3px solid #7AB8E0", borderRadius: "12px", padding: "10px 14px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "10px" }}>
-                                  <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(122,184,224,.15)", border: "1.5px solid rgba(122,184,224,.4)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--mono)", fontSize: "9px", color: "#7AB8E0", fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
-                                  <div style={{ flex: 1 }}>
-                                    <span style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,.9)" }}>{o.pacNombre}</span>
-                                    {o.obraSocial && <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.35)", marginLeft: "8px" }}>· {o.obraSocial}</span>}
-                                    <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.25)", marginLeft: "8px" }}>{estadoIcon} {o.fecha} {o.hora}</span>
+                                <div key={i} style={{ background: "rgba(255,255,255,.05)", border: "1px solid rgba(200,146,42,.2)", borderLeft: "3px solid var(--do)", borderRadius: "10px", padding: "10px 14px", marginBottom: "8px" }}>
+                                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                                    <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(200,146,42,.2)", border: "1.5px solid rgba(200,146,42,.5)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--mono)", fontSize: "9px", color: "var(--do)", fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
+                                    <div style={{ flex: 1 }}>
+                                      <span style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,.9)" }}>{n.pacNombre}</span>
+                                      <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.35)", marginLeft: "8px" }}>{estadoIcon} {estadoLabel}</span>
+                                      <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.25)", marginLeft: "8px" }}>{n.fecha} {n.hora}</span>
+                                    </div>
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); sesObj && setModalTurno({ mode: "editar", sesion: sesObj, fecha: sesObj.fecha, hora: sesObj.horaInicio }); }}
+                                      style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.3)", padding: "2px 6px", borderRadius: "6px" }}
+                                      title="Abrir turno"
+                                    >Abrir →</button>
                                   </div>
-                                  <button
-                                    onClick={() => sesObj && setModalTurno({ mode: "editar", sesion: sesObj, fecha: sesObj.fecha, hora: sesObj.horaInicio })}
-                                    style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.3)", padding: "2px 6px", borderRadius: "6px" }}
-                                    title="Abrir turno para emitir orden"
-                                  >Abrir →</button>
+                                  <div style={{ display: "flex", flexDirection: "column", gap: "5px", paddingLeft: "30px" }}>
+                                    {n.items.map((it, j) => (
+                                      <div key={j} style={{ display: "flex", alignItems: "center", gap: "8px" }} onClick={(e) => e.stopPropagation()}>
+                                        {it.campo !== null ? (
+                                          <div onClick={() => resolverItem(n.sesionId, it.campo)} title="Marcar como resuelto" style={{ width: "18px", height: "18px", borderRadius: "5px", border: "2px solid var(--do)", background: "rgba(200,146,42,.1)", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s" }} />
+                                        ) : (
+                                          <span style={{ fontSize: "11px", flexShrink: 0 }}>⚠️</span>
+                                        )}
+                                        <span style={{ fontFamily: "var(--mono)", fontSize: "11px", color: it.campo ? "var(--do)" : "rgba(255,200,80,.8)" }}>{it.texto}</span>
+                                      </div>
+                                    ))}
+                                  </div>
                                 </div>
                               );
                             })}
-                          </div>
+                            {ordenesHistPendientes.length > 0 && (
+                              <div style={{ marginTop: novedadesItems.length > 0 ? "8px" : "0" }}>
+                                <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(200,146,42,.65)", textTransform: "uppercase", letterSpacing: ".07em", marginBottom: "8px", paddingLeft: "2px" }}>
+                                  🏥 Órdenes OS pendientes de emitir
+                                </div>
+                                {ordenesHistPendientes.map((o, i) => {
+                                  const sesObj = sesiones.find((s) => s.id === o.sesionId);
+                                  const estadoIcon = o.estado === "cancelo" ? "❌" : o.estado === "inasistencia" ? "🚫" : "🔄";
+                                  return (
+                                    <div key={o.sesionId} style={{ background: "rgba(255,255,255,.05)", border: "1px solid rgba(200,146,42,.2)", borderLeft: "3px solid #7AB8E0", borderRadius: "10px", padding: "10px 14px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "10px" }}>
+                                      <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(122,184,224,.15)", border: "1.5px solid rgba(122,184,224,.4)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--mono)", fontSize: "9px", color: "#7AB8E0", fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
+                                      <div style={{ flex: 1 }}>
+                                        <span style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,.9)" }}>{o.pacNombre}</span>
+                                        {o.obraSocial && <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.35)", marginLeft: "8px" }}>· {o.obraSocial}</span>}
+                                        <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.25)", marginLeft: "8px" }}>{estadoIcon} {o.fecha} {o.hora}</span>
+                                      </div>
+                                      <button
+                                        onClick={() => sesObj && setModalTurno({ mode: "editar", sesion: sesObj, fecha: sesObj.fecha, hora: sesObj.horaInicio })}
+                                        style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.3)", padding: "2px 6px", borderRadius: "6px" }}
+                                      >Abrir →</button>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
                     )}
                   </div>
 
                   {/* ── SUB-BLOQUE 2: RECORDATORIOS ── */}
-                  <div style={{ marginBottom: "10px" }}>
+                  <div style={{ marginBottom: "6px" }}>
+                    {/* Tab header */}
                     <div
-                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 4px", cursor: "pointer" }}
-                      onClick={() => setShowSubRecordatorios((v) => !v)}
+                      onClick={() => { const next = !showSubRecordatorios; setShowSubRecordatorios(next); if (next) { setShowSubNovedades(false); setShowSubCoordinar(false); } }}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        padding: "9px 14px", cursor: "pointer", transition: "all .2s",
+                        borderRadius: showSubRecordatorios ? "12px 12px 0 0" : "12px",
+                        background: showSubRecordatorios ? "rgba(74,124,95,.3)" : "rgba(255,255,255,.04)",
+                        border: `1.5px solid ${showSubRecordatorios ? "rgba(74,124,95,.55)" : "rgba(255,255,255,.1)"}`,
+                        borderBottom: showSubRecordatorios ? "none" : undefined,
+                      }}
                     >
-                      <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(200,146,42,.75)", textTransform: "uppercase", letterSpacing: ".07em", display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: showSubRecordatorios ? "#A8DDB8" : "rgba(200,146,42,.75)", textTransform: "uppercase", letterSpacing: ".07em", display: "flex", alignItems: "center", gap: "6px", fontWeight: 700 }}>
                         {showSubRecordatorios ? "▼" : "▶"} 📌 Recordatorios
                         {recordatoriosActivos.length > 0 && (
                           <span style={{ background: "var(--do)", color: "var(--vd)", borderRadius: "10px", padding: "1px 6px", fontSize: "9px", fontWeight: 700 }}>
@@ -9073,100 +9117,118 @@
                       </span>
                       <button
                         onClick={(e) => { e.stopPropagation(); setRecDraft({ titulo: "", descripcion: "" }); setModalNuevoRec(true); }}
-                        title="Agregar recordatorio"
                         style={{ padding: "3px 10px", borderRadius: "50px", border: "1.5px solid rgba(200,146,42,.4)", background: "rgba(200,146,42,.1)", color: "var(--do)", fontFamily: "var(--sans)", fontSize: "11px", fontWeight: 700, cursor: "pointer" }}
                       >+ Agregar</button>
                     </div>
+                    {/* Content area */}
                     {showSubRecordatorios && (
-                      <div style={{ paddingLeft: "4px" }}>
-                        {recordatoriosActivos.length === 0 ? (
-                          <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.3)", padding: "6px 10px" }}>
-                            Sin recordatorios esta semana.
-                          </div>
-                        ) : (
-                          recordatoriosActivos.map((r) => (
-                            <div key={r.id} style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(200,146,42,.2)", borderLeft: "3px solid var(--vc)", borderRadius: "12px", padding: "10px 14px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div style={{ background: "rgba(42,77,56,.45)", border: "1.5px solid rgba(74,124,95,.55)", borderTop: "none", borderRadius: "0 0 12px 12px", padding: "12px" }}>
+                        {(() => {
+                          const todosRec = recordatoriosSemana.filter((r) => r.semana === semanaKey);
+                          if (todosRec.length === 0) return (
+                            <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.3)", padding: "4px 6px" }}>
+                              Sin recordatorios esta semana.
+                            </div>
+                          );
+                          return todosRec.map((r) => (
+                            <div key={r.id} style={{ background: r.resuelto ? "rgba(125,204,144,.07)" : "rgba(255,255,255,.05)", border: `1px solid ${r.resuelto ? "rgba(125,204,144,.2)" : "rgba(200,146,42,.2)"}`, borderLeft: `3px solid ${r.resuelto ? "#7DCC90" : "var(--vc)"}`, borderRadius: "10px", padding: "10px 14px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "10px", opacity: r.resuelto ? 0.65 : 1, transition: "opacity .2s" }}>
                               {/* Checkbox */}
-                              <div onClick={() => resolverRecordatorio(r.id)} title="Marcar como resuelto" style={{ width: "20px", height: "20px", borderRadius: "5px", border: "2.5px solid var(--do)", background: "rgba(200,146,42,.1)", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s" }} />
+                              <div
+                                onClick={() => resolverRecordatorio(r.id)}
+                                title={r.resuelto ? "Desmarcar" : "Marcar como ocupado"}
+                                style={{ width: "20px", height: "20px", borderRadius: "5px", border: `2.5px solid ${r.resuelto ? "#7DCC90" : "var(--do)"}`, background: r.resuelto ? "rgba(125,204,144,.25)" : "rgba(200,146,42,.1)", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s", color: "#7DCC90", fontSize: "13px", fontWeight: 700 }}
+                              >{r.resuelto ? "✓" : ""}</div>
                               {/* Contenido */}
                               <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,.9)", lineHeight: 1.3 }}>{r.titulo}</div>
+                                <div style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,.9)", lineHeight: 1.3, textDecoration: r.resuelto ? "line-through" : "none" }}>{r.titulo}</div>
                                 {r.descripcion && <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.4)", marginTop: "2px", lineHeight: 1.4 }}>{r.descripcion}</div>}
                               </div>
                               {/* Acciones */}
                               <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
-                                <button onClick={() => abrirEditRec(r)} title="Editar recordatorio" style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1.5px solid rgba(200,146,42,.3)", background: "rgba(200,146,42,.08)", color: "var(--do)", cursor: "pointer", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center" }}>✏️</button>
-                                <button onClick={() => eliminarRecordatorio(r.id)} title="Eliminar recordatorio" style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1.5px solid rgba(200,80,80,.3)", background: "rgba(200,80,80,.08)", color: "#FF8888", cursor: "pointer", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center" }}>🗑️</button>
+                                <button onClick={() => abrirEditRec(r)} title="Editar" style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1.5px solid rgba(200,146,42,.3)", background: "rgba(200,146,42,.08)", color: "var(--do)", cursor: "pointer", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center" }}>✏️</button>
+                                <button onClick={() => eliminarRecordatorio(r.id, r.titulo)} title="Eliminar" style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1.5px solid rgba(200,80,80,.3)", background: "rgba(200,80,80,.08)", color: "#FF8888", cursor: "pointer", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center" }}>🗑️</button>
                               </div>
                             </div>
-                          ))
-                        )}
+                          ));
+                        })()}
                       </div>
                     )}
                   </div>
 
                   {/* ── SUB-BLOQUE 3: COORDINAR ── */}
                   <div style={{ marginBottom: "4px" }}>
+                    {/* Tab header */}
                     <div
-                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 4px", cursor: "pointer" }}
-                      onClick={() => setShowSubCoordinar((v) => !v)}
+                      onClick={() => { const next = !showSubCoordinar; setShowSubCoordinar(next); if (next) { setShowSubNovedades(false); setShowSubRecordatorios(false); } }}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        padding: "9px 14px", cursor: "pointer", transition: "all .2s",
+                        borderRadius: showSubCoordinar ? "12px 12px 0 0" : "12px",
+                        background: showSubCoordinar ? "rgba(74,124,95,.3)" : "rgba(255,255,255,.04)",
+                        border: `1.5px solid ${showSubCoordinar ? "rgba(74,124,95,.55)" : "rgba(255,255,255,.1)"}`,
+                        borderBottom: showSubCoordinar ? "none" : undefined,
+                      }}
                     >
-                      <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(200,146,42,.75)", textTransform: "uppercase", letterSpacing: ".07em", display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: showSubCoordinar ? "#A8DDB8" : "rgba(200,146,42,.75)", textTransform: "uppercase", letterSpacing: ".07em", display: "flex", alignItems: "center", gap: "6px", fontWeight: 700 }}>
                         {showSubCoordinar ? "▼" : "▶"} 🔄 Coordinar
-                        {(coordSemana.length + coordManuales.length) > 0 && (
+                        {(coordSemana.length + coordManualesPendientes.length) > 0 && (
                           <span style={{ background: "var(--do)", color: "var(--vd)", borderRadius: "10px", padding: "1px 6px", fontSize: "9px", fontWeight: 700 }}>
-                            {coordSemana.length + coordManuales.length}
+                            {coordSemana.length + coordManualesPendientes.length}
                           </span>
                         )}
                       </span>
                       <button
                         onClick={(e) => { e.stopPropagation(); setCoordDraft({ titulo: "", descripcion: "" }); setModalNuevoCoord(true); }}
-                        title="Agregar ítem de coordinación para esta semana"
                         style={{ padding: "3px 10px", borderRadius: "50px", border: "1.5px solid rgba(200,146,42,.4)", background: "rgba(200,146,42,.1)", color: "var(--do)", fontFamily: "var(--sans)", fontSize: "11px", fontWeight: 700, cursor: "pointer" }}
                       >+ Agregar</button>
                     </div>
+                    {/* Content area */}
                     {showSubCoordinar && (
-                      <div style={{ paddingLeft: "4px" }}>
+                      <div style={{ background: "rgba(42,77,56,.45)", border: "1.5px solid rgba(74,124,95,.55)", borderTop: "none", borderRadius: "0 0 12px 12px", padding: "12px" }}>
                         {(coordSemana.length + coordManuales.length) === 0 ? (
-                          <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.3)", padding: "6px 10px" }}>
+                          <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.3)", padding: "4px 6px" }}>
                             Sin pacientes a coordinar esta semana.
                           </div>
                         ) : (
                           <>
                             {coordSemana.map((c) => {
                               const pac = pacientes.find((p) => p.id === c.pacienteId);
+                              const nombre = pac ? `${pac.nombre} ${pac.apellido}` : "Paciente no encontrado";
                               return (
-                                <div key={c.id} style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(200,146,42,.2)", borderLeft: "3px solid var(--do)", borderRadius: "12px", padding: "10px 14px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "12px" }}>
+                                <div key={c.id} style={{ background: "rgba(255,255,255,.05)", border: "1px solid rgba(200,146,42,.2)", borderLeft: "3px solid var(--do)", borderRadius: "10px", padding: "10px 14px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "12px" }}>
                                   <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "rgba(200,146,42,.2)", border: "2px solid rgba(200,146,42,.4)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--serif)", fontSize: "14px", color: "var(--do)", fontWeight: 700, flexShrink: 0 }}>
                                     {pac ? pac.nombre.charAt(0) : "?"}
                                   </div>
                                   <div style={{ flex: 1 }}>
-                                    <div style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,.9)" }}>
-                                      {pac ? `${pac.nombre} ${pac.apellido}` : "Paciente no encontrado"}
-                                    </div>
+                                    <div style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,.9)" }}>{nombre}</div>
                                     <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.4)", marginTop: "2px" }}>
                                       🔄 Turno flotante · {pac?.frecuencia || "—"} · {pac?.diasHorarios?.map((h) => h.dia).join(", ") || "sin horario fijo"}
                                     </div>
                                   </div>
                                   <div style={{ display: "flex", gap: "4px", flexShrink: 0, alignItems: "center" }}>
                                     <div onClick={() => resolverCoord(c.id)} title="Marcar como coordinado" style={{ width: "20px", height: "20px", borderRadius: "5px", border: "2.5px solid #7DCC90", background: "rgba(125,204,144,.1)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s" }} />
+                                    <button onClick={() => eliminarCoordAuto(c.id, nombre)} title="Eliminar" style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1.5px solid rgba(200,80,80,.3)", background: "rgba(200,80,80,.08)", color: "#FF8888", cursor: "pointer", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center" }}>🗑️</button>
                                   </div>
                                 </div>
                               );
                             })}
                             {coordManuales.map((m) => (
-                              <div key={m.id} style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(200,146,42,.2)", borderLeft: "3px solid var(--vc)", borderRadius: "12px", padding: "10px 14px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "10px" }}>
+                              <div key={m.id} style={{ background: m.coordinado ? "rgba(125,204,144,.07)" : "rgba(255,255,255,.05)", border: `1px solid ${m.coordinado ? "rgba(125,204,144,.2)" : "rgba(200,146,42,.2)"}`, borderLeft: `3px solid ${m.coordinado ? "#7DCC90" : "var(--vc)"}`, borderRadius: "10px", padding: "10px 14px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "10px", opacity: m.coordinado ? 0.65 : 1, transition: "opacity .2s" }}>
                                 {/* Checkbox coordinado */}
-                                <div onClick={() => resolverCoordManual(m.id)} title="Marcar como coordinado" style={{ width: "20px", height: "20px", borderRadius: "5px", border: "2.5px solid #7DCC90", background: "rgba(125,204,144,.1)", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s" }} />
+                                <div
+                                  onClick={() => resolverCoordManual(m.id)}
+                                  title={m.coordinado ? "Desmarcar" : "Marcar como coordinado"}
+                                  style={{ width: "20px", height: "20px", borderRadius: "5px", border: `2.5px solid ${m.coordinado ? "#7DCC90" : "#7DCC90"}`, background: m.coordinado ? "rgba(125,204,144,.25)" : "rgba(125,204,144,.1)", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s", color: "#7DCC90", fontSize: "13px", fontWeight: 700 }}
+                                >{m.coordinado ? "✓" : ""}</div>
                                 {/* Contenido */}
                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                  <div style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,.9)", lineHeight: 1.3 }}>{m.titulo}</div>
+                                  <div style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,.9)", lineHeight: 1.3, textDecoration: m.coordinado ? "line-through" : "none" }}>{m.titulo}</div>
                                   {m.descripcion && <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.4)", marginTop: "2px", lineHeight: 1.4 }}>{m.descripcion}</div>}
                                 </div>
                                 {/* Acciones */}
                                 <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
                                   <button onClick={() => abrirEditCoord(m)} title="Editar" style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1.5px solid rgba(200,146,42,.3)", background: "rgba(200,146,42,.08)", color: "var(--do)", cursor: "pointer", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center" }}>✏️</button>
-                                  <button onClick={() => eliminarCoordManual(m.id)} title="Eliminar" style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1.5px solid rgba(200,80,80,.3)", background: "rgba(200,80,80,.08)", color: "#FF8888", cursor: "pointer", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center" }}>🗑️</button>
+                                  <button onClick={() => eliminarCoordManual(m.id, m.titulo)} title="Eliminar" style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1.5px solid rgba(200,80,80,.3)", background: "rgba(200,80,80,.08)", color: "#FF8888", cursor: "pointer", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center" }}>🗑️</button>
                                 </div>
                               </div>
                             ))}
@@ -9846,6 +9908,33 @@
                         <button className="btn btn-g" onClick={guardarCoordManual}>
                           🔄 Crear
                         </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>,
+                document.body,
+              )}
+
+            {/* MODAL CONFIRMAR BORRADO */}
+            {confirmBorrar &&
+              ReactDOM.createPortal(
+                <div className="modal-overlay" onClick={() => setConfirmBorrar(null)}>
+                  <div className="modal-card" style={{ maxWidth: "380px" }} onClick={(e) => e.stopPropagation()}>
+                    <div style={{ height: "4px", background: "linear-gradient(90deg,#C84040,#E87070)", borderRadius: "var(--r) var(--r) 0 0" }} />
+                    <div className="modal-header">
+                      <span className="modal-title" style={{ color: "#FF8888" }}>🗑️ Confirmar eliminación</span>
+                      <button className="modal-icon-btn" onClick={() => setConfirmBorrar(null)}>✕</button>
+                    </div>
+                    <div style={{ padding: "20px 24px 24px" }}>
+                      <div style={{ color: "rgba(255,255,255,.82)", fontFamily: "var(--sans)", fontSize: "14px", lineHeight: 1.6, marginBottom: "22px" }}>
+                        {confirmBorrar.label}
+                      </div>
+                      <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+                        <button className="btn btn-sec" onClick={() => setConfirmBorrar(null)}>Cancelar</button>
+                        <button
+                          style={{ padding: "8px 20px", borderRadius: "50px", border: "2px solid rgba(200,80,80,.6)", background: "rgba(200,80,80,.15)", color: "#FF8888", fontFamily: "var(--sans)", fontWeight: 700, cursor: "pointer", fontSize: "13px" }}
+                          onClick={() => { confirmBorrar.fn(); setConfirmBorrar(null); }}
+                        >🗑️ Eliminar</button>
                       </div>
                     </div>
                   </div>
