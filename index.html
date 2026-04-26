@@ -126,7 +126,8 @@
         align-items: center;
         justify-content: space-between;
         padding: 12px 24px;
-        background: rgba(0, 0, 0, 0.05);
+        background: var(--vd);
+        border-bottom: 2px solid rgba(200, 146, 42, 0.4);
       }
 
       .topbar-brand {
@@ -211,6 +212,35 @@
         align-items: center;
         gap: 12px;
         min-width: 0;
+      }
+      /* Desktop: las dos líneas forman una fila horizontal compacta */
+      .topbar-row2-line1 {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        flex: 1;
+        gap: 12px;
+      }
+      .topbar-row2-line2 {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        flex: 0 0 auto;
+        gap: 10px;
+        flex-wrap: nowrap;
+      }
+      .agenda-activa .topbar-section {
+        flex: 1;
+        min-width: 0;
+      }
+      /* Nav semana — contenedor del grupo de navegación */
+      .topbar-nav-semana {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 50px;
+        border: 1px solid rgba(254, 179, 4, 0.95);
+        background: rgba(58, 174, 20, 0.22);
+        overflow: hidden;
       }
 
       /* ── LAYOUT PRINCIPAL ── */
@@ -1240,6 +1270,16 @@
         .topbar-cta {
           display: none;
         }
+        /* El botón Crear reserva vive en line1, no en topbar-actions */
+        .topbar-row2-line1 .topbar-cta.primary {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 8px 12px;
+          font-size: 12px;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
         .topbar-row-1 {
           align-items: flex-start;
           gap: 10px;
@@ -1273,40 +1313,67 @@
           font-size: 13px !important;
           flex-shrink: 0;
         }
+        /* row-2 es ahora hermano del topbar (fuera de él) — sticky funciona en toda la página */
         .topbar-row-2 {
-          flex-wrap: wrap;
-          justify-content: center;
-          gap: 10px;
-          padding: 8px 12px 10px;
-        }
-        .topbar-section {
-          width: 100%;
-          justify-content: center;
-          text-align: center;
-          gap: 10px;
-        }
-        .topbar-section-title {
-          font-size: 18px !important;
-          line-height: 1.15;
-          overflow-wrap: anywhere;
-        }
-        .topbar-section-emoji {
-          font-size: 22px !important;
-          flex-shrink: 0;
-        }
-        .topbar-center {
-          display: none;
-        }
-        .topbar {
-          position: fixed;
+          position: sticky;
           top: 0;
           left: 0;
           right: 0;
           z-index: 200;
-          height: auto;
+          background: var(--vd);
+          border-bottom: 2px solid rgba(200, 146, 42, 0.4);
           flex-wrap: wrap;
-          align-items: center;
-          padding: 0 14px;
+          justify-content: center;
+          gap: 8px;
+          padding: 8px 12px 10px;
+        }
+        /* En mobile las líneas ocupan todo el ancho disponible */
+        .topbar-row2-line1 {
+          width: 100%;
+          flex: none;
+          justify-content: center;
+        }
+        .agenda-activa .topbar-row2-line1 {
+          justify-content: space-between;
+        }
+        .topbar-row2-line2 {
+          width: 100%;
+          flex: none;
+          justify-content: center;
+          padding-bottom: 2px;
+        }
+        /* El nav de semana se estira para llenar la línea 2 en mobile */
+        .topbar-nav-semana {
+          flex: 1;
+          justify-content: center;
+        }
+        /* SEMANA ACTUAL: "SEMANA" arriba y "ACTUAL" abajo en mobile */
+        .topbar-nav-hoy {
+          flex-direction: column !important;
+          gap: 1px !important;
+          padding: 0 6px !important;
+          line-height: 1.15;
+        }
+        .topbar {
+          position: static;
+          height: auto;
+          padding: 0;
+        }
+        .topbar-section {
+          width: auto;
+          gap: 10px;
+        }
+        .topbar-section-title {
+          font-size: 24px !important;
+          line-height: 1.15;
+          overflow-wrap: anywhere;
+        }
+        .topbar-section-emoji {
+          font-size: 28px !important;
+          flex-shrink: 0;
+        }
+        .topbar-center {
+          display: none;
         }
         .topbar-actions {
           width: 100%;
@@ -1328,8 +1395,8 @@
         }
         .app-layout {
           flex-direction: column;
-          margin-top: var(--mobile-topbar-offset);
-          min-height: calc(100vh - var(--mobile-topbar-offset) - 60px);
+          margin-top: 0;
+          min-height: calc(100vh - 60px);
         }
         /* BUG 1 — Objetivos responsive */
         .obj-panel-view {
@@ -1348,7 +1415,7 @@
           text-align: center;
           justify-content: center;
         }
-        /* page-header sticky en mobile debajo del topbar de 2 filas */
+        /* page-header sticky en mobile debajo del nav de sección (row-2) */
         .page-header {
           top: var(--mobile-topbar-offset);
         }
@@ -1399,6 +1466,40 @@
         }
         .agenda-novedades-row {
           justify-content: center;
+        }
+
+        /* ── Modal turno: fecha en fila completa, inicio/fin debajo ── */
+        .mt-always-row {
+          grid-template-columns: 1fr 1fr;
+        }
+        .mt-always-row > div:first-child {
+          grid-column: 1 / -1;
+          text-align: center;
+        }
+
+        /* ── Modal: scroll táctil (iOS) y altura ajustada ── */
+        .modal-card {
+          max-height: 92vh;
+          width: 96%;
+        }
+        .modal-body {
+          -webkit-overflow-scrolling: touch;
+          overflow-y: scroll;
+        }
+
+        /* ── Notas tabs: compactos en mobile ── */
+        .notas-tabs-bar {
+          overflow: hidden;
+        }
+        .ntab {
+          min-width: 0;
+          padding: 7px 5px !important;
+        }
+        .ntab .ntab-label {
+          display: none;
+        }
+        .ntab.ntab-on .ntab-label {
+          display: inline;
         }
       }
 
@@ -2602,6 +2703,7 @@
       }) {
         const current = NAV_SECTIONS.find((s) => s.id === activeSection);
         const topbarRef = useRef(null);
+        const topbarRow2Ref = useRef(null);
         const [showReservaMenu, setShowReservaMenu] = React.useState(false);
         const menuRef = useRef(null);
         const [showConfigMenu, setShowConfigMenu] = React.useState(false);
@@ -2623,12 +2725,13 @@
         useEffect(() => {
           const root = document.documentElement;
           const syncTopbarOffset = () => {
-            const fallback = "128px";
+            const fallback = "80px";
             if (window.innerWidth > 767) {
               root.style.setProperty("--mobile-topbar-offset", fallback);
               return;
             }
-            const height = topbarRef.current?.offsetHeight || 0;
+            /* En mobile solo la row-2 es sticky — medimos su alto */
+            const height = topbarRow2Ref.current?.offsetHeight || 0;
             root.style.setProperty(
               "--mobile-topbar-offset",
               height ? `${height}px` : fallback,
@@ -2639,9 +2742,9 @@
           window.addEventListener("resize", syncTopbarOffset);
 
           let observer = null;
-          if (typeof ResizeObserver !== "undefined" && topbarRef.current) {
+          if (typeof ResizeObserver !== "undefined" && topbarRow2Ref.current) {
             observer = new ResizeObserver(syncTopbarOffset);
-            observer.observe(topbarRef.current);
+            observer.observe(topbarRow2Ref.current);
           }
 
           return () => {
@@ -2651,8 +2754,9 @@
         }, [activeSection]);
 
         return (
+          <>
           <div className="topbar" ref={topbarRef}>
-            {/* ROW 1: BRAND */}
+            {/* ROW 1: BRAND — scrollea normalmente, no se ancla */}
             <div className="topbar-row-1">
               <div className="topbar-brand">
                 <div className="topbar-icon">🌱</div>
@@ -2672,174 +2776,40 @@
                 </button>
               )}
             </div>
+          </div>
 
-            {/* ROW 2: SECTION TITLE & ACTIONS */}
-            <div className="topbar-row-2">
-              <div className="topbar-section">
-                <span
-                  className="topbar-section-emoji"
-                  style={{ fontSize: "28px" }}
-                >
-                  {current?.id === "agenda" ? "🗓️" : current?.emoji}
-                </span>
-                <span
-                  className="topbar-section-title"
-                  style={{
-                    fontFamily: "var(--sans)",
-                    fontSize: "26px",
-                    fontWeight: "700",
-                    color: "#fff",
-                    letterSpacing: ".01em",
-                    textShadow: "0 2px 4px rgba(0,0,0,0.3)",
-                  }}
-                >
-                  {current?.label}
-                </span>
-              </div>
+            {/* ROW 2: fuera del topbar — sticky anclado al tope al hacer scroll */}
+            <div
+              className={`topbar-row-2${activeSection === "agenda" ? " agenda-activa" : ""}`}
+              ref={topbarRow2Ref}
+            >
+              {/* ── Línea 1: ícono + título + botón Crear reserva ── */}
+              <div className="topbar-row2-line1">
+                <div className="topbar-section">
+                  <span
+                    className="topbar-section-emoji"
+                    style={{ fontSize: "28px" }}
+                  >
+                    {current?.id === "agenda" ? "🗓️" : current?.emoji}
+                  </span>
+                  <span
+                    className="topbar-section-title"
+                    style={{
+                      fontFamily: "var(--sans)",
+                      fontSize: "26px",
+                      fontWeight: "700",
+                      color: "#fff",
+                      letterSpacing: ".01em",
+                      textShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                    }}
+                  >
+                    {current?.label}
+                  </span>
+                </div>
 
-              {activeSection === "agenda" && (
-                <div
-                  className="topbar-actions"
-                  style={{ alignItems: "center", gap: "8px" }}
-                >
-                  {/* Nav semanal en topbar */}
-                  {vista === "semanal" && (
-                    <>
-                    {/* ⚙️ Botón configuración — a la izquierda del nav */}
-                    <div style={{ position: "relative" }} ref={configMenuRef}>
-                      <button
-                        onClick={() => setShowConfigMenu(!showConfigMenu)}
-                        title="Configuración de la semana"
-                        style={{
-                          display: "inline-flex", alignItems: "center", gap: "6px",
-                          padding: "6px 14px", borderRadius: "50px",
-                          border: "1.5px solid rgba(200,146,42,.5)",
-                          background: showConfigMenu ? "rgba(200,146,42,.25)" : "rgba(200,146,42,.1)",
-                          color: "var(--do)",
-                          fontFamily: "var(--sans)", fontSize: "12px", fontWeight: 700,
-                          cursor: "pointer", whiteSpace: "nowrap",
-                          transition: "all .2s"
-                        }}
-                      >
-                        <span style={{ fontSize: "16px", lineHeight: 1 }}>⚙️</span> Semana
-                      </button>
-
-                      {/* Dropdown de configuración de semana */}
-                      {showConfigMenu && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: "100%",
-                            left: 0,
-                            marginTop: "8px",
-                            background: "var(--vd)",
-                            border: "1.5px solid rgba(200,146,42,.3)",
-                            borderRadius: "12px",
-                            padding: "6px",
-                            minWidth: "220px",
-                            boxShadow: "0 8px 24px rgba(0,0,0,.4)",
-                            zIndex: 100,
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "2px",
-                          }}
-                        >
-                          <button
-                            onClick={() => {
-                              onCargarTurnosFijos();
-                              setShowConfigMenu(false);
-                            }}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "8px",
-                              padding: "10px 12px",
-                              background: "transparent",
-                              border: "none",
-                              color: "rgba(255,255,255,.9)",
-                              fontFamily: "var(--sans)",
-                              fontSize: "13px",
-                              fontWeight: 600,
-                              cursor: "pointer",
-                              borderRadius: "8px",
-                              textAlign: "left",
-                              transition: "background .15s",
-                            }}
-                            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,.06)")}
-                            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                          >
-                            <span style={{ fontSize: "15px" }}>🔃</span> Transferir turnos fijos
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                    <div
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        borderRadius: "50px",
-                        border: "1px solid rgba(254, 179, 4, 0.95)",
-                        background: "rgba(58, 174, 20, 0.22)",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <button
-                        onClick={prevWeek}
-                        title="Semana anterior"
-                        style={{
-                          width: "36px",
-                          height: "34px",
-                          margin: "0 10px",
-                          background: "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          fontSize: "25px",
-                          color: "var(--do)",
-                          lineHeight: 1,
-                        }}
-                      >
-                        🔙
-                      </button>
-                      <button
-                        onClick={goHoy}
-                        title="Ir a semana actual"
-                        style={{
-                          padding: "0 10px",
-                          height: "34px",
-                          background: "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          fontFamily: "var(--sans)",
-                          fontWeight: 700,
-                          fontSize: "12px",
-                          color: "rgba(250, 248, 251, 0.9)",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        SEMANA ACTUAL
-                      </button>
-                      <button
-                        onClick={nextWeek}
-                        title="Semana siguiente"
-                        style={{
-                          width: "36px",
-                          height: "34px",
-                          margin: "0 10px",
-                          background: "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          fontSize: "25px",
-                          color: "var(--do)",
-                          lineHeight: 1,
-                        }}
-                      >
-                        🔜
-                      </button>
-                    </div>
-                    </>
-                  )}
-                  {/* Botón Crear reserva con dropdown */}
-                  <div style={{ position: "relative" }} ref={menuRef}>
+                {/* Botón Crear reserva — en la misma línea que el título */}
+                {activeSection === "agenda" && (
+                  <div style={{ position: "relative", flexShrink: 0 }} ref={menuRef}>
                     <button
                       className="topbar-cta primary"
                       onClick={() => setShowReservaMenu((v) => !v)}
@@ -2926,10 +2896,144 @@
                       </div>
                     )}
                   </div>
+                )}
+              </div>
+
+              {/* ── Línea 2: configuración de semana + navegación (solo agenda semanal) ── */}
+              {activeSection === "agenda" && vista === "semanal" && (
+                <div className="topbar-row2-line2">
+                  {/* ⚙️ Config semana */}
+                  <div style={{ position: "relative" }} ref={configMenuRef}>
+                    <button
+                      onClick={() => setShowConfigMenu(!showConfigMenu)}
+                      title="Configuración de la semana"
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: "6px",
+                        padding: "6px 14px", borderRadius: "50px",
+                        border: "1.5px solid rgba(200,146,42,.5)",
+                        background: showConfigMenu ? "rgba(200,146,42,.25)" : "rgba(200,146,42,.1)",
+                        color: "var(--do)",
+                        fontFamily: "var(--sans)", fontSize: "12px", fontWeight: 700,
+                        cursor: "pointer", whiteSpace: "nowrap",
+                        transition: "all .2s"
+                      }}
+                    >
+                      <span style={{ fontSize: "16px", lineHeight: 1 }}>⚙️</span> Semana
+                    </button>
+                    {showConfigMenu && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "100%",
+                          left: 0,
+                          marginTop: "8px",
+                          background: "var(--vd)",
+                          border: "1.5px solid rgba(200,146,42,.3)",
+                          borderRadius: "12px",
+                          padding: "6px",
+                          minWidth: "220px",
+                          boxShadow: "0 8px 24px rgba(0,0,0,.4)",
+                          zIndex: 300,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "2px",
+                        }}
+                      >
+                        <button
+                          onClick={() => {
+                            onCargarTurnosFijos();
+                            setShowConfigMenu(false);
+                          }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            padding: "10px 12px",
+                            background: "transparent",
+                            border: "none",
+                            color: "rgba(255,255,255,.9)",
+                            fontFamily: "var(--sans)",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            borderRadius: "8px",
+                            textAlign: "left",
+                            transition: "background .15s",
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,.06)")}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                        >
+                          <span style={{ fontSize: "15px" }}>🔃</span> Transferir turnos fijos
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Navegación semanal */}
+                  <div className="topbar-nav-semana">
+                    <button
+                      onClick={prevWeek}
+                      title="Semana anterior"
+                      style={{
+                        flexShrink: 0,
+                        width: "40px",
+                        height: "36px",
+                        background: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        fontSize: "22px",
+                        color: "var(--do)",
+                        lineHeight: 1,
+                      }}
+                    >
+                      🔙
+                    </button>
+                    <button
+                      className="topbar-nav-hoy"
+                      onClick={goHoy}
+                      title="Ir a semana actual"
+                      style={{
+                        flex: 1,
+                        minWidth: 0,
+                        height: "36px",
+                        background: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        fontFamily: "var(--sans)",
+                        fontWeight: 700,
+                        fontSize: "11px",
+                        color: "rgba(250, 248, 251, 0.9)",
+                        padding: "0 10px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "4px",
+                      }}
+                    >
+                      <span>SEMANA</span><span>ACTUAL</span>
+                    </button>
+                    <button
+                      onClick={nextWeek}
+                      title="Semana siguiente"
+                      style={{
+                        flexShrink: 0,
+                        width: "40px",
+                        height: "36px",
+                        background: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        fontSize: "22px",
+                        color: "var(--do)",
+                        lineHeight: 1,
+                      }}
+                    >
+                      🔜
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
-          </div>
+          </>
         );
       }
 
@@ -6501,6 +6605,7 @@
                   {openSection === "notas" && (
                     <div className="acc-body">
                       <div
+                        className="notas-tabs-bar"
                         style={{
                           display: "flex",
                           gap: "4px",
@@ -6526,6 +6631,7 @@
                           return (
                             <button
                               key={t.key}
+                              className={`ntab${activo ? " ntab-on" : ""}`}
                               onClick={() => setNotasTab(t.key)}
                               style={{
                                 flex: 1,
@@ -6558,6 +6664,7 @@
                                 {t.label.split(" ")[0]}
                               </span>
                               <span
+                                className="ntab-label"
                                 style={{
                                   fontFamily: "var(--mono)",
                                   fontSize: "11px",
