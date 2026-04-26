@@ -72,7 +72,7 @@
         --sans: "Inter", sans-serif;
         --mono: "DM Mono", monospace;
         --serif-num: "DM Sans", sans-serif;
-        --mobile-topbar-offset: 128px;
+        --mobile-topbar-offset: 64px;
       }
 
       body {
@@ -107,8 +107,7 @@
       /* ── TOPBAR ── */
       .topbar {
         background: var(--vd);
-        position: sticky;
-        top: 0;
+        position: static;
         z-index: 100;
         display: flex;
         flex-direction: column;
@@ -128,6 +127,9 @@
         padding: 12px 24px;
         background: var(--vd);
         border-bottom: 2px solid rgba(200, 146, 42, 0.4);
+        position: sticky;
+        top: 0;
+        z-index: 200;
       }
 
       .topbar-brand {
@@ -246,7 +248,7 @@
       /* ── LAYOUT PRINCIPAL ── */
       .app-layout {
         display: flex;
-        min-height: calc(100vh - 64px);
+        min-height: calc(100vh - var(--mobile-topbar-offset, 64px));
       }
 
       /* ── SIDEBAR ── */
@@ -254,8 +256,8 @@
         width: 240px;
         background: var(--vd);
         position: sticky;
-        top: 64px;
-        height: calc(100vh - 64px);
+        top: var(--mobile-topbar-offset, 64px);
+        height: calc(100vh - var(--mobile-topbar-offset, 64px));
         display: flex;
         flex-direction: column;
         overflow-y: auto;
@@ -383,7 +385,7 @@
         padding: 12px 20px;
         background: var(--vd);
         position: sticky;
-        top: 64px;
+        top: var(--mobile-topbar-offset, 64px);
         z-index: 89;
         border-radius: var(--r);
         border: 2px solid var(--vm);
@@ -2725,16 +2727,11 @@
         useEffect(() => {
           const root = document.documentElement;
           const syncTopbarOffset = () => {
-            const fallback = "80px";
-            if (window.innerWidth > 767) {
-              root.style.setProperty("--mobile-topbar-offset", fallback);
-              return;
-            }
-            /* En mobile solo la row-2 es sticky — medimos su alto */
+            /* row-2 es sticky en todas las pantallas — medimos su alto */
             const height = topbarRow2Ref.current?.offsetHeight || 0;
             root.style.setProperty(
               "--mobile-topbar-offset",
-              height ? `${height}px` : fallback,
+              height ? `${height}px` : "64px",
             );
           };
 
