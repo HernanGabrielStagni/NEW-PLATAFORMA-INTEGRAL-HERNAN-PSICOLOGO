@@ -2598,6 +2598,7 @@
         nextWeek,
         goHoy,
         vista,
+        onCargarTurnosFijos,
       }) {
         const current = NAV_SECTIONS.find((s) => s.id === activeSection);
         const topbarRef = useRef(null);
@@ -2698,6 +2699,23 @@
                 >
                   {/* Nav semanal en topbar */}
                   {vista === "semanal" && (
+                    <>
+                    {/* ⚙️ Botón configuración — a la izquierda del nav */}
+                    <button
+                      onClick={onCargarTurnosFijos}
+                      title="Cargar turnos fijos en la semana"
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: "5px",
+                        padding: "6px 13px", borderRadius: "50px",
+                        border: "1.5px solid rgba(200,146,42,.5)",
+                        background: "rgba(200,146,42,.1)",
+                        color: "var(--do)",
+                        fontFamily: "var(--sans)", fontSize: "12px", fontWeight: 700,
+                        cursor: "pointer", whiteSpace: "nowrap",
+                      }}
+                    >
+                      ⚙️ Semana
+                    </button>
                     <div
                       style={{
                         display: "inline-flex",
@@ -2761,6 +2779,7 @@
                         🔜
                       </button>
                     </div>
+                    </>
                   )}
                   {/* Botón Crear reserva con dropdown */}
                   <div style={{ position: "relative" }} ref={menuRef}>
@@ -7343,12 +7362,13 @@
         setBaseDate,
         vista,
         setVista,
+        modalConfirmActivar,
+        setModalConfirmActivar,
       }) {
         const [showWeekend, setShowWeekend] = useState(false);
         const [sesiones, setSesiones] = useState([]);
         const [pacientes, setPacientes] = useState([]);
         const [modalEliminar, setModalEliminar] = useState(null);
-        const [modalConfirmActivar, setModalConfirmActivar] = useState(false);
         const [extraFeriados, setExtraFeriados] = useState([]);
         const [showOrdenes, setShowOrdenes] = useState(false);
         const [showNovedades, setShowNovedades] = useState(false);
@@ -7377,7 +7397,6 @@
         const [recEditDraft, setRecEditDraft] = useState({ titulo: "", descripcion: "" });
         const [modalEditCoord, setModalEditCoord] = useState(null);
         const [coordEditDraft, setCoordEditDraft] = useState({ titulo: "", descripcion: "" });
-        const [showSemanaConfig, setShowSemanaConfig] = useState(false);
         const [confirmBorrar, setConfirmBorrar] = useState(null); // { fn, label }
         const [config, setConfig] = useState(
           () => getData("hgsp_config") || {},
@@ -9257,64 +9276,11 @@
 
               {vista === "semanal" && (
                 <>
-                  {/* ⚙️ Configuración de semana */}
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <div style={{ position: "relative" }}>
-                      <button
-                        onClick={() => setShowSemanaConfig((v) => !v)}
-                        title="Configuración de semana"
-                        style={{
-                          display: "inline-flex", alignItems: "center", gap: "6px",
-                          padding: "8px 16px", borderRadius: "50px",
-                          border: `2px solid ${showSemanaConfig ? "var(--do)" : "rgba(200,146,42,.4)"}`,
-                          background: showSemanaConfig ? "var(--do)" : "rgba(200,146,42,.08)",
-                          color: showSemanaConfig ? "var(--vd)" : "var(--do)",
-                          fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700,
-                          cursor: "pointer", transition: "all .2s",
-                        }}
-                      >
-                        ⚙️ Semana
-                        {coordSemana.length > 0 && (
-                          <span style={{ background: showSemanaConfig ? "var(--vd)" : "var(--do)", color: showSemanaConfig ? "var(--do)" : "var(--vd)", fontFamily: "var(--mono)", fontSize: "10px", fontWeight: 700, borderRadius: "10px", padding: "1px 6px" }}>
-                            {coordSemana.length}
-                          </span>
-                        )}
-                      </button>
-
-                      {/* Dropdown panel */}
-                      {showSemanaConfig && (
-                        <div style={{
-                          position: "absolute", top: "calc(100% + 8px)", left: 0, zIndex: 50,
-                          background: "var(--vd)", border: "2px solid var(--vm)",
-                          borderRadius: "16px", padding: "14px", minWidth: "240px",
-                          boxShadow: "0 8px 24px rgba(0,0,0,.35)",
-                        }}>
-                          <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(200,146,42,.7)", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: "10px" }}>
-                            ⚙️ Configuración de semana
-                          </div>
-                          <button
-                            className="btn btn-g"
-                            onClick={() => { setModalConfirmActivar(true); setShowSemanaConfig(false); }}
-                            title="Transfiere los turnos fijos a la agenda semanal. ⚠️ Precaución: borra registros que se superpongan"
-                            style={{ display: "inline-flex", alignItems: "center", gap: "6px", width: "100%", justifyContent: "center" }}
-                          >
-                            🔃 Cargar Turnos Fijos
-                            {coordSemana.length > 0 && (
-                              <span style={{ background: "var(--vd)", color: "var(--do)", fontFamily: "var(--mono)", fontSize: "10px", fontWeight: 700, borderRadius: "10px", padding: "1px 6px" }}>
-                                {coordSemana.length}
-                              </span>
-                            )}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    {semanaActivada && (
-                      <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "6px 14px", borderRadius: "50px", border: "2px solid rgba(125,204,144,.35)", background: "rgba(125,204,144,.08)", fontFamily: "var(--mono)", fontSize: "11px", color: "#7DCC90", fontWeight: 700 }}>
-                        ✓ Semana activada
-                      </span>
-                    )}
-                  </div>
+                  {semanaActivada && (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "6px 14px", borderRadius: "50px", border: "2px solid rgba(125,204,144,.35)", background: "rgba(125,204,144,.08)", fontFamily: "var(--mono)", fontSize: "11px", color: "#7DCC90", fontWeight: 700 }}>
+                      ✓ Semana activada
+                    </span>
+                  )}
 
                   {/* Rango fecha — mes en dorado/negrita */}
                   <span
@@ -19605,6 +19571,7 @@
         const [modalReserva, setModalReserva] = useState(null);
         const [baseDate, setBaseDate] = useState(new Date());
         const [vista, setVista] = useState("semanal");
+        const [modalConfirmActivar, setModalConfirmActivar] = useState(false);
 
         const hoyStr = new Date().toISOString().slice(0, 10);
 
@@ -19640,6 +19607,8 @@
             setBaseDate,
             vista,
             setVista,
+            modalConfirmActivar,
+            setModalConfirmActivar,
           };
           switch (activeSection) {
             case "agenda":
@@ -19683,6 +19652,7 @@
               nextWeek={nextWeek}
               goHoy={goHoy}
               vista={vista}
+              onCargarTurnosFijos={() => setModalConfirmActivar(true)}
             />
             <div className="app-layout">
               <Sidebar
