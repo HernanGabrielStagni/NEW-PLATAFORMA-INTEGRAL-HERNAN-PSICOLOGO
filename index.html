@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -1714,6 +1714,18 @@
         align-items: center;
         gap: 6px;
       }
+      .alert-urgente {
+        background: rgba(239,68,68,.15);
+        color: #FCA5A5;
+        border: 1px solid rgba(239,68,68,.35);
+        border-radius: var(--rsm);
+        padding: 8px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
       .alert-info {
         background: var(--vs);
         color: var(--vd);
@@ -3184,6 +3196,29 @@
         return !!s?.alertaUrgente;
       }
 
+      function getPacientesPendientesPrevios(sesiones) {
+        const hoy = new Date();
+        const dow = hoy.getDay();
+        const diffLunes = dow === 0 ? -6 : 1 - dow;
+        const lunes = new Date(hoy);
+        lunes.setDate(hoy.getDate() + diffLunes);
+        lunes.setHours(0, 0, 0, 0);
+        const lunesStr = lunes.toISOString().slice(0, 10);
+        const set = new Set();
+        sesiones.forEach((s) => {
+          if (!s.pacienteId || s.tipo === "reserva_personal") return;
+          if (s.fecha >= lunesStr) return;
+          const tieneUrgente = !!s.alertaUrgente;
+          const tieneNotas = !!(s.notasAlertas?.clinica || s.notasAlertas?.admin || s.notasAlertas?.asistencia);
+          const sinCalificar = s.estado === "pendiente" && s.tipo !== "AT";
+          const sinCobrar = !s.cobrado && s.tipo !== "AT" && s.estado !== "cancelo" && s.estado !== "reprogramo";
+          if (tieneUrgente || tieneNotas || sinCalificar || sinCobrar) {
+            set.add(s.pacienteId);
+          }
+        });
+        return set;
+      }
+
       /* Turno que ya pasó en hora pero sigue en estado "pendiente" (sin calificar) */
       function esTurnoPasadoSinCalificar(s) {
         if (!s || s.tipo === "reserva_personal" || s.tipo === "AT")
@@ -4133,6 +4168,7 @@
           return pacientes.find((p) => p.id === id);
         }
 
+        const pacPrevSet = getPacientesPendientesPrevios(sesiones);
         function handleColClick(e, ds) {
           /* ignora clicks en sesiones (stopPropagation desde ahí) */
           const rect = e.currentTarget.getBoundingClientRect();
@@ -4401,10 +4437,10 @@
                               </>
                             ) : (
                               <>
-                                {(tieneAlertaUrgente(s) || tienePendientePago(s, hoyStr) || tieneNotasAlerta(s) || esTurnoPasadoSinCalificar(s)) && (
+                                {(tieneAlertaUrgente(s) || pacPrevSet.has(s.pacienteId) || tienePendientePago(s, hoyStr) || tieneNotasAlerta(s) || esTurnoPasadoSinCalificar(s)) && (
                                   <div className="ag-badges-top">
-                                    {tieneAlertaUrgente(s) && (
-                                      <span className="ag-urgente-badge" title="Alerta urgente — revisar antes del turno">🚨</span>
+                                    {(tieneAlertaUrgente(s) || pacPrevSet.has(s.pacienteId)) && (
+                                      <span className="ag-urgente-badge" title={tieneAlertaUrgente(s) ? "Alerta urgente — revisar antes del turno" : "Pendientes sin resolver de semanas anteriores"}>🚨</span>
                                     )}
                                     {(tienePendientePago(s, hoyStr) || tieneNotasAlerta(s) || esTurnoPasadoSinCalificar(s)) && (
                                       <div className="ag-pago-alerta" title="Turno requiere atención">!</div>
@@ -5073,6 +5109,41 @@
             const tienePagoNuevo = sesion.modalidadPago != null;
             const datosPago = tienePagoNuevo ? pagoF(sesion) : pagoDesde(pac);
             initialState = { ...sesion, ...datosPago };
+            /* auto-nota admin si paciente tiene pendientes de semanas anteriores */
+            if (pac && !initialState.notasAdmin) {
+              const hoyPN = new Date();
+              const dowPN = hoyPN.getDay();
+              const diffLPN = dowPN === 0 ? -6 : 1 - dowPN;
+              const lunesPN = new Date(hoyPN);
+              lunesPN.setDate(hoyPN.getDate() + diffLPN);
+              lunesPN.setHours(0, 0, 0, 0);
+              const lunesStrPN = lunesPN.toISOString().slice(0, 10);
+              const MESES_PN = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+              const prevPend = (allSesiones || []).filter((s) =>
+                s.pacienteId === pac.id &&
+                s.id !== sesion.id &&
+                s.fecha < lunesStrPN &&
+                s.tipo !== "reserva_personal" &&
+                (s.alertaUrgente ||
+                 s.notasAlertas?.clinica || s.notasAlertas?.admin || s.notasAlertas?.asistencia ||
+                 (s.estado === "pendiente" && s.tipo !== "AT") ||
+                 (!s.cobrado && s.tipo !== "AT" && s.estado !== "cancelo" && s.estado !== "reprogramo"))
+              ).sort((a, b) => b.fecha.localeCompare(a.fecha));
+              if (prevPend.length > 0) {
+                const fechas = prevPend.slice(0, 3).map((s) => {
+                  const p = s.fecha.split("-");
+                  return parseInt(p[2]) + " de " + MESES_PN[parseInt(p[1]) - 1];
+              });
+                const fechaTxt = fechas.length === 1
+                  ? "Turno del " + fechas[0]
+                  : "Turnos del " + fechas.slice(0, -1).join(", ") + " y " + fechas[fechas.length - 1];
+                initialState = {
+                  ...initialState,
+                  notasAdmin: "Posee novedades de semanas anteriores · " + fechaTxt,
+                  notasAlertas: { ...(initialState.notasAlertas || {}), admin: true },
+                };
+              }
+            }
             setF(initialState);
             if (pac) {
               setPacSel(pac);
@@ -10147,14 +10218,13 @@
         montoFijoAT: 0,
         modalidadAT: "Mixta",
       };
-
       function pacAlerts(p) {
         const alerts = [];
         if (p.vencimientoCredencial) {
           const diff =
             (new Date(p.vencimientoCredencial) - new Date()) / 86400000;
-          if (diff < 30 && diff > 0) alerts.push("Credencial vence pronto");
-          if (diff <= 0) alerts.push("Credencial vencida");
+          if (diff < 30 && diff > 0) alerts.push({ tipo: "warn", texto: "Credencial vence pronto" });
+          if (diff <= 0) alerts.push({ tipo: "warn", texto: "Credencial vencida" });
         }
         const sesiones = getData("hgsp_sesiones").filter(
           (s) => s.pacienteId === p.id,
@@ -10162,14 +10232,33 @@
         const cobros = getData("hgsp_cobros").filter(
           (c) => c.pacienteId === p.id && !c.cobrado,
         );
-        if (cobros.length > 0) alerts.push("Cobros pendientes");
+        if (cobros.length > 0) alerts.push({ tipo: "warn", texto: "Cobros pendientes" });
         if (sesiones.length > 0) {
           const ultima = sesiones.sort((a, b) =>
             b.fecha.localeCompare(a.fecha),
           )[0];
           const diff2 = (new Date() - new Date(ultima.fecha)) / 86400000;
-          if (diff2 > 30) alerts.push(">30 días sin sesión");
+          if (diff2 > 30) alerts.push({ tipo: "warn", texto: ">30 días sin sesión" });
         }
+        const hoyPA = new Date();
+        const diaSemPA = hoyPA.getDay();
+        const diffLunes = diaSemPA === 0 ? -6 : 1 - diaSemPA;
+        const lunesActual = new Date(hoyPA);
+        lunesActual.setDate(hoyPA.getDate() + diffLunes);
+        lunesActual.setHours(0, 0, 0, 0);
+        const lunesStr = lunesActual.toISOString().slice(0, 10);
+        const MESES_PA = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+        sesiones.forEach((s) => {
+          if (s.fecha < lunesStr) {
+            const tieneUrgente = !!s.alertaUrgente;
+            const tieneNota = !!(s.notasAlertas?.clinica || s.notasAlertas?.admin || s.notasAlertas?.asistencia);
+            if (tieneUrgente || tieneNota) {
+              const parts = s.fecha.split("-");
+              const fechaTxt = parseInt(parts[2]) + " de " + MESES_PA[parseInt(parts[1]) - 1];
+              alerts.push({ tipo: "urgente", texto: "Tiene pendiente en el turno del " + fechaTxt });
+            }
+          }
+        });
         return alerts;
       }
 
@@ -11536,8 +11625,8 @@
                       }}
                     >
                       {pacAlerts(p).map((a, i) => (
-                        <div key={i} className="alert-warn">
-                          ⚠️ {a}
+                        <div key={i} className={a.tipo === "urgente" ? "alert-urgente" : "alert-warn"}>
+                          {a.tipo === "urgente" ? "🚨" : "⚠️"} {a.texto}
                         </div>
                       ))}
                     </div>
@@ -12356,11 +12445,12 @@
                                 {alerts.length > 0 && (
                                   <span
                                     style={{
-                                      color: "#D9534F",
+                                      color: alerts.some((a) => a.tipo === "urgente") ? "#FCA5A5" : "#D9534F",
                                       fontSize: "11px",
                                     }}
                                   >
-                                    ⚠️ {alerts[0]}
+                                    {alerts.some((a) => a.tipo === "urgente") ? "🚨" : "⚠️"}{" "}
+                                    {(alerts.find((a) => a.tipo === "urgente") || alerts[0]).texto}
                                   </span>
                                 )}
                               </div>
@@ -12496,14 +12586,17 @@
                         {p.diasHorarios?.map((h) => h.dia).join(", ")}
                       </div>
                       {alerts.length > 0 && (
-                        <div
-                          style={{
-                            color: "#FFD0B8",
-                            fontSize: "11px",
-                            marginTop: "6px",
-                          }}
-                        >
-                          ⚠️ {alerts.join(" · ")}
+                        <div style={{ fontSize: "11px", marginTop: "6px" }}>
+                          {alerts.some((a) => a.tipo === "urgente") && (
+                            <div style={{ color: "#FCA5A5", marginBottom: "2px" }}>
+                              🚨 {alerts.filter((a) => a.tipo === "urgente").map((a) => a.texto).join(" · ")}
+                            </div>
+                          )}
+                          {alerts.some((a) => a.tipo === "warn") && (
+                            <div style={{ color: "#FFD0B8" }}>
+                              ⚠️ {alerts.filter((a) => a.tipo === "warn").map((a) => a.texto).join(" · ")}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
