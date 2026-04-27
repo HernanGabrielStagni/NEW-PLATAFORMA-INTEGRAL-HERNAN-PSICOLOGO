@@ -2141,6 +2141,18 @@
         z-index: 2;
         letter-spacing: -0.5px;
       }
+      /* Ícono urgente en bloque de sesión — inline, no tapa otros badges */
+      .ag-urgente-inline {
+        font-size: 15px;
+        line-height: 1;
+        flex-shrink: 0;
+        animation: urgente-pulse 1.6s ease-in-out infinite;
+        filter: drop-shadow(0 0 5px rgba(239,68,68,.9));
+      }
+      @keyframes urgente-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.28); }
+      }
       /* Panel de novedades de la semana */
       .novedades-panel {
         background: var(--vd);
@@ -2514,65 +2526,26 @@
             <div className="modal-card">
               <div className="modal-bar"></div>
               <div className="modal-header">
-                <span className="modal-title">{title}</span>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "6px",
-                    alignItems: "center",
-                  }}
-                >
-                  {onDelete && (
-                    <button
-                      className="modal-icon-btn danger"
-                      onClick={onDelete}
-                      title="Eliminar"
-                    >
-                      🗑️
-                    </button>
-                  )}
-                  {onSave && (
-                    <button
-                      className="modal-icon-btn"
-                      onClick={onSave}
-                      title="Guardar"
-                    >
-                      💾
-                    </button>
-                  )}
-                  <button
-                    className="modal-icon-btn"
-                    onClick={tryClose}
-                    title="Cerrar"
-                  >
-                    ✕
-                  </button>
-                </div>
+                {confirmClose ? (
+                  <>
+                    <span style={{ color: "rgba(255,255,255,.85)", fontSize: "13px", fontFamily: "var(--sans)", flex: 1 }}>¿Salir sin guardar los cambios?</span>
+                    <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+                      <button className="btn btn-danger" style={{ padding: "5px 14px", fontSize: "13px" }} onClick={doClose}>S&#237;, salir</button>
+                      <button className="btn btn-sec" style={{ padding: "5px 14px", fontSize: "13px" }} onClick={() => setConfirmClose(false)}>No, quedarme</button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <span className="modal-title">{title}</span>
+                    <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                      {onDelete && <button className="modal-icon-btn danger" onClick={onDelete} title="Eliminar">🗑️</button>}
+                      {onSave && <button className="modal-icon-btn" onClick={onSave} title="Guardar">💾</button>}
+                      <button className="modal-icon-btn" onClick={tryClose} title="Cerrar">✕</button>
+                    </div>
+                  </>
+                )}
               </div>
               <div className="modal-body">{children}</div>
-              {confirmClose && (
-                <div className="modal-confirm-cancel">
-                  <span className="modal-confirm-cancel-text">
-                    ¿Salir sin guardar los cambios?
-                  </span>
-                  <div className="modal-confirm-cancel-btns">
-                    <button
-                      className="btn btn-danger"
-                      style={{ padding: "5px 14px", fontSize: "13px" }}
-                      onClick={doClose}
-                    >
-                      Sí, salir
-                    </button>
-                    <button
-                      className="btn btn-sec"
-                      style={{ padding: "5px 14px", fontSize: "13px" }}
-                      onClick={() => setConfirmClose(false)}
-                    >
-                      No, quedarme
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>,
           document.body,
@@ -3201,6 +3174,9 @@
       function tieneNotasAlerta(s) {
         const na = s.notasAlertas || {};
         return !!(na.clinica || na.admin || na.asistencia);
+      }
+      function tieneAlertaUrgente(s) {
+        return !!s?.alertaUrgente;
       }
 
       /* Turno que ya pasó en hora pero sigue en estado "pendiente" (sin calificar) */
@@ -4438,6 +4414,12 @@
                                     minWidth: 0,
                                   }}
                                 >
+                                  {tieneAlertaUrgente(s) && (
+                                    <span
+                                      className="ag-urgente-inline"
+                                      title="Alerta urgente — revisar antes del turno"
+                                    >🚨</span>
+                                  )}
                                   <span
                                     style={{
                                       fontSize:
@@ -5117,6 +5099,7 @@
               notasAdmin: "",
               notasAsistencia: "",
               notasAlertas: { clinica: false, admin: false, asistencia: false },
+              alertaUrgente: false,
               colorLabel: "",
               ...pagoDesde(null),
             };
@@ -5468,6 +5451,7 @@
         })();
 
         const notasResumen = (() => {
+          if (f.alertaUrgente) return "🚨 Alerta urgente activa";
           const tieneAlerta =
             f.notasAlertas?.clinica ||
             f.notasAlertas?.admin ||
@@ -6590,6 +6574,42 @@
                   </div>
                   {openSection === "notas" && (
                     <div className="acc-body">
+                      {/* Alerta urgente — toggle independiente */}
+                      <div
+                        onClick={() => upd("alertaUrgente", !f.alertaUrgente)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                          padding: "9px 14px",
+                          borderRadius: "12px",
+                          border: `2px solid ${f.alertaUrgente ? "rgba(239,68,68,.85)" : "rgba(239,68,68,.22)"}`,
+                          background: f.alertaUrgente ? "rgba(239,68,68,.16)" : "rgba(239,68,68,.04)",
+                          cursor: "pointer",
+                          marginBottom: "10px",
+                          transition: "all .2s",
+                          userSelect: "none",
+                        }}
+                      >
+                        <span style={{ fontSize: "20px", lineHeight: 1, flexShrink: 0 }}>🚨</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontFamily: "var(--sans)", fontWeight: 700, fontSize: "13px", color: f.alertaUrgente ? "#FCA5A5" : "rgba(255,255,255,.45)", lineHeight: 1.3 }}>
+                            Alerta urgente
+                          </div>
+                          <div style={{ fontFamily: "var(--mono)", fontSize: "9px", color: f.alertaUrgente ? "rgba(252,165,165,.65)" : "rgba(255,255,255,.22)", letterSpacing: ".05em", textTransform: "uppercase", marginTop: "2px" }}>
+                            Revisar antes del turno
+                          </div>
+                        </div>
+                        <div style={{
+                          width: "20px", height: "20px", borderRadius: "5px", flexShrink: 0,
+                          border: `2px solid ${f.alertaUrgente ? "rgba(239,68,68,.9)" : "rgba(239,68,68,.3)"}`,
+                          background: f.alertaUrgente ? "rgba(239,68,68,.8)" : "transparent",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: "12px", color: "#fff", fontWeight: 900, transition: "all .15s",
+                        }}>
+                          {f.alertaUrgente ? "✓" : ""}
+                        </div>
+                      </div>
                       <div
                         className="notas-tabs-bar"
                         style={{
@@ -7026,9 +7046,10 @@
               <div className="modal-bar" />
               <div className="modal-header">
                 <span className="modal-title">Confirmar eliminación</span>
-                <button className="modal-close" onClick={onClose}>
-                  ✕
-                </button>
+                <div style={{ display: "flex", gap: "6px" }}>
+                  <button className="modal-icon-btn danger" onClick={onConfirm} title="Eliminar definitivamente">🗑️</button>
+                  <button className="modal-icon-btn" onClick={onClose} title="Cancelar">✕</button>
+                </div>
               </div>
               <div className="modal-body">
                 <div
@@ -7088,20 +7109,6 @@
                     </span>
                   </p>
                 )}
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "10px",
-                    justifyContent: "flex-end",
-                  }}
-                >
-                  <button className="btn btn-sec" onClick={onClose}>
-                    Cancelar
-                  </button>
-                  <button className="btn btn-danger" onClick={onConfirm}>
-                    🗑️ Eliminar
-                  </button>
-                </div>
               </div>
             </div>
           </div>,
@@ -7665,6 +7672,7 @@
             (s) =>
               tienePendientePago(s, hoyStr) ||
               tieneNotasAlerta(s) ||
+              tieneAlertaUrgente(s) ||
               esTurnoPasadoSinCalificar(s),
           )
           .map((s) => {
@@ -7691,6 +7699,11 @@
               base.items.push({
                 texto: "Notas pendientes en Asistencia",
                 campo: "notasAlertas_asistencia",
+              });
+            if (s.alertaUrgente)
+              base.items.push({
+                texto: "🚨 Alerta urgente — revisar antes del turno",
+                campo: "alertaUrgente",
               });
             return base;
           });
@@ -7751,6 +7764,8 @@
                 [subkey]: false,
               },
             };
+          } else if (campo === "alertaUrgente") {
+            all[idx] = { ...all[idx], alertaUrgente: false };
           } else {
             all[idx] = { ...all[idx], [campo]: true };
           }
@@ -8120,6 +8135,7 @@
                       admin: false,
                       asistencia: false,
                     },
+                    alertaUrgente: false,
                     modalidadPago:
                       pac.cobertura === "particular"
                         ? "particular"
@@ -9702,12 +9718,16 @@
                     />
                     <div className="modal-header">
                       <span className="modal-title">Activar semana</span>
-                      <button
-                        className="modal-icon-btn"
-                        onClick={() => { setModalConfirmActivar(false); setPinActivar(""); }}
-                      >
-                        ✕
-                      </button>
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        <button
+                          className="modal-icon-btn"
+                          onClick={() => { setModalConfirmActivar(false); setPinActivar(""); activarSemana(); }}
+                          title="Confirmar"
+                          disabled={pinActivar !== "123"}
+                          style={{ opacity: pinActivar === "123" ? 1 : 0.35, cursor: pinActivar === "123" ? "pointer" : "not-allowed" }}
+                        >✓</button>
+                        <button className="modal-icon-btn" onClick={() => { setModalConfirmActivar(false); setPinActivar(""); }} title="Cancelar">✕</button>
+                      </div>
                     </div>
                     <div style={{ padding: "20px 24px 24px" }}>
                       <div
@@ -9768,35 +9788,7 @@
                         />
                       </div>
 
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "10px",
-                          justifyContent: "flex-end",
-                        }}
-                      >
-                        <button
-                          className="btn btn-sec"
-                          onClick={() => { setModalConfirmActivar(false); setPinActivar(""); }}
-                        >
-                          Cancelar
-                        </button>
-                        <button
-                          className="btn btn-g"
-                          onClick={() => {
-                            setModalConfirmActivar(false);
-                            setPinActivar("");
-                            activarSemana();
-                          }}
-                          disabled={pinActivar !== "123"}
-                          style={{
-                             opacity: pinActivar === "123" ? 1 : 0.5,
-                             cursor: pinActivar === "123" ? "pointer" : "not-allowed"
-                          }}
-                        >
-                          ✓ Confirmar
-                        </button>
-                      </div>
+
                     </div>
                   </div>
                 </div>,
@@ -9824,12 +9816,10 @@
                     />
                     <div className="modal-header">
                       <span className="modal-title">📌 Nuevo recordatorio</span>
-                      <button
-                        className="modal-icon-btn"
-                        onClick={() => setModalNuevoRec(false)}
-                      >
-                        ✕
-                      </button>
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        <button className="modal-icon-btn" onClick={guardarRecordatorio} title="Guardar">💾</button>
+                        <button className="modal-icon-btn" onClick={() => { setModalNuevoRec(false); setRecDraft({ titulo: "", descripcion: "" }); }} title="Cancelar">✕</button>
+                      </div>
                     </div>
                     <div style={{ padding: "20px 24px 24px" }}>
                       <div
@@ -9889,29 +9879,7 @@
                           }))
                         }
                       />
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "10px",
-                          justifyContent: "flex-end",
-                        }}
-                      >
-                        <button
-                          className="btn btn-sec"
-                          onClick={() => {
-                            setModalNuevoRec(false);
-                            setRecDraft({ titulo: "", descripcion: "" });
-                          }}
-                        >
-                          Cancelar
-                        </button>
-                        <button
-                          className="btn btn-g"
-                          onClick={guardarRecordatorio}
-                        >
-                          📌 Crear
-                        </button>
-                      </div>
+
                     </div>
                   </div>
                 </div>,
@@ -9930,7 +9898,10 @@
                     <div style={{ height: "4px", background: "linear-gradient(90deg,var(--do),#E8B84B)", borderRadius: "var(--r) var(--r) 0 0" }} />
                     <div className="modal-header">
                       <span className="modal-title">🔄 Nuevo ítem de coordinación</span>
-                      <button className="modal-icon-btn" onClick={() => setModalNuevoCoord(false)}>✕</button>
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        <button className="modal-icon-btn" onClick={guardarCoordManual} title="Guardar">💾</button>
+                        <button className="modal-icon-btn" onClick={() => { setModalNuevoCoord(false); setCoordDraft({ titulo: "", descripcion: "" }); }} title="Cancelar">✕</button>
+                      </div>
                     </div>
                     <div style={{ padding: "20px 24px 24px" }}>
                       <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "4px" }}>
@@ -9955,14 +9926,7 @@
                         value={coordDraft.descripcion}
                         onChange={(e) => setCoordDraft((d) => ({ ...d, descripcion: e.target.value }))}
                       />
-                      <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
-                        <button className="btn btn-sec" onClick={() => { setModalNuevoCoord(false); setCoordDraft({ titulo: "", descripcion: "" }); }}>
-                          Cancelar
-                        </button>
-                        <button className="btn btn-g" onClick={guardarCoordManual}>
-                          🔄 Crear
-                        </button>
-                      </div>
+
                     </div>
                   </div>
                 </div>,
@@ -9977,19 +9941,16 @@
                     <div style={{ height: "4px", background: "linear-gradient(90deg,#C84040,#E87070)", borderRadius: "var(--r) var(--r) 0 0" }} />
                     <div className="modal-header">
                       <span className="modal-title" style={{ color: "#FF8888" }}>🗑️ Confirmar eliminación</span>
-                      <button className="modal-icon-btn" onClick={() => setConfirmBorrar(null)}>✕</button>
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        <button className="modal-icon-btn danger" onClick={() => { confirmBorrar.fn(); setConfirmBorrar(null); }} title="Eliminar">🗑️</button>
+                        <button className="modal-icon-btn" onClick={() => setConfirmBorrar(null)} title="Cancelar">✕</button>
+                      </div>
                     </div>
                     <div style={{ padding: "20px 24px 24px" }}>
                       <div style={{ color: "rgba(255,255,255,.82)", fontFamily: "var(--sans)", fontSize: "14px", lineHeight: 1.6, marginBottom: "22px" }}>
                         {confirmBorrar.label}
                       </div>
-                      <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
-                        <button className="btn btn-sec" onClick={() => setConfirmBorrar(null)}>Cancelar</button>
-                        <button
-                          style={{ padding: "8px 20px", borderRadius: "50px", border: "2px solid rgba(200,80,80,.6)", background: "rgba(200,80,80,.15)", color: "#FF8888", fontFamily: "var(--sans)", fontWeight: 700, cursor: "pointer", fontSize: "13px" }}
-                          onClick={() => { confirmBorrar.fn(); setConfirmBorrar(null); }}
-                        >🗑️ Eliminar</button>
-                      </div>
+
                     </div>
                   </div>
                 </div>,
@@ -10008,7 +9969,10 @@
                     <div style={{ height: "4px", background: "linear-gradient(90deg,var(--do),#E8B84B)", borderRadius: "var(--r) var(--r) 0 0" }} />
                     <div className="modal-header">
                       <span className="modal-title">✏️ Editar recordatorio</span>
-                      <button className="modal-icon-btn" onClick={() => setModalEditRec(null)}>✕</button>
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        <button className="modal-icon-btn" onClick={guardarEditRec} title="Guardar">💾</button>
+                        <button className="modal-icon-btn" onClick={() => setModalEditRec(null)} title="Cancelar">✕</button>
+                      </div>
                     </div>
                     <div style={{ padding: "20px 24px 24px" }}>
                       <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "4px" }}>
@@ -10033,14 +9997,7 @@
                         value={recEditDraft.descripcion}
                         onChange={(e) => setRecEditDraft((d) => ({ ...d, descripcion: e.target.value }))}
                       />
-                      <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
-                        <button className="btn btn-sec" onClick={() => setModalEditRec(null)}>
-                          Cancelar
-                        </button>
-                        <button className="btn btn-g" onClick={guardarEditRec}>
-                          ✏️ Guardar
-                        </button>
-                      </div>
+
                     </div>
                   </div>
                 </div>,
@@ -10059,7 +10016,10 @@
                     <div style={{ height: "4px", background: "linear-gradient(90deg,var(--do),#E8B84B)", borderRadius: "var(--r) var(--r) 0 0" }} />
                     <div className="modal-header">
                       <span className="modal-title">✏️ Editar ítem de coordinación</span>
-                      <button className="modal-icon-btn" onClick={() => setModalEditCoord(null)}>✕</button>
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        <button className="modal-icon-btn" onClick={guardarEditCoord} title="Guardar">💾</button>
+                        <button className="modal-icon-btn" onClick={() => setModalEditCoord(null)} title="Cancelar">✕</button>
+                      </div>
                     </div>
                     <div style={{ padding: "20px 24px 24px" }}>
                       <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "4px" }}>
@@ -10084,14 +10044,7 @@
                         value={coordEditDraft.descripcion}
                         onChange={(e) => setCoordEditDraft((d) => ({ ...d, descripcion: e.target.value }))}
                       />
-                      <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
-                        <button className="btn btn-sec" onClick={() => setModalEditCoord(null)}>
-                          Cancelar
-                        </button>
-                        <button className="btn btn-g" onClick={guardarEditCoord}>
-                          ✏️ Guardar
-                        </button>
-                      </div>
+
                     </div>
                   </div>
                 </div>,
@@ -10399,31 +10352,23 @@
             <div className="modal-card modal-lg">
               <div className="modal-bar"></div>
               <div className="modal-header">
-                <span className="modal-title">
-                  {paciente ? "Editar paciente" : "Nuevo paciente"}
-                </span>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "6px",
-                    alignItems: "center",
-                  }}
-                >
-                  <button
-                    className="modal-icon-btn"
-                    onClick={handleSave}
-                    title="Guardar"
-                  >
-                    💾
-                  </button>
-                  <button
-                    className="modal-icon-btn"
-                    onClick={tryClose}
-                    title="Cerrar"
-                  >
-                    ✕
-                  </button>
-                </div>
+                {confirmCancel ? (
+                  <>
+                    <span style={{ color: "rgba(255,255,255,.85)", fontSize: "13px", fontFamily: "var(--sans)", flex: 1 }}>¿Salir sin guardar los cambios?</span>
+                    <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+                      <button className="btn btn-danger" style={{ padding: "5px 14px", fontSize: "13px" }} onClick={doClose}>S&#237;, salir</button>
+                      <button className="btn btn-sec" style={{ padding: "5px 14px", fontSize: "13px" }} onClick={() => setConfirmCancel(false)}>No, quedarme</button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <span className="modal-title">{paciente ? "Editar paciente" : "Nuevo paciente"}</span>
+                    <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                      <button className="modal-icon-btn" onClick={handleSave} title="Guardar">💾</button>
+                      <button className="modal-icon-btn" onClick={tryClose} title="Cerrar">✕</button>
+                    </div>
+                  </>
+                )}
               </div>
 
               <div style={{ padding: "12px 22px 0" }}>
@@ -11336,44 +11281,6 @@
                 )}
               </div>
 
-              <div
-                style={{
-                  padding: "0 22px 18px",
-                  display: "flex",
-                  gap: "10px",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <button className="btn btn-sec" onClick={tryClose}>
-                  Cancelar
-                </button>
-                <button className="btn btn-g" onClick={handleSave}>
-                  Guardar paciente
-                </button>
-              </div>
-              {confirmCancel && (
-                <div className="modal-confirm-cancel">
-                  <span className="modal-confirm-cancel-text">
-                    ¿Salir sin guardar los cambios?
-                  </span>
-                  <div className="modal-confirm-cancel-btns">
-                    <button
-                      className="btn btn-danger"
-                      style={{ padding: "5px 14px", fontSize: "13px" }}
-                      onClick={doClose}
-                    >
-                      Sí, salir
-                    </button>
-                    <button
-                      className="btn btn-sec"
-                      style={{ padding: "5px 14px", fontSize: "13px" }}
-                      onClick={() => setConfirmCancel(false)}
-                    >
-                      No, quedarme
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>,
           document.body,
@@ -11409,9 +11316,10 @@
               <div className="modal-bar"></div>
               <div className="modal-header">
                 <span className="modal-title">Dar de baja</span>
-                <button className="modal-close" onClick={onClose}>
-                  ✕
-                </button>
+                <div style={{ display: "flex", gap: "6px" }}>
+                  <button className="modal-icon-btn danger" onClick={handleConfirm} title="Confirmar baja">🗑️</button>
+                  <button className="modal-icon-btn" onClick={onClose} title="Cancelar">✕</button>
+                </div>
               </div>
               <div className="modal-body">
                 <div className="alert-warn" style={{ marginBottom: "16px" }}>
@@ -11438,20 +11346,7 @@
                   onChange={(e) => setDetalle(e.target.value)}
                   placeholder="Comentarios adicionales..."
                 />
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "10px",
-                    justifyContent: "flex-end",
-                  }}
-                >
-                  <button className="btn btn-sec" onClick={onClose}>
-                    Cancelar
-                  </button>
-                  <button className="btn btn-danger" onClick={handleConfirm}>
-                    Confirmar baja
-                  </button>
-                </div>
+
               </div>
             </div>
           </div>,
