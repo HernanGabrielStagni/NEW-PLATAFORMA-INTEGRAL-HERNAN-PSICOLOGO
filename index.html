@@ -4169,6 +4169,7 @@
         }
 
         const pacPrevSet = getPacientesPendientesPrevios(sesiones);
+        const lunesActualStr = (() => { const h=new Date(); const d=h.getDay(); const diff=d===0?-6:1-d; const l=new Date(h); l.setDate(h.getDate()+diff); l.setHours(0,0,0,0); return l.toISOString().slice(0,10); })();
         function handleColClick(e, ds) {
           /* ignora clicks en sesiones (stopPropagation desde ahí) */
           const rect = e.currentTarget.getBoundingClientRect();
@@ -4437,9 +4438,9 @@
                               </>
                             ) : (
                               <>
-                                {(tieneAlertaUrgente(s) || pacPrevSet.has(s.pacienteId) || tienePendientePago(s, hoyStr) || tieneNotasAlerta(s) || esTurnoPasadoSinCalificar(s)) && (
+                                {(tieneAlertaUrgente(s) || (s.fecha >= lunesActualStr && pacPrevSet.has(s.pacienteId)) || tienePendientePago(s, hoyStr) || tieneNotasAlerta(s) || esTurnoPasadoSinCalificar(s)) && (
                                   <div className="ag-badges-top">
-                                    {(tieneAlertaUrgente(s) || pacPrevSet.has(s.pacienteId)) && (
+                                    {(tieneAlertaUrgente(s) || (s.fecha >= lunesActualStr && pacPrevSet.has(s.pacienteId))) && (
                                       <span className="ag-urgente-badge" title={tieneAlertaUrgente(s) ? "Alerta urgente — revisar antes del turno" : "Pendientes sin resolver de semanas anteriores"}>🚨</span>
                                     )}
                                     {(tienePendientePago(s, hoyStr) || tieneNotasAlerta(s) || esTurnoPasadoSinCalificar(s)) && (
