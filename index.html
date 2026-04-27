@@ -2118,16 +2118,23 @@
         line-height: 1.2;
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
       }
-      /* Badge de alerta de pago pendiente en bloque de sesión */
-      .ag-pago-alerta {
+      /* Contenedor de badges en esquina top-right del bloque de sesión */
+      .ag-badges-top {
         position: absolute;
         top: 1px;
         right: 2px;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        z-index: 3;
+      }
+      /* Badge amarillo — alerta pendiente sin urgencia */
+      .ag-pago-alerta {
         width: 17px;
         height: 17px;
         border-radius: 50%;
-        background: #dc2626;
-        color: #fff;
+        background: #C8922A;
+        color: #1E3D2B;
         font-size: 11px;
         font-weight: 900;
         font-family: var(--mono);
@@ -2136,16 +2143,14 @@
         justify-content: center;
         line-height: 1;
         box-shadow:
-          0 0 0 2px rgba(220, 38, 38, 0.4),
+          0 0 0 2px rgba(200, 146, 42, 0.45),
           0 2px 6px rgba(0, 0, 0, 0.4);
-        z-index: 2;
         letter-spacing: -0.5px;
       }
-      /* Ícono urgente en bloque de sesión — inline, no tapa otros badges */
-      .ag-urgente-inline {
-        font-size: 15px;
+      /* Badge rojo urgente — requiere atención inmediata */
+      .ag-urgente-badge {
+        font-size: 18px;
         line-height: 1;
-        flex-shrink: 0;
         animation: urgente-pulse 1.6s ease-in-out infinite;
         filter: drop-shadow(0 0 5px rgba(239,68,68,.9));
       }
@@ -4396,14 +4401,14 @@
                               </>
                             ) : (
                               <>
-                                {(tienePendientePago(s, hoyStr) ||
-                                  tieneNotasAlerta(s) ||
-                                  esTurnoPasadoSinCalificar(s)) && (
-                                  <div
-                                    className="ag-pago-alerta"
-                                    title="Turno requiere atención"
-                                  >
-                                    !
+                                {(tieneAlertaUrgente(s) || tienePendientePago(s, hoyStr) || tieneNotasAlerta(s) || esTurnoPasadoSinCalificar(s)) && (
+                                  <div className="ag-badges-top">
+                                    {tieneAlertaUrgente(s) && (
+                                      <span className="ag-urgente-badge" title="Alerta urgente — revisar antes del turno">🚨</span>
+                                    )}
+                                    {(tienePendientePago(s, hoyStr) || tieneNotasAlerta(s) || esTurnoPasadoSinCalificar(s)) && (
+                                      <div className="ag-pago-alerta" title="Turno requiere atención">!</div>
+                                    )}
                                   </div>
                                 )}
                                 <div
@@ -4414,12 +4419,6 @@
                                     minWidth: 0,
                                   }}
                                 >
-                                  {tieneAlertaUrgente(s) && (
-                                    <span
-                                      className="ag-urgente-inline"
-                                      title="Alerta urgente — revisar antes del turno"
-                                    >🚨</span>
-                                  )}
                                   <span
                                     style={{
                                       fontSize:
