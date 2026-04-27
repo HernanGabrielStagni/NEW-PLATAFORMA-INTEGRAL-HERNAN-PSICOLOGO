@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestor de Sesiones — Hernán Stagni</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Nunito:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --vd:#1e3d2b;--vm:#2d5a3d;--vc:#4a7c5f;--vs:#d4e6da;--vu:#eef5f0;
+  --do:#c8922a;--dc:#f5e6c8;
+  --cr:#f5f0e8;--cro:#ede6d8;--crb:#d8d0c0;
+  --tx:#1a2e22;--tx2:#4a6357;--tx3:#7a9485;--bl:#ffffff;
+  --wb:#fff8e8;--wc:#7a5200;
+  --r:20px;--rsm:12px;
+  --mono:'DM Mono',monospace;--serif:'Playfair Display',serif;--sans:'Nunito',sans-serif;
+}
+body{font-family:var(--sans);background:#ede8dc;color:var(--tx);min-height:100vh;font-size:14px;line-height:1.6}
+.topbar{background:var(--vd);color:var(--bl);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:64px;position:sticky;top:0;z-index:100;border-bottom:2px solid rgba(200,146,42,.4)}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-ico{width:42px;height:42px;background:var(--do);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 0 3px rgba(200,146,42,.35),0 2px 8px rgba(0,0,0,.3)}
+.brand-name{font-family:var(--serif);font-size:22px;font-weight:800;letter-spacing:.01em;text-shadow:0 2px 8px rgba(0,0,0,.5);color:var(--do);line-height:1.1}
+.brand-sub{font-size:12px;color:rgba(255,255,255,.75);font-family:var(--sans);font-weight:500;margin-top:3px;letter-spacing:.02em}
+.topbar-center{font-family:var(--serif);font-size:15px;font-weight:600;color:rgba(255,255,255,.9)}
+.pills{display:flex;gap:8px;align-items:center}
+.pill{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:4px 10px;font-size:11px;font-family:var(--mono);color:rgba(255,255,255,.65)}
+.dot{width:6px;height:6px;border-radius:50%}
+.on{background:#6dba8a}.off{background:rgba(255,255,255,.25)}
+.shell{display:flex;min-height:calc(100vh - 64px)}
+.sidebar{width:240px;min-width:240px;background:var(--vd);display:flex;flex-direction:column;position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto}
+.nav{padding:12px 12px;flex:1}
+.nav-sec{font-size:11px;font-family:var(--sans);font-weight:700;letter-spacing:.07em;color:var(--do);padding:14px 14px 6px;text-transform:uppercase;border-top:1px solid rgba(200,146,42,.35);margin-top:6px}
+.nav-sec:first-child{border-top:none;padding-top:6px;margin-top:0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:50px;cursor:pointer;color:rgba(255,255,255,.78);font-size:13px;font-weight:500;transition:background .2s,color .2s;border:none;background:none;width:100%;text-align:left;margin-bottom:2px;font-family:var(--sans)}
+.nav-item:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.95)}
+.nav-item.active{background:var(--do);color:var(--vd);font-weight:700}
+.nav-ico{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px}
+.nav-item.active .nav-ico{background:rgba(30,61,43,.2)}
+.nav-badge{margin-left:auto;background:var(--do);color:var(--vd);font-size:10px;font-family:var(--mono);font-weight:700;padding:2px 7px;border-radius:10px}
+.nav-item.active .nav-badge{background:var(--vd);color:var(--do)}
+.sb-footer{padding:16px;border-top:2px solid rgba(200,146,42,.35)}
+.sb-footer-lbl{font-size:11px;font-family:var(--sans);font-weight:700;color:var(--do);margin-bottom:10px;letter-spacing:.06em;text-transform:uppercase;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(200,146,42,.5)}
+.sb-row{display:flex;align-items:center;gap:7px;font-size:12px;color:rgba(255,255,255,.82);margin-bottom:7px}
+.main{flex:1}
+.content{padding:28px 32px}
+.section{display:none}.section.active{display:block}
+.ph{margin-bottom:24px}
+.ph-row{display:flex;align-items:flex-start;justify-content:space-between}
+.page-sub{font-size:11px;font-family:var(--mono);color:var(--tx3);letter-spacing:.06em;text-transform:uppercase}
+.divider{width:48px;height:3px;background:var(--do);border-radius:2px;margin-top:10px}
+.card{background:#faf7f2;border:2px solid #b8b0a0;border-left:5px solid var(--vm);border-radius:var(--r);padding:22px;margin-bottom:18px}
+.ch{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.ch-ico{width:32px;height:32px;border-radius:50%;background:var(--vu);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+/* Card header title con sombra y más peso */
+.ch-title{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--vd);text-shadow:0 1px 2px rgba(255,255,255,.8)}
+/* Labels de rutas: dorado intenso, máximo contraste */
+.pf label{display:block;font-size:12px;font-family:var(--sans);font-weight:800;color:var(--do);margin-bottom:8px;letter-spacing:.05em;text-transform:uppercase}
+/* Botón carpeta: SVG grande con sombra */
+.btn-ico{padding:4px 6px;font-size:32px;background:transparent !important;border:none !important;box-shadow:none;cursor:pointer;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.btn-ico:hover{transform:scale(1.12)}.btn-ico:active{transform:scale(.97)}
+.btn-ico svg{filter:drop-shadow(0 3px 5px rgba(0,0,0,.45)) drop-shadow(0 1px 2px rgba(0,0,0,.3))}
+/* Status dots mejorados */
+.sb-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;transition:all .3s}
+.sb-dot.on{background:#6dba8a;box-shadow:0 0 0 3px rgba(109,186,138,.25),0 0 0 6px rgba(109,186,138,.1)}
+.sb-dot.off{background:rgba(255,255,255,.2);box-shadow:0 0 0 3px rgba(255,255,255,.06)}
+/* Sidebar footer: mejor contraste de texto */
+.sb-footer-lbl{font-size:10px;font-family:var(--mono);color:rgba(255,255,255,.55);margin-bottom:8px;letter-spacing:.06em;text-transform:uppercase}
+.sb-row{display:flex;align-items:center;gap:7px;font-size:12px;color:rgba(255,255,255,.8);margin-bottom:6px}
+/* Page title con sombra sutil */
+.page-title{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--vd);line-height:1.2;margin-bottom:4px;text-shadow:0 1px 3px rgba(255,255,255,.6)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.sc{background:#faf7f2;border:2px solid #b8b0a0;border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--do);border-radius:var(--r) var(--r) 0 0}
+.sc-lbl{font-size:10px;font-family:var(--mono);color:var(--tx3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px}
+.sc-val{font-family:var(--serif);font-size:28px;font-weight:700;color:var(--vd);line-height:1}
+.sc-sub{font-size:11px;color:var(--tx3);margin-top:4px}
+.path-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pf label{display:block;font-size:10px;font-family:var(--mono);color:var(--tx3);margin-bottom:6px;letter-spacing:.07em;text-transform:uppercase}
+.pr{display:flex;gap:8px}
+.pi{flex:1;background:var(--cr);border:1px solid var(--crb);border-radius:50px;padding:8px 16px;font-family:var(--mono);font-size:11px;color:var(--tx);outline:none}
+.pi:focus{border-color:var(--vc)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:50px;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;border:2px solid var(--crb);background:var(--bl);color:var(--tx2);transition:all .15s;white-space:nowrap}
+.btn:hover{border-color:var(--vc);color:var(--vd);background:var(--vu)}.btn:active{transform:scale(.97)}
+.btn-p{background:var(--vd);color:var(--bl);border-color:var(--vd)}.btn-p:hover{background:var(--vm);border-color:var(--vm);color:var(--bl)}
+.btn-g{background:var(--do);color:var(--vd);border-color:var(--do)}.btn-g:hover{background:#b8821f;border-color:#b8821f;color:var(--bl)}
+.btn-sm{padding:6px 14px;font-size:12px}.btn-ico{padding:7px 10px}
+.alert{background:#e8f0ea;border:2px solid var(--vm);border-radius:var(--rsm);padding:14px 18px;font-size:12px;color:var(--vd);display:flex;align-items:flex-start;gap:10px;margin-bottom:18px;font-weight:500}
+.alert-info{background:var(--vd);border-radius:var(--r);padding:20px 22px;margin-bottom:18px;display:flex;gap:16px;align-items:flex-start}
+.alert-info-icon{font-size:28px;line-height:1;flex-shrink:0;margin-top:2px}
+.alert-info-title{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--do);margin-bottom:6px}
+.alert-info-text{font-size:12px;color:rgba(255,255,255,.75);line-height:1.7}
+.alert-info-text strong{color:rgba(255,255,255,.95)}
+.alert-info-text em{color:var(--do);font-style:normal;font-weight:700}
+.pi-warm{flex:1;background:#f0ebe0;border:2px solid var(--vm);border-radius:50px;padding:9px 18px;font-family:var(--mono);font-size:12px;color:var(--vd);outline:none;font-weight:500}
+.pi-warm:focus{border-color:var(--do);background:#fff8ec}
+/* Checkbox custom */
+.chk-cell{display:flex;align-items:center;justify-content:center}
+.chk-box{width:20px;height:20px;border:2.5px solid var(--do);border-radius:5px;background:#faf7f2;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s;flex-shrink:0}
+.chk-box:hover{border-color:var(--vm);background:#f0ebe0}
+.chk-box.checked{background:var(--vd);border-color:var(--vd)}
+.chk-box.checked::after{content:'✓';color:var(--do);font-size:13px;font-weight:700;line-height:1}
+/* Checkbox seleccionar todo */
+.chk-all-box{width:20px;height:20px;border:2.5px solid var(--do);border-radius:5px;background:#faf7f2;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s;flex-shrink:0;vertical-align:middle}
+.chk-all-box:hover{border-color:var(--vm);background:#f0ebe0}
+.chk-all-box.checked{background:var(--vd);border-color:var(--vd)}
+.chk-all-box.checked::after{content:'✓';color:var(--do);font-size:13px;font-weight:700;line-height:1}
+.tb-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.tb-toolbar .left{display:flex;align-items:center;gap:10px;flex:1}
+.chk-wrap{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--vd);user-select:none;font-weight:700}
+.chk-wrap input{width:18px;height:18px;accent-color:var(--vm);cursor:pointer}
+.fi{background:#f5f0e4;border:2px solid var(--vm);border-radius:50px;padding:7px 16px;font-size:12px;font-family:var(--sans);color:var(--tx);outline:none;width:200px;font-weight:500}
+.fi:focus{border-color:var(--do);background:#fff8ec}
+.sel-c{font-size:12px;font-family:var(--mono);color:var(--tx3)}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;padding:10px 14px;font-size:10px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.75);background:var(--vd);font-weight:500;white-space:nowrap}
+thead th:first-child{border-radius:10px 0 0 10px}
+thead th:last-child{border-radius:0 10px 10px 0}
+tbody tr{border-bottom:1px solid #ddd5c4;transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#f0ebe0}
+tbody tr.sel{background:#dff0e5}
+tbody tr.fv{background:#fff6e4}
+tbody tr.fv:hover{background:#ffefc8}
+tbody tr.fv.sel{background:#ffe9b0}
+tbody td{padding:11px 14px;color:var(--tx);vertical-align:middle}
+.tm{font-family:var(--mono);font-size:11px;color:var(--tx2)}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:50px;font-size:12px;font-family:var(--sans);font-weight:700;white-space:nowrap}
+.bok{background:#1e3d2b;color:#a8ddb8}.bvarios{background:#7a5200;color:#fdeaaa}.bsr{background:#7a2800;color:#ffd0b8}
+.ec{background:#f5f0e4;border:2px solid var(--vm);border-radius:50px;padding:5px 14px;font-family:var(--sans);font-size:12px;font-weight:600;color:var(--vd);outline:none;width:150px}
+.ec:focus{border-color:var(--do);background:#fff8ec}
+.dc{font-family:var(--mono);font-size:11px;color:var(--tx3);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dv{color:var(--wc);font-weight:500}
+.log{background:var(--vd);border-radius:var(--rsm);padding:16px 18px;font-family:var(--mono);font-size:12px;line-height:1.9;max-height:190px;overflow-y:auto;color:rgba(255,255,255,.6)}
+.ll{display:block}.lok{color:#7dcc90}.lw{color:#f0c860}.li{color:#7ab8e0}
+.lt{color:rgba(255,255,255,.25);margin-right:10px}
+.tabs{display:flex;background:var(--cro);border-radius:50px;padding:4px;gap:2px;width:fit-content;margin-bottom:20px}
+.tab{padding:8px 20px;font-size:13px;font-weight:500;color:var(--tx2);cursor:pointer;border-radius:50px;transition:all .2s;user-select:none;white-space:nowrap}
+.tab:hover{color:var(--vd)}.tab.active{background:var(--vd);color:var(--bl);font-weight:700}
+.tr-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--cro)}
+.tr-row:last-child{border-bottom:none}
+.tr-lbl{font-size:13px;color:var(--tx);font-weight:500}
+.tr-sub{font-size:11px;color:var(--tx3);margin-top:3px}
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.tt{position:absolute;inset:0;background:var(--crb);border-radius:11px;cursor:pointer;transition:background .2s}
+.toggle input:checked+.tt{background:var(--vm)}
+.tt::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:white;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle input:checked+.tt::after{transform:translateX(18px)}
+/* Botones de acción en topbar */
+.btn-tb{display:inline-flex;align-items:center;gap:7px;padding:8px 18px;border-radius:50px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;border:2px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:rgba(255,255,255,.92);transition:all .15s;white-space:nowrap;letter-spacing:.02em}
+.btn-tb:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.4);color:#fff}
+.btn-tb:active{transform:scale(.97)}
+.btn-tb-gold{background:var(--do);border-color:var(--do);color:var(--vd)}
+.btn-tb-gold:hover{background:#e0a82e;border-color:#e0a82e;color:var(--vd)}
+/* Tarjetas pacientes rediseñadas */
+.pc{background:var(--vd);border:2px solid var(--vm);border-radius:var(--r);padding:18px;cursor:pointer;transition:border-color .2s,transform .15s,box-shadow .2s;position:relative;overflow:hidden}
+.pc::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--do),#e8b84b);border-radius:var(--r) var(--r) 0 0}
+.pc:hover{border-color:var(--do);transform:translateY(-3px);box-shadow:0 8px 24px rgba(30,61,43,.35)}
+.pav{width:42px;height:42px;border-radius:50%;background:var(--do);color:var(--vd);display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:16px;font-weight:700;flex-shrink:0;box-shadow:0 0 0 3px rgba(200,146,42,.3)}
+.pn{font-family:Georgia,serif;font-size:16px;font-weight:700;color:var(--do);margin-bottom:4px;text-shadow:0 1px 3px rgba(0,0,0,.4);letter-spacing:.01em}
+.pm{font-size:12px;color:rgba(255,255,255,.75);font-family:Georgia,serif;font-style:italic}
+.pb{height:6px;background:rgba(255,255,255,.12);border-radius:3px;margin-top:14px;overflow:hidden}
+.pbf{height:100%;background:linear-gradient(90deg,var(--do),#e8c060);border-radius:3px;box-shadow:0 0 8px rgba(200,146,42,.5)}
+.add-pc{background:transparent;border:2px dashed rgba(200,146,42,.4);border-radius:var(--r);padding:18px;cursor:pointer;transition:border-color .2s,background .2s;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;min-height:120px;color:rgba(200,146,42,.6);font-size:13px;font-weight:600}
+.add-pc:hover{border-color:var(--do);background:rgba(200,146,42,.07);color:var(--do)}
+.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.modal-bd{display:none;position:fixed;inset:0;background:rgba(30,61,43,.55);z-index:200;align-items:center;justify-content:center}
+.modal-bd.open{display:flex}
+.modal{background:var(--bl);border-radius:var(--r);border:1px solid var(--crb);padding:28px;width:460px;max-width:92vw}
+.mt{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--vd);margin-bottom:6px}
+.md{width:36px;height:3px;background:var(--do);border-radius:2px;margin-bottom:20px}
+.ff{margin-bottom:16px}
+.ff label{display:block;font-size:10px;font-family:var(--mono);color:var(--tx3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em}
+.fi2{width:100%;background:var(--cr);border:1px solid var(--crb);border-radius:50px;padding:9px 16px;font-family:var(--sans);font-size:13px;color:var(--tx);outline:none}
+.fi2:focus{border-color:var(--vc)}
+.ma{display:flex;justify-content:flex-end;gap:8px;margin-top:22px}
+.ni{background:var(--cr);border:1px solid var(--crb);border-radius:50px;padding:6px 14px;font-family:var(--mono);font-size:13px;color:var(--tx);outline:none;width:76px;text-align:center}
+.ni:focus{border-color:var(--vc)}
+.ir{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx2)}
+.np{background:var(--cr);border-radius:var(--rsm);padding:14px 16px;margin-top:12px}
+.nt{font-weight:600;font-size:13px;color:var(--vd);margin-bottom:6px}
+.nb{color:var(--tx2);font-size:12px;line-height:1.7}
+.hint{font-size:11px;color:var(--tx3);margin-top:5px;line-height:1.5}
+.ec-box{background:var(--cr);border-radius:var(--rsm);padding:16px;margin-top:12px}
+.si{padding-left:18px;border-left:3px solid var(--cro)}
+.add-pc{background:transparent;border:2px dashed var(--crb);border-radius:var(--r);padding:16px;cursor:pointer;transition:border-color .2s,background .2s;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;min-height:110px;color:var(--tx3);font-size:12px;font-weight:500}
+.add-pc:hover{border-color:var(--vc);background:var(--vu);color:var(--vm)}
+.scr{max-height:420px;overflow-y:auto}
+/* ── Config dark theme ── */
+.cfg-card{background:var(--vd);border:2px solid var(--vm);border-radius:var(--r);padding:22px;margin-bottom:18px;position:relative;overflow:hidden}
+.cfg-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--do),#e8b84b);border-radius:var(--r) var(--r) 0 0}
+.cfg-ico{width:38px;height:38px;border-radius:50%;background:var(--do);color:var(--vd);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;box-shadow:0 0 0 3px rgba(200,146,42,.28)}
+.cfg-title{font-family:Georgia,serif;font-size:16px;font-weight:700;color:var(--do);text-shadow:0 1px 3px rgba(0,0,0,.4);letter-spacing:.01em}
+.cfg-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.cfg-row:last-child{border-bottom:none}
+.cfg-lbl{font-size:13px;color:rgba(255,255,255,.9);font-weight:600}
+.cfg-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:3px}
+.cfg-toggle .tt{background:rgba(255,255,255,.18)}
+.cfg-toggle input:checked+.tt{background:var(--do)}
+.cfg-toggle .tt::after{box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.ni-d{background:rgba(255,255,255,.07);border:1.5px solid rgba(200,146,42,.4);border-radius:50px;padding:6px 14px;font-family:var(--mono);font-size:13px;color:rgba(255,255,255,.9);outline:none;width:76px;text-align:center}
+.ni-d:focus{border-color:var(--do);background:rgba(200,146,42,.1)}
+.ir-d{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.6)}
+.si-d{padding-left:18px;border-left:3px solid rgba(200,146,42,.3)}
+.pi-d{flex:1;background:rgba(255,255,255,.06);border:1.5px solid rgba(200,146,42,.3);border-radius:50px;padding:9px 18px;font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.85);outline:none}
+.pi-d:focus{border-color:var(--do);background:rgba(200,146,42,.07)}
+.fi2-d{width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(200,146,42,.3);border-radius:50px;padding:9px 18px;font-family:var(--sans);font-size:13px;color:rgba(255,255,255,.9);outline:none;margin-bottom:2px}
+.fi2-d:focus{border-color:var(--do);background:rgba(200,146,42,.07)}
+.ff-d{margin-bottom:14px}
+.ff-d label{display:block;font-size:10px;font-family:var(--mono);color:rgba(255,255,255,.45);margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em}
+.ec-box-d{background:rgba(0,0,0,.25);border-radius:var(--rsm);border:1px solid rgba(200,146,42,.2);padding:18px;margin-top:14px}
+.np-d{background:rgba(0,0,0,.2);border-radius:var(--rsm);border-left:3px solid var(--do);padding:14px 16px;margin-top:12px}
+.nt-d{font-size:10px;font-family:var(--mono);color:var(--do);text-transform:uppercase;letter-spacing:.07em;font-weight:700;margin-bottom:8px}
+.nb-d{color:rgba(255,255,255,.6);font-size:12px;line-height:1.75}
+.nb-d strong{color:rgba(255,255,255,.85)}
+.hint-d{font-size:11px;color:rgba(255,255,255,.35);margin-top:6px;line-height:1.5}
+.cfg-lbl-dim{font-size:10px;font-family:var(--mono);color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:6px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-ico">🌱</div>
+    <div><div class="brand-name">Gestor de Sesiones</div><div class="brand-sub">Hernán Gabriel Stagni · MP 11919 · v2.0</div></div>
+  </div>
+  <div class="topbar-center" id="tc">Escanear archivos</div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <button class="btn-tb" onclick="doEscanear()">↻ Escanear ahora</button>
+    <button class="btn-tb btn-tb-gold" id="btn-mv-top" style="display:none" onclick="mover()">▶ Mover seleccionados (<span id="cnt-top">0</span>)</button>
+  </div>
+</div>
+
+<div class="shell">
+  <aside class="sidebar">
+    <nav class="nav">
+      <div class="nav-sec">Principal</div>
+      <button class="nav-item active" onclick="show('escaneo',this,'Escanear archivos')">
+        <div class="nav-ico">🔍</div>Escanear<span class="nav-badge" id="badge">3</span>
+      </button>
+      <button class="nav-item" onclick="show('historial',this,'Historial de movimientos')">
+        <div class="nav-ico">📋</div>Historial
+      </button>
+      <button class="nav-item" onclick="show('pacientes',this,'Gestión de pacientes')">
+        <div class="nav-ico">🌿</div>Pacientes
+      </button>
+      <div class="nav-sec" style="margin-top:8px">Sistema</div>
+      <button class="nav-item" onclick="show('cfg',this,'Configuración')">
+        <div class="nav-ico">⚙️</div>Configuración
+      </button>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-footer-lbl">Estado del sistema</div>
+      <div class="sb-row"><div class="sb-dot on"></div>Flask corriendo (5000)</div>
+      <div class="sb-row"><div class="sb-dot off" id="s-d-scan"></div><span id="s-l-scan">Escaneo manual</span></div>
+      <div class="sb-row"><div class="sb-dot off" id="s-d-move"></div><span id="s-l-move">Movimiento manual</span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="content">
+
+      <!-- ESCANEO -->
+      <div class="section active" id="section-escaneo">
+        <div class="ph">
+          <div class="ph-row">
+            <div><div class="page-title">Escanear archivos</div><div class="page-sub">Easy Voice Recorder → Almacén Her-M2</div><div class="divider"></div></div>
+            <div style="display:flex;gap:8px;margin-top:4px">
+              <button class="btn btn-sm" onclick="doEscanear()">↻ Escanear ahora</button>
+              <button class="btn btn-g btn-sm" id="btn-mv" style="display:none" onclick="mover()">Mover seleccionados (<span id="cnt">0</span>)</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ch"><div class="ch-ico">📁</div><div class="ch-title">Rutas configuradas</div></div>
+          <div class="path-grid">
+            <div class="pf"><label>Carpeta origen</label><div class="pr"><input class="pi-warm" id="input-origen" value="Cargando..."><button class="btn btn-p btn-sm btn-ico" onclick="cambiarRuta('origen')" title="Cambiar carpeta origen"><svg width="44" height="44" viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" fill="#c8922a" stroke="#7a5200" stroke-width="1.2"/><path d="M3 9h18" stroke="#b8821f" stroke-width="1" opacity=".5"/></svg></button></div></div>
+            <div class="pf"><label>Carpeta destino</label><div class="pr"><input class="pi-warm" id="input-destino" value="Cargando..."><button class="btn btn-p btn-sm btn-ico" onclick="cambiarRuta('destino')" title="Cambiar carpeta destino"><svg width="44" height="44" viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" fill="#c8922a" stroke="#7a5200" stroke-width="1.2"/><path d="M3 9h18" stroke="#b8821f" stroke-width="1" opacity=".5"/></svg></button></div></div>
+          </div>
+        </div>
+
+        <div class="alert-info">
+          <div class="alert-info-icon">🎙️</div>
+          <div class="alert-info-body">
+            <div class="alert-info-title">4 grabaciones esperando nombre de paciente</div>
+            <div class="alert-info-text">Aparecen como <strong>Mi grabación X.mp3</strong> porque aún no las renombraste. Una vez que les asignes el nombre en el formato correcto (por ejemplo <strong>260409 Martin M.mp3</strong>), el gestor las detectará y moverá automáticamente. Por ahora podés enviarlas a <em>Varios</em> tildándolas manualmente.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="tb-toolbar">
+            <div class="left">
+              <label class="chk-wrap" onclick="toggleAllCustom()">
+                <div class="chk-all-box" id="chk-all-box"></div>
+                Seleccionar todo
+              </label>
+              <span class="sel-c" id="sel-lbl"></span>
+              <input class="fi" placeholder="🔍 Filtrar archivos..." oninput="filtrar(this.value)">
+            </div>
+            <div style="font-size:11px;font-family:var(--mono);color:var(--tx3)">Último escaneo: <span id="ls">14:32 hs</span></div>
+          </div>
+          <div class="tw" style="max-height:440px;overflow-y:auto">
+            <table>
+              <thead style="position:sticky;top:0;z-index:1"><tr><th style="width:38px"></th><th>Archivo</th><th>Estado</th><th>Paciente detectado</th><th>Destino</th><th>Duración</th><th>Tamaño</th></tr></thead>
+              <tbody id="tb"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ch"><div class="ch-ico">📟</div><div class="ch-title">Log de actividad</div></div>
+          <div class="log" id="log">
+            <span class="ll"><span class="lt">14:32:01</span><span class="li">Sistema iniciado. Flask corriendo en puerto 5000.</span></span>
+            <span class="ll"><span class="lt">14:32:05</span><span class="li">Escaneo iniciado en G:\Mi unidad\00_Easy Voice Recorder</span></span>
+            <span class="ll"><span class="lt">14:32:06</span><span class="lok">✓ 260409 Martin M.mp3 — detectado → Martin M</span></span>
+            <span class="ll"><span class="lt">14:32:06</span><span class="lok">✓ 260326 Leonardo P.mp3 — detectado → Leonardo P</span></span>
+            <span class="ll"><span class="lt">14:32:06</span><span class="lok">✓ 260409 Daniel Chi.mp3 — detectado → Daniel Chi</span></span>
+            <span class="ll"><span class="lt">14:32:06</span><span class="lw">⚠ reunion_equipo.mp3 — sin clasificar → Varios</span></span>
+            <span class="ll"><span class="lt">14:32:06</span><span class="li">Escaneo completo. 3 listos, 4 sin renombrar, 1 sin clasificar.</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORIAL -->
+      <div class="section" id="section-historial">
+        <div class="ph"><div class="page-title">Historial de movimientos</div><div class="page-sub">Registro completo de archivos procesados</div><div class="divider"></div></div>
+        <div class="stats">
+          <div class="sc"><div class="sc-lbl">Total movidos</div><div class="sc-val" id="st-total">—</div><div class="sc-sub">desde el inicio</div></div>
+          <div class="sc"><div class="sc-lbl">Este mes</div><div class="sc-val" id="st-mes">—</div><div class="sc-sub" id="st-mes-nombre"></div></div>
+          <div class="sc"><div class="sc-lbl">Horas grabadas</div><div class="sc-val" id="st-horas">—</div><div class="sc-sub">total acumulado</div></div>
+          <div class="sc"><div class="sc-lbl">Pacientes</div><div class="sc-val" id="st-pacs">—</div><div class="sc-sub">con grabaciones</div></div>
+        </div>
+        <div class="card">
+          <div class="tb-toolbar">
+            <div class="left">
+              <input class="fi" placeholder="🔍 Filtrar..." style="width:220px">
+              <select style="background:var(--cr);border:1px solid var(--crb);border-radius:50px;padding:7px 16px;font-size:12px;font-family:var(--sans);color:var(--tx);outline:none"><option>Todos los pacientes</option><option>Martin M</option><option>Leonardo P</option><option>Daniel Chi</option></select>
+            </div>
+            <button class="btn btn-g btn-sm" onclick="abrirExcel()">📊 Abrir Excel</button>
+          </div>
+          <div class="tw scr">
+            <table>
+              <thead><tr><th>Fecha</th><th>Archivo</th><th>Paciente</th><th>Destino</th><th>Duración</th><th>Tamaño</th><th>Estado</th></tr></thead>
+              <tbody>
+                <tr><td class="tm">09/04/2026 14:32</td><td style="font-family:var(--mono);font-size:11px">260409 Martin M.mp3</td><td>Martin M</td><td class="dc">01_Actuales\Martin M</td><td class="tm">1:06:10</td><td class="tm">121.2 MB</td><td><span class="badge bok">✓ OK</span></td></tr>
+                <tr><td class="tm">09/04/2026 14:32</td><td style="font-family:var(--mono);font-size:11px">260409 Daniel Chi.mp3</td><td>Daniel Chi</td><td class="dc">01_Actuales\Daniel Chi</td><td class="tm">0:56:25</td><td class="tm">106.8 MB</td><td><span class="badge bok">✓ OK</span></td></tr>
+                <tr><td class="tm">26/03/2026 09:15</td><td style="font-family:var(--mono);font-size:11px">260326 Leonardo P.mp3</td><td>Leonardo P</td><td class="dc">01_Actuales\Leonardo P</td><td class="tm">1:02:44</td><td class="tm">118.4 MB</td><td><span class="badge bok">✓ OK</span></td></tr>
+                <tr><td class="tm">15/03/2026 11:30</td><td style="font-family:var(--mono);font-size:11px">reunion_equipo.mp3</td><td style="color:var(--tx3)">—</td><td class="dc dv">01_Actuales\Varios</td><td class="tm">0:34:18</td><td class="tm">62.3 MB</td><td><span class="badge bvarios">⚠ Varios</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PACIENTES -->
+      <div class="section" id="section-pacientes">
+        <div class="ph">
+          <div class="ph-row">
+            <div><div class="page-title">Gestión de pacientes</div><div class="page-sub">Carpetas, aliases y resumen de sesiones</div><div class="divider"></div></div>
+            <button class="btn btn-p btn-sm" style="margin-top:4px" onclick="abrirModal()">+ Nuevo paciente</button>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab(this,'act')" id="tab-btn-act">Actuales</div>
+          <div class="tab" onclick="switchTab(this,'inact')" id="tab-btn-inact">Inactivos</div>
+        </div>
+        <div id="tab-act">
+          <div class="pg" style="padding:20px 0;color:var(--tx3);font-size:13px">Cargando pacientes...</div>
+        </div>
+        <div id="tab-inact" style="display:none">
+          <div class="pg"></div>
+        </div>
+      </div>
+
+      <!-- CONFIGURACION -->
+      <div class="section" id="section-cfg">
+        <div class="ph"><div class="page-title">Configuración</div><div class="page-sub">Escaneo, movimiento, notificaciones y rutas</div><div class="divider"></div></div>
+
+        <div class="cfg-card">
+          <div class="ch" style="margin-bottom:18px">
+            <div class="cfg-ico">⏱️</div>
+            <div class="cfg-title">Escaneo y movimiento</div>
+          </div>
+          <div class="cfg-row">
+            <div><div class="cfg-lbl">Escaneo automático</div><div class="cfg-sub">El sistema revisa la carpeta origen periódicamente</div></div>
+            <label class="toggle cfg-toggle"><input type="checkbox" id="tog-scan" onchange="sync()"><div class="tt"></div></label>
+          </div>
+          <div class="cfg-row si-d" id="row-min">
+            <div><div class="cfg-lbl" style="color:rgba(255,255,255,.6)">Intervalo de escaneo</div></div>
+            <div class="ir-d"><input class="ni-d" type="number" value="30" min="5" max="240" id="inp-min" onchange="sync()"> <span>minutos</span></div>
+          </div>
+          <div class="cfg-row">
+            <div><div class="cfg-lbl">Movimiento automático</div><div class="cfg-sub">Mueve sin pedir confirmación. Si está desactivado, espera tu autorización.</div></div>
+            <label class="toggle cfg-toggle"><input type="checkbox" id="tog-move" onchange="sync()"><div class="tt"></div></label>
+          </div>
+          <div class="cfg-row">
+            <div><div class="cfg-lbl">Umbral de similitud <span style="font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.45)">(fuzzy matching)</span></div><div class="cfg-sub">Porcentaje mínimo para identificar un nombre de paciente</div></div>
+            <div class="ir-d"><input class="ni-d" type="number" value="85" min="60" max="99" id="inp-fuzzy" onchange="sync()"> <span>%</span></div>
+          </div>
+        </div>
+
+        <div class="cfg-card">
+          <div class="ch" style="margin-bottom:18px">
+            <div class="cfg-ico">🔔</div>
+            <div class="cfg-title">Notificaciones</div>
+          </div>
+          <div class="cfg-row">
+            <div><div class="cfg-lbl">Notificaciones de Windows</div><div class="cfg-sub">Aparece abajo a la derecha cuando hay novedades</div></div>
+            <label class="toggle cfg-toggle"><input type="checkbox" id="tog-notif-win" onchange="sync()"><div class="tt"></div></label>
+          </div>
+          <div class="cfg-row">
+            <div><div class="cfg-lbl">Notificación por email</div><div class="cfg-sub">Envía resumen a Gmail cuando se mueven archivos</div></div>
+            <label class="toggle cfg-toggle"><input type="checkbox" id="tog-email" onchange="toggleEmail()"><div class="tt"></div></label>
+          </div>
+          <div id="email-cfg" style="display:none" class="ec-box-d">
+            <div class="ff-d"><label>Dirección de email</label><input class="fi2-d" value="psicologohernanstagni@gmail.com"></div>
+            <div class="ff-d"><label>Contraseña de aplicación Gmail</label><input class="fi2-d" type="password" placeholder="xxxx xxxx xxxx xxxx"><div class="hint-d">Obtené tu contraseña en: myaccount.google.com → Seguridad → Contraseñas de aplicaciones</div></div>
+            <button class="btn btn-sm" style="border-color:rgba(200,146,42,.5);color:var(--do);background:rgba(200,146,42,.1)">Probar envío</button>
+            <div class="np-d"><div class="nt-d">Vista previa del email</div><div class="nb-d"><strong>Asunto:</strong> 2 grabaciones movidas — 09/04/2026<br><br>Se procesaron automáticamente los siguientes archivos:<br>· 260409 Martin M.mp3 → Martin M (1:06:10 · 121 MB)<br>· 260409 Daniel Chi.mp3 → Daniel Chi (0:56:25 · 107 MB)</div></div>
+          </div>
+        </div>
+
+        <div class="cfg-card">
+          <div class="ch" style="margin-bottom:18px">
+            <div class="cfg-ico">📂</div>
+            <div class="cfg-title">Rutas y archivos</div>
+          </div>
+          <div class="path-grid" style="margin-bottom:18px">
+            <div><span class="cfg-lbl-dim">Carpeta origen</span><div class="pr"><input class="pi-d" id="input-origen" value="G:\Mi unidad\00_Easy Voice Recorder"><button class="btn btn-sm btn-ico" onclick="cambiarRuta('origen')"><svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" fill="#c8922a" stroke="#7a5200" stroke-width="1.2"/><path d="M3 9h18" stroke="#b8821f" stroke-width="1" opacity=".5"/></svg></button></div></div>
+            <div><span class="cfg-lbl-dim">Carpeta destino</span><div class="pr"><input class="pi-d" id="input-destino" value="B:\...\01_Actuales"><button class="btn btn-sm btn-ico" onclick="cambiarRuta('destino')"><svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" fill="#c8922a" stroke="#7a5200" stroke-width="1.2"/><path d="M3 9h18" stroke="#b8821f" stroke-width="1" opacity=".5"/></svg></button></div></div>
+          </div>
+          <div><span class="cfg-lbl-dim">Archivo de registro (Excel)</span><div class="pr"><input class="pi-d" value="B:\...\01_Actuales\000_Registro sesiones.xlsx" style="flex:1"></div></div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:4px">
+          <button class="btn" style="border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.65);background:rgba(255,255,255,.07)" onclick="cargarConfigInicial()">Restablecer</button>
+          <button class="btn btn-g" onclick="guardarConfig()">Guardar configuración</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- MODAL NUEVO PACIENTE -->
+<div class="modal-bd" id="modal">
+  <div class="modal" style="background:var(--vd);border:2px solid var(--vm);position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--do),#e8b84b);border-radius:20px 20px 0 0"></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;margin-top:6px">
+      <div style="width:38px;height:38px;border-radius:50%;background:var(--do);color:var(--vd);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 0 0 3px rgba(200,146,42,.28)">＋</div>
+      <div style="font-family:Georgia,serif;font-size:20px;font-weight:700;color:var(--do);text-shadow:0 1px 3px rgba(0,0,0,.4)">Nuevo paciente</div>
+    </div>
+    <div style="width:36px;height:3px;background:var(--do);border-radius:2px;margin-bottom:22px;margin-left:50px"></div>
+    <div class="ff-d"><label>Nombre de la carpeta (oficial)</label><input class="fi2-d" placeholder="Ej: Martin M" id="inp-pac"></div>
+    <div class="ff-d">
+      <label>Variantes / aliases (separados por coma)</label>
+      <input class="fi2-d" placeholder="Ej: martin m, Martín M, martin, MARTIN" id="inp-aliases">
+      <div class="hint-d" style="margin-top:8px">
+        ⟶ El sistema normaliza automáticamente mayúsculas y acentos al comparar, pero podés agregar variantes tipográficas (apellidos abreviados, apodos, errores comunes de transcripción).
+        <br>Ejemplo: <code style="background:rgba(200,146,42,.15);color:var(--do);padding:1px 6px;border-radius:4px;font-size:11px">Martin M, Martín, martin morales, M.M.</code>
+      </div>
+    </div>
+    <div class="ff-d"><label>Estado</label><select class="fi2-d" style="border-radius:50px;cursor:pointer"><option>Actual</option><option>Inactivo</option></select></div>
+    <div class="ma" style="margin-top:24px">
+      <button class="btn" style="border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.65);background:rgba(255,255,255,.07)" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-g" onclick="crearPaciente()">Crear carpeta</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR PACIENTE -->
+<div class="modal-bd" id="modal-edit">
+  <div class="modal" style="background:var(--vd);border:2px solid var(--vm);position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--do),#e8b84b);border-radius:20px 20px 0 0"></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;margin-top:6px">
+      <div style="width:38px;height:38px;border-radius:50%;background:var(--do);color:var(--vd);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;box-shadow:0 0 0 3px rgba(200,146,42,.28)">✏️</div>
+      <div style="font-family:Georgia,serif;font-size:20px;font-weight:700;color:var(--do);text-shadow:0 1px 3px rgba(0,0,0,.4)">Editar paciente</div>
+    </div>
+    <div style="width:36px;height:3px;background:var(--do);border-radius:2px;margin-bottom:22px;margin-left:50px"></div>
+    <div class="ff-d"><label>Nombre de la carpeta (oficial)</label><input class="fi2-d" placeholder="Ej: Martin M" id="edit-pac"></div>
+    <div class="ff-d">
+      <label>Variantes / aliases (separados por coma)</label>
+      <input class="fi2-d" placeholder="Ej: martin m, Martín M, martin, MARTIN" id="edit-aliases">
+      <div class="hint-d" style="margin-top:8px">
+        ⟶ El sistema normaliza automáticamente mayúsculas y acentos al comparar, pero podés agregar variantes tipográficas (apellidos abreviados, apodos, errores comunes de transcripción).
+        <br>Ejemplo: <code style="background:rgba(200,146,42,.15);color:var(--do);padding:1px 6px;border-radius:4px;font-size:11px">Martin M, Martín, martin morales, M.M.</code>
+      </div>
+    </div>
+    <div class="ff-d"><label>Estado</label><select class="fi2-d" id="edit-estado" style="border-radius:50px;cursor:pointer"><option>Actual</option><option>Inactivo</option></select></div>
+    <div class="ma" style="margin-top:24px">
+      <button class="btn" style="border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.65);background:rgba(255,255,255,.07)" onclick="cerrarModalEditar()">Cancelar</button>
+      <button class="btn btn-g" onclick="guardarEdicionPaciente()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Helpers ────────────────────────────────────────────────────────────────────
+function ts(){return new Date().toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+function logLine(txt,cls='li'){
+  const log=document.getElementById('log');
+  log.innerHTML+=`<span class="ll"><span class="lt">${ts()}</span><span class="${cls}">${txt}</span></span>`;
+  log.scrollTop=log.scrollHeight;
+}
+
+// ── Render tabla ───────────────────────────────────────────────────────────────
+function render(lista){
+  // Ordenar: ok primero, luego sin_renombrar, luego varios
+  const orden={'ok':0,'sin_renombrar':1,'varios':2};
+  lista=lista.slice().sort((a,b)=>(orden[a.tipo]||1)-(orden[b.tipo]||1));
+  const tb=document.getElementById('tb');
+  if(!tb){console.error('No se encontró #tb');return;}
+  tb.innerHTML='';
+  let nOk=0,nSr=0,nVarios=0;
+  lista.forEach(function(f){
+    const tipo=f.tipo||'varios';
+    const ok=(tipo==='ok');
+    const sr=(tipo==='sin_renombrar');
+    if(ok)nOk++; else if(sr)nSr++; else nVarios++;
+    const badge=ok
+      ?'<span class="badge bok">✓ Listo para mover</span>'
+      :sr
+        ?'<span class="badge bsr">Sin renombrar → Varios</span>'
+        :'<span class="badge bvarios">Sin clasificar → Varios</span>';
+    const pacVal=ok?(f.paciente_detectado||f.paciente||''):'Varios';
+    const pac=ok
+      ?('<input class="ec" value="'+pacVal+'" placeholder="Nombre paciente">')
+      :'<span style="font-family:var(--mono);font-size:11px;color:var(--tx3)">Varios</span>';
+    const dest=ok?('01_Actuales\\'+f.carpeta_destino):'01_Actuales\\Varios';
+    const dur=f.duracion||'—';
+    const tam=(f.tamano_mb||0)+' MB';
+    const nombre=f.nombre||'—';
+    const tr=document.createElement('tr');
+    tr.dataset.nombre=nombre;
+    tr.dataset.destino=f.carpeta_destino||'Varios';
+    if(!ok)tr.classList.add('fv');
+    tr.innerHTML='<td class="chk-cell"><div class="chk-box" onclick="toggleChk(this)"></div></td>'
+      +'<td style="font-family:var(--mono);font-size:11px">'+nombre+'</td>'
+      +'<td>'+badge+'</td>'
+      +'<td>'+pac+'</td>'
+      +'<td class="dc'+(ok?'':' dv')+'">'+dest+'</td>'
+      +'<td class="tm">'+dur+'</td>'
+      +'<td class="tm">'+tam+'</td>';
+    tb.appendChild(tr);
+  });
+  updSel();
+  const alertEl=document.querySelector('.alert-info-title');
+  if(alertEl){
+    const total=nSr+nVarios;
+    if(total===0){document.querySelector('.alert-info').style.display='none';}
+    else{
+      document.querySelector('.alert-info').style.display='flex';
+      alertEl.textContent=nSr+' grabación(es) esperando nombre'+(nVarios>0?' · '+nVarios+' sin clasificar':'');
+    }
+  }
+  document.getElementById('badge').textContent=nOk;
+  document.getElementById('ls').textContent=ts()+' hs';
+  console.log('[OK] Tabla renderizada: '+nOk+' listos, '+nSr+' sin renombrar, '+nVarios+' sin clasificar');
+}
+
+function toggleChk(box){
+  box.classList.toggle('checked');
+  box.closest('tr').classList.toggle('sel',box.classList.contains('checked'));
+  updSel();
+}
+
+function toggleAllCustom(){
+  const allBox=document.getElementById('chk-all-box');
+  const boxes=document.querySelectorAll('#tb .chk-box');
+  const toCheck=!allBox.classList.contains('checked');
+  allBox.classList.toggle('checked',toCheck);
+  boxes.forEach(b=>{b.classList.toggle('checked',toCheck);b.closest('tr').classList.toggle('sel',toCheck)});
+  updSel();
+}
+
+function updSel(){
+  const boxes=[...document.querySelectorAll('#tb .chk-box')];
+  const ch=boxes.filter(b=>b.classList.contains('checked'));
+  const n=ch.length;
+  document.getElementById('sel-lbl').textContent=n>0?`${n} seleccionado${n>1?'s':''}` :'';
+  document.getElementById('cnt').textContent=n;
+  document.getElementById('btn-mv').style.display=n>0?'inline-flex':'none';
+  // Botón en topbar
+  const btnTop=document.getElementById('btn-mv-top');
+  if(btnTop){
+    document.getElementById('cnt-top').textContent=n;
+    btnTop.style.display=n>0?'inline-flex':'none';
+  }
+}
+
+function filtrar(q){document.querySelectorAll('#tb tr').forEach(tr=>{tr.style.display=tr.textContent.toLowerCase().includes(q.toLowerCase())?'':'none'})}
+
+// ── Escanear (llama al backend) ───────────────────────────────────────────────
+async function doEscanear(){
+  logLine('Escaneo manual iniciado...');
+  try{
+    const r=await fetch('/api/escanear');
+    const data=await r.json();
+    if(data.error){logLine('✗ '+data.error,'lw');return;}
+    render(data.archivos);
+    const n=data.archivos.length;
+    const ok=data.archivos.filter(f=>f.tipo==='ok').length;
+    const sr=data.archivos.filter(f=>f.tipo==='sin_renombrar').length;
+    const v=data.archivos.filter(f=>f.tipo==='varios').length;
+    logLine(`Escaneo completo. ${ok} listo(s), ${sr} sin renombrar, ${v} sin clasificar.`);
+  }catch(e){logLine('✗ No se pudo conectar con el servidor. ¿Está corriendo Flask?','lw')}
+}
+
+// ── Cambiar ruta via explorador Windows ──────────────────────────────────────
+async function cambiarRuta(campo){
+  const inputId = campo==='origen'?'input-origen':'input-destino';
+  const rutaActual = document.getElementById(inputId).value;
+  logLine(`Abriendo explorador para carpeta ${campo}...`);
+  try{
+    const r=await fetch('/api/explorar',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({campo, ruta_actual: rutaActual})
+    });
+    const d=await r.json();
+    if(d.ok && d.ruta){
+      document.getElementById(inputId).value=d.ruta;
+      logLine(`✓ Carpeta ${campo} actualizada: ${d.ruta}`,'lok');
+    }else{
+      logLine('Selección cancelada.');
+    }
+  }catch(e){logLine('✗ Error al abrir el explorador','lw')}
+}
+
+// ── Mover seleccionados (llama al backend) ────────────────────────────────────
+async function mover(){
+  const checks=[...document.querySelectorAll('#tb .chk-box.checked')];
+  if(!checks.length)return;
+  const archivos=checks.map(b=>{
+    const tr=b.closest('tr');
+    // Obtener paciente detectado (puede haber sido editado manualmente)
+    const inputPac=tr.querySelector('input.ec');
+    const carpeta=inputPac?inputPac.value.trim():tr.dataset.destino;
+    return{nombre:tr.dataset.nombre, carpeta_destino:carpeta||'Varios'};
+  });
+  logLine(`Iniciando movimiento de ${archivos.length} archivo(s)...`);
+  try{
+    const r=await fetch('/api/mover',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({archivos})});
+    const data=await r.json();
+    let exitosos=0;
+    data.resultados.forEach(res=>{
+      if(res.ok){
+        exitosos++;
+        logLine(`✓ ${res.nombre} → ${res.carpeta} (${res.duracion} · ${res.tamano_mb} MB)`,'lok');
+      }else{
+        logLine(`✗ ${res.error||'Error desconocido'}`, 'lw');
+      }
+    });
+    if(exitosos>0){
+      logLine(`${exitosos} archivo(s) movido(s) correctamente. Actualizando lista...`,'li');
+      // Limpiar tabla inmediatamente para feedback visual
+      document.getElementById('tb').innerHTML='';
+      updSel();
+      // Actualizar historial y re-escanear
+      cargarHistorial();
+      // Pequeña pausa para que el filesystem se estabilice
+      await new Promise(r=>setTimeout(r,500));
+      await doEscanear();
+    } else {
+      logLine('No se pudo mover ningún archivo.','lw');
+    }
+  }catch(e){logLine('✗ Error al conectar con el servidor','lw')}
+}
+
+// ── Navegación ────────────────────────────────────────────────────────────────
+function show(id,btn,titulo){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('tc').textContent=titulo;
+  if(id==='historial')cargarHistorial();
+  if(id==='pacientes')cargarPacientes();
+}
+
+// ── Sincronizar config con backend ────────────────────────────────────────────
+async function sync(){
+  const as=document.getElementById('tog-scan').checked;
+  const am=document.getElementById('tog-move').checked;
+  const min=document.getElementById('inp-min').value;
+  const nw=document.getElementById('tog-notif-win').checked;
+  const fuzzy=document.getElementById('inp-fuzzy').value;
+  // Actualizar sidebar
+  document.getElementById('s-d-scan').className='sb-dot '+(as?'on':'off');
+  document.getElementById('s-l-scan').textContent=as?`Escaneo cada ${min} min`:'Escaneo manual';
+  document.getElementById('s-d-move').className='sb-dot '+(am?'on':'off');
+  document.getElementById('s-l-move').textContent=am?'Movimiento automático':'Movimiento manual';
+  // Guardar al backend
+  await guardarConfig();
+}
+
+async function guardarConfig(){
+  const cfg={
+    escaneo_automatico:document.getElementById('tog-scan').checked,
+    movimiento_automatico:document.getElementById('tog-move').checked,
+    intervalo_minutos:parseInt(document.getElementById('inp-min').value),
+    notif_windows:document.getElementById('tog-notif-win').checked,
+    notif_email:document.getElementById('tog-email').checked,
+    fuzzy_umbral:parseInt(document.getElementById('inp-fuzzy').value)
+  };
+  try{
+    await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cfg)});
+    logLine('✓ Configuración guardada','lok');
+  }catch(e){logLine('✗ Error al guardar configuración','lw')}
+}
+
+// ── Email ─────────────────────────────────────────────────────────────────────
+function toggleEmail(){document.getElementById('email-cfg').style.display=document.getElementById('tog-email').checked?'block':'none';sync()}
+
+async function testEmail(){
+  const pwd=document.querySelector('#email-cfg input[type=password]').value;
+  const dest=document.querySelector('#email-cfg input[type=email], #email-cfg input:not([type])').value;
+  logLine('Enviando email de prueba...');
+  try{
+    const r=await fetch('/api/test-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email_password:pwd,email_destino:dest})});
+    const d=await r.json();
+    logLine(d.ok?'✓ Email enviado correctamente':'✗ Error al enviar email. Verificá la contraseña de aplicación.',d.ok?'lok':'lw');
+  }catch(e){logLine('✗ Error de conexión','lw')}
+}
+
+// ── Historial ─────────────────────────────────────────────────────────────────
+async function abrirExcel(){
+  try{
+    const r=await fetch('/api/abrir-excel',{method:'POST'});
+    const d=await r.json();
+    if(d.ok) logLine('✓ Abriendo Excel...','lok');
+    else logLine('✗ '+d.error,'lw');
+  }catch(e){logLine('✗ Error al abrir Excel','lw')}
+}
+
+async function cargarStats(){
+  try{
+    const r=await fetch('/api/historial/stats');
+    const s=await r.json();
+    document.getElementById('st-total').textContent=s.total||0;
+    document.getElementById('st-mes').textContent=s.este_mes||0;
+    document.getElementById('st-horas').textContent=s.horas||'0h';
+    document.getElementById('st-pacs').textContent=s.pacientes||0;
+    if(s.mes_nombre) document.getElementById('st-mes-nombre').textContent=s.mes_nombre;
+  }catch(e){}
+}
+
+async function cargarHistorial(){
+  cargarStats();
+  const tbody=document.querySelector('#section-historial tbody');
+  if(!tbody)return;
+  tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--tx3);font-size:12px">Cargando...</td></tr>';
+  try{
+    const r=await fetch('/api/historial');
+    const data=await r.json();
+    if(data.error){
+      logLine('⚠ Historial: '+data.error,'lw');
+    }
+    const movs=data.movimientos||[];
+    if(movs.length===0){
+      tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--tx3);font-size:12px">Sin registros aún. Los movimientos aparecerán aquí.</td></tr>';
+      return;
+    }
+    tbody.innerHTML='';
+    movs.slice().reverse().forEach(m=>{
+      const estado=String(m['Estado']||'');
+      const ok=estado.startsWith('✓');
+      tbody.innerHTML+=`<tr>
+        <td class="tm">${m['Fecha movimiento']||'—'}</td>
+        <td style="font-family:var(--mono);font-size:11px">${m['Nombre archivo']||'—'}</td>
+        <td>${m['Paciente']||'—'}</td>
+        <td class="dc">${m['Carpeta destino']||'—'}</td>
+        <td class="tm">${m['Duración']||'—'}</td>
+        <td class="tm">${m['Tamaño (MB)']||'—'}</td>
+        <td><span class="badge ${ok?'bok':'bvarios'}">${estado}</span></td>
+      </tr>`;
+    });
+  }catch(e){
+    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:20px;color:#c0392b;font-size:12px">⚠ No se pudo conectar con el servidor</td></tr>';
+    logLine('✗ Error al cargar historial: '+e.message,'lw');
+  }
+}
+
+// ── Pacientes ─────────────────────────────────────────────────────────────────
+async function cargarPacientes(){
+  const grid=document.getElementById('tab-act');
+  if(!grid)return;
+  grid.innerHTML='<div class="pg" style="padding:20px 0;color:var(--tx3);font-size:13px">Cargando pacientes...</div>';
+  try{
+    const r=await fetch('/api/pacientes');
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    const actuales=(data.pacientes||[]).filter(p=>p.estado!=='Inactivo');
+    const inactivos=(data.pacientes||[]).filter(p=>p.estado==='Inactivo');
+    const iniciales=n=>n.split(' ').filter(Boolean).map(p=>p[0]).join('').toUpperCase().slice(0,2)||'?';
+
+    // Actualizar contadores en tabs
+    const btnAct=document.getElementById('tab-btn-act');
+    const btnInact=document.getElementById('tab-btn-inact');
+    if(btnAct) btnAct.textContent=`Actuales (${actuales.length})`;
+    if(btnInact) btnInact.textContent=`Inactivos (${inactivos.length})`;
+
+    if(actuales.length===0 && inactivos.length===0){
+      grid.innerHTML='<div class="pg" style="padding:20px 0;color:var(--tx3);font-size:13px">No hay pacientes aún. Creá el primero con <b>+ Nuevo paciente</b>.<br><small>Asegurate de que la carpeta destino esté configurada y exista.</small></div>';
+    } else {
+      grid.innerHTML=`<div class="pg">${
+        actuales.map(p=>`<div class="pc" ondblclick="abrirModalEditar('${p.nombre.replace(/'/g,"\\'")}');" title="Doble clic para editar"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div class="pav">${iniciales(p.nombre)}</div><div><div class="pn">${p.nombre}</div><div class="pm">${p.sesiones} sesión(es) · ${p.ultima_sesion}</div></div></div><div class="pb"><div class="pbf" style="width:${Math.min(100,p.sesiones*10)}%"></div></div></div>`).join('')
+      }<div class="add-pc" onclick="abrirModal()"><div style="font-size:22px">＋</div><div>Nuevo paciente</div></div></div>`;
+    }
+
+    document.getElementById('tab-inact').innerHTML=inactivos.length===0
+      ? '<div class="pg" style="padding:20px 0;color:var(--tx3);font-size:13px">No hay pacientes inactivos.</div>'
+      : `<div class="pg">${
+          inactivos.map(p=>`<div class="pc" style="opacity:.55;filter:grayscale(.4)" ondblclick="abrirModalEditar('${p.nombre.replace(/'/g,"\\'")}');" title="Doble clic para editar"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div class="pav" style="background:var(--tx3);box-shadow:none">${iniciales(p.nombre)}</div><div><div class="pn" style="color:rgba(255,255,255,.6)">${p.nombre}</div><div class="pm">${p.sesiones} sesión(es) · ${p.ultima_sesion}</div></div></div><div class="pb"><div class="pbf" style="width:${Math.min(100,p.sesiones*10)}%;background:var(--tx3);box-shadow:none"></div></div></div>`).join('')
+        }</div>`;
+
+  }catch(e){
+    grid.innerHTML=`<div class="pg" style="padding:20px 0;color:#c0392b;font-size:13px">
+      ⚠️ No se pudo cargar la lista de pacientes.<br>
+      <small>Verificá que el servidor Flask esté corriendo y que la carpeta destino exista.<br>Error: ${e.message}</small>
+    </div>`;
+    console.error('cargarPacientes error:',e);
+  }
+}
+
+function switchTab(el,tab){
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-act').style.display=tab==='act'?'block':'none';
+  document.getElementById('tab-inact').style.display=tab==='inact'?'block':'none';
+}
+
+// ── Modal paciente ────────────────────────────────────────────────────────────
+function abrirModal(){document.getElementById('modal').classList.add('open')}
+function cerrarModal(){
+  document.getElementById('modal').classList.remove('open');
+  document.getElementById('inp-pac').value='';
+  document.getElementById('inp-aliases').value='';
+  document.querySelector('#modal select').value='Actual';
+}
+
+async function crearPaciente(){
+  const nom=document.getElementById('inp-pac').value.trim();
+  if(!nom)return;
+  const aliases=document.getElementById('inp-aliases').value;
+  const estado=document.querySelector('#modal select').value;
+  try{
+    const r=await fetch('/api/pacientes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre:nom,aliases,estado})});
+    const d=await r.json();
+    if(d.ok){
+      logLine(`✓ Carpeta creada: ${nom}`,'lok');
+      cerrarModal();
+      cargarPacientes();
+    }else{
+      logLine('✗ '+d.error,'lw');
+    }
+  }catch(e){logLine('✗ Error al crear paciente','lw')}
+}
+
+// ── Modal editar paciente ─────────────────────────────────────────────────────
+let editPacienteOriginal='';
+
+async function abrirModalEditar(nombre){
+  editPacienteOriginal=nombre;
+  document.getElementById('edit-pac').value=nombre;
+  document.getElementById('edit-aliases').value='';
+  document.getElementById('edit-estado').value='Actual';
+  // Intentar cargar aliases y estado desde el backend
+  try{
+    const r=await fetch('/api/pacientes');
+    const data=await r.json();
+    const p=(data.pacientes||[]).find(x=>x.nombre===nombre);
+    if(p){
+      if(p.aliases){
+        const al=Array.isArray(p.aliases)?p.aliases.join(', '):p.aliases;
+        document.getElementById('edit-aliases').value=al;
+      }
+      if(p.estado) document.getElementById('edit-estado').value=p.estado;
+    }
+  }catch(e){}
+  document.getElementById('modal-edit').classList.add('open');
+}
+
+function cerrarModalEditar(){
+  document.getElementById('modal-edit').classList.remove('open');
+  editPacienteOriginal='';
+}
+
+async function guardarEdicionPaciente(){
+  const nombre=document.getElementById('edit-pac').value.trim();
+  if(!nombre)return;
+  const aliases=document.getElementById('edit-aliases').value;
+  const estado=document.getElementById('edit-estado').value;
+  try{
+    const r=await fetch('/api/pacientes',{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({nombre_original:editPacienteOriginal,nombre,aliases,estado})
+    });
+    const d=await r.json();
+    if(d.ok){
+      logLine(`✓ Paciente actualizado: ${nombre}`,'lok');
+      cerrarModalEditar();
+      cargarPacientes();
+    }else{
+      logLine('✗ '+(d.error||'Error al guardar'),'lw');
+    }
+  }catch(e){logLine('✗ Error al conectar con el servidor','lw')}
+}
+
+// ── Cargar config al iniciar ──────────────────────────────────────────────────
+async function cargarConfigInicial(){
+  try{
+    const r=await fetch('/api/config');
+    const cfg=await r.json();
+    // Poblar inputs de ruta
+    const inOrigen=document.getElementById('input-origen');
+    const inDestino=document.getElementById('input-destino');
+    if(inOrigen)inOrigen.value=cfg.origen||'';
+    if(inDestino)inDestino.value=cfg.destino||'';
+    // Toggles de configuración
+    document.getElementById('tog-scan').checked=cfg.escaneo_automatico||false;
+    document.getElementById('tog-move').checked=cfg.movimiento_automatico||false;
+    document.getElementById('inp-min').value=cfg.intervalo_minutos||30;
+    document.getElementById('tog-notif-win').checked=cfg.notif_windows!==false;
+    document.getElementById('inp-fuzzy').value=cfg.fuzzy_umbral||85;
+    document.getElementById('tog-email').checked=cfg.notif_email||false;
+    if(cfg.notif_email)document.getElementById('email-cfg').style.display='block';
+    // Actualizar sidebar sin guardar al backend (es carga inicial)
+    const as=cfg.escaneo_automatico||false;
+    const am=cfg.movimiento_automatico||false;
+    const min=cfg.intervalo_minutos||30;
+    document.getElementById('s-d-scan').className='sb-dot '+(as?'on':'off');
+    document.getElementById('s-l-scan').textContent=as?`Escaneo cada ${min} min`:'Escaneo manual';
+    document.getElementById('s-d-move').className='sb-dot '+(am?'on':'off');
+    document.getElementById('s-l-move').textContent=am?'Movimiento automático':'Movimiento manual';
+    logLine('Sistema iniciado. Flask corriendo en puerto 5000.');
+    // Cargar pacientes y escanear al inicio
+    cargarPacientes();
+    await doEscanear();
+  }catch(e){
+    logLine('Modo demo — conectá el backend Flask para datos reales.','lw');
+    // Mostrar error en sección pacientes también
+    const grid=document.getElementById('tab-act');
+    if(grid) grid.innerHTML='<div class="pg" style="padding:20px 0;color:#c0392b;font-size:13px">⚠️ Backend no disponible. Iniciá el servidor con <b>INICIAR.bat</b>.</div>';
+  }
+}
+
+// ── Polling de log automático ─────────────────────────────────────────────────
+let _logDesde=0;
+async function pollLog(){
+  try{
+    const r=await fetch('/api/log/recientes?desde='+_logDesde);
+    const d=await r.json();
+    if(d.entradas && d.entradas.length>0){
+      d.entradas.forEach(e=>{
+        const cls=e.nivel==='ok'?'lok':e.nivel==='warn'?'lw':'li';
+        logLine(e.msg,cls);
+      });
+      _logDesde=d.total;
+    }
+    if(d.refresh){
+      logLine('[Auto] Lista actualizada por escaneo automático.','li');
+      doEscanear();
+      cargarHistorial();
+    }
+  }catch(e){}
+}
+setInterval(pollLog, 8000);
+
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))cerrarModal()});
+document.getElementById('modal-edit').addEventListener('click',e=>{if(e.target===document.getElementById('modal-edit'))cerrarModalEditar()});
+
+document.querySelector('#email-cfg .btn-sm')?.addEventListener('click',testEmail);
+
+cargarConfigInicial();
+</script>
+</body>
+</html>

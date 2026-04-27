@@ -424,6 +424,57 @@
         flex-wrap: wrap;
         flex-shrink: 0;
       }
+      /* SearchInput dentro del page-header oscuro */
+      .page-header .search-wrap {
+        flex: 1;
+        min-width: 180px;
+      }
+      .page-header .search-wrap .input {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(200, 146, 42, 0.3);
+        color: #fff;
+        width: 100%;
+      }
+      .page-header .search-wrap .input::placeholder {
+        color: rgba(255, 255, 255, 0.38);
+      }
+      .page-header .search-wrap .input:focus {
+        background: rgba(255, 255, 255, 0.13);
+        border-color: rgba(200, 146, 42, 0.65);
+      }
+      .page-header .search-icon {
+        filter: brightness(2);
+        opacity: 0.55;
+      }
+      /* Controles de pacientes integrados en topbar-row-2 */
+      .topbar-pac-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: auto;
+        flex-shrink: 0;
+      }
+      .topbar-pac-actions .search-wrap {
+        min-width: 200px;
+      }
+      .topbar-pac-actions .search-wrap .input {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(200, 146, 42, 0.3);
+        color: #fff;
+        width: 100%;
+        padding: 7px 16px 7px 38px;
+      }
+      .topbar-pac-actions .search-wrap .input::placeholder {
+        color: rgba(255, 255, 255, 0.38);
+      }
+      .topbar-pac-actions .search-wrap .input:focus {
+        background: rgba(255, 255, 255, 0.13);
+        border-color: rgba(200, 146, 42, 0.65);
+      }
+      .topbar-pac-actions .search-icon {
+        filter: brightness(2);
+        opacity: 0.55;
+      }
       @keyframes slideDown {
         from {
           opacity: 0;
@@ -1157,7 +1208,7 @@
         font-size: 15px;
         line-height: 1;
         flex-shrink: 0;
-        filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
       }
       .agenda-legend-caret {
         font-family: var(--mono);
@@ -1334,9 +1385,23 @@
           width: 100%;
           flex: none;
           justify-content: center;
+          flex-wrap: wrap;
+          gap: 8px;
         }
         .agenda-activa .topbar-row2-line1 {
           justify-content: space-between;
+        }
+        /* Controles de pacientes: bajan a su propia línea en mobile */
+        .topbar-pac-actions {
+          width: 100%;
+          margin-left: 0;
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        .topbar-pac-actions .search-wrap {
+          flex: 1;
+          min-width: 140px;
         }
         .topbar-row2-line2 {
           width: 100%;
@@ -1364,6 +1429,7 @@
         .topbar-section {
           width: auto;
           gap: 10px;
+          justify-content: center;
         }
         .topbar-section-title {
           font-size: 24px !important;
@@ -1715,9 +1781,9 @@
         gap: 6px;
       }
       .alert-urgente {
-        background: rgba(239,68,68,.15);
-        color: #FCA5A5;
-        border: 1px solid rgba(239,68,68,.35);
+        background: rgba(239, 68, 68, 0.15);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.35);
         border-radius: var(--rsm);
         padding: 8px 14px;
         font-size: 12px;
@@ -2145,8 +2211,8 @@
         width: 17px;
         height: 17px;
         border-radius: 50%;
-        background: #C8922A;
-        color: #1E3D2B;
+        background: #c8922a;
+        color: #1e3d2b;
         font-size: 11px;
         font-weight: 900;
         font-family: var(--mono);
@@ -2164,11 +2230,16 @@
         font-size: 18px;
         line-height: 1;
         animation: urgente-pulse 1.6s ease-in-out infinite;
-        filter: drop-shadow(0 0 5px rgba(239,68,68,.9));
+        filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.9));
       }
       @keyframes urgente-pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.28); }
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.28);
+        }
       }
       /* Panel de novedades de la semana */
       .novedades-panel {
@@ -2498,6 +2569,7 @@
           id: "pacientes",
           label: "Pacientes",
           emoji: "🌿",
+          /*sub: "ABM completo con perfil detallado, filtros y baja lógica",*/
           group: "PRINCIPAL",
         },
         {
@@ -2545,19 +2617,68 @@
               <div className="modal-header">
                 {confirmClose ? (
                   <>
-                    <span style={{ color: "rgba(255,255,255,.85)", fontSize: "13px", fontFamily: "var(--sans)", flex: 1 }}>¿Salir sin guardar los cambios?</span>
+                    <span
+                      style={{
+                        color: "rgba(255,255,255,.85)",
+                        fontSize: "13px",
+                        fontFamily: "var(--sans)",
+                        flex: 1,
+                      }}
+                    >
+                      ¿Salir sin guardar los cambios?
+                    </span>
                     <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
-                      <button className="btn btn-danger" style={{ padding: "5px 14px", fontSize: "13px" }} onClick={doClose}>S&#237;, salir</button>
-                      <button className="btn btn-sec" style={{ padding: "5px 14px", fontSize: "13px" }} onClick={() => setConfirmClose(false)}>No, quedarme</button>
+                      <button
+                        className="btn btn-danger"
+                        style={{ padding: "5px 14px", fontSize: "13px" }}
+                        onClick={doClose}
+                      >
+                        S&#237;, salir
+                      </button>
+                      <button
+                        className="btn btn-sec"
+                        style={{ padding: "5px 14px", fontSize: "13px" }}
+                        onClick={() => setConfirmClose(false)}
+                      >
+                        No, quedarme
+                      </button>
                     </div>
                   </>
                 ) : (
                   <>
                     <span className="modal-title">{title}</span>
-                    <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                      {onDelete && <button className="modal-icon-btn danger" onClick={onDelete} title="Eliminar">🗑️</button>}
-                      {onSave && <button className="modal-icon-btn" onClick={onSave} title="Guardar">💾</button>}
-                      <button className="modal-icon-btn" onClick={tryClose} title="Cerrar">✕</button>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "6px",
+                        alignItems: "center",
+                      }}
+                    >
+                      {onDelete && (
+                        <button
+                          className="modal-icon-btn danger"
+                          onClick={onDelete}
+                          title="Eliminar"
+                        >
+                          🗑️
+                        </button>
+                      )}
+                      {onSave && (
+                        <button
+                          className="modal-icon-btn"
+                          onClick={onSave}
+                          title="Guardar"
+                        >
+                          💾
+                        </button>
+                      )}
+                      <button
+                        className="modal-icon-btn"
+                        onClick={tryClose}
+                        title="Cerrar"
+                      >
+                        ✕
+                      </button>
                     </div>
                   </>
                 )}
@@ -2692,6 +2813,7 @@
         goHoy,
         vista,
         onCargarTurnosFijos,
+        pacientesBar,
       }) {
         const current = NAV_SECTIONS.find((s) => s.id === activeSection);
         const topbarRef = useRef(null);
@@ -2703,10 +2825,18 @@
 
         useEffect(() => {
           function handleClick(e) {
-            if (showReservaMenu && menuRef.current && !menuRef.current.contains(e.target)) {
+            if (
+              showReservaMenu &&
+              menuRef.current &&
+              !menuRef.current.contains(e.target)
+            ) {
               setShowReservaMenu(false);
             }
-            if (showConfigMenu && configMenuRef.current && !configMenuRef.current.contains(e.target)) {
+            if (
+              showConfigMenu &&
+              configMenuRef.current &&
+              !configMenuRef.current.contains(e.target)
+            ) {
               setShowConfigMenu(false);
             }
           }
@@ -2742,28 +2872,29 @@
 
         return (
           <>
-          <div className="topbar" ref={topbarRef}>
-            {/* ROW 1: BRAND — scrollea normalmente, no se ancla */}
-            <div className="topbar-row-1">
-              <div className="topbar-brand">
-                <div className="topbar-icon">🌱</div>
-                <div className="topbar-brand-copy">
-                  <div className="topbar-title">Plataforma Integral</div>
-                  <div className="topbar-subtitle">
-                    Hernán Gabriel Stagni · MP 11919 · v1.0
+            <div className="topbar" ref={topbarRef}>
+              {/* ROW 1: BRAND — scrollea normalmente, no se ancla */}
+              <div className="topbar-row-1">
+                <div className="topbar-brand">
+                  <div className="topbar-icon">🌱</div>
+                  <div className="topbar-brand-copy">
+                    <div className="topbar-title">Plataforma Integral</div>
+                    <div className="topbar-subtitle">
+                      Hernán Gabriel Stagni · MP 11919 · v1.0
+                    </div>
                   </div>
                 </div>
+                {activeSection !== "agenda" &&
+                  activeSection !== "pacientes" && (
+                    <button
+                      className="topbar-cta"
+                      onClick={() => onNavigate("agenda")}
+                    >
+                      + Nuevo turno
+                    </button>
+                  )}
               </div>
-              {activeSection !== "agenda" && (
-                <button
-                  className="topbar-cta"
-                  onClick={() => onNavigate("agenda")}
-                >
-                  + Nuevo turno
-                </button>
-              )}
             </div>
-          </div>
 
             {/* ROW 2: fuera del topbar — sticky anclado al tope al hacer scroll */}
             <div
@@ -2779,24 +2910,76 @@
                   >
                     {current?.id === "agenda" ? "🗓️" : current?.emoji}
                   </span>
-                  <span
-                    className="topbar-section-title"
+                  <div
                     style={{
-                      fontFamily: "var(--sans)",
-                      fontSize: "26px",
-                      fontWeight: "700",
-                      color: "#fff",
-                      letterSpacing: ".01em",
-                      textShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "1px",
                     }}
                   >
-                    {current?.label}
-                  </span>
+                    <span
+                      className="topbar-section-title"
+                      style={{
+                        fontFamily: "var(--sans)",
+                        fontSize: "26px",
+                        fontWeight: "700",
+                        color: "#fff",
+                        letterSpacing: ".01em",
+                        textShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                        lineHeight: 1.1,
+                      }}
+                    >
+                      {current?.label}
+                    </span>
+                    {current?.sub && (
+                      <span
+                        style={{
+                          fontFamily: "var(--sans)",
+                          fontSize: "11px",
+                          color: "rgba(255,255,255,.55)",
+                          letterSpacing: ".01em",
+                        }}
+                      >
+                        {current.sub}
+                      </span>
+                    )}
+                  </div>
                 </div>
+
+                {/* Controles Pacientes — búsqueda + acciones integradas en el topbar */}
+                {activeSection === "pacientes" && pacientesBar && (
+                  <div className="topbar-pac-actions">
+                    <SearchInput
+                      placeholder="Buscar paciente..."
+                      value={pacientesBar.search}
+                      onChange={pacientesBar.setSearch}
+                    />
+                    <button
+                      className="topbar-cta primary"
+                      onClick={pacientesBar.onNuevo}
+                    >
+                      + Nuevo paciente
+                    </button>
+                    <button
+                      className="topbar-cta"
+                      onClick={() => pacientesBar.setVistaCards((v) => !v)}
+                      title={
+                        pacientesBar.vistaCards
+                          ? "Cambiar a vista tabla"
+                          : "Cambiar a vista cards"
+                      }
+                    >
+                      {pacientesBar.vistaCards ? "☰ Tabla" : "▦ Cards"}
+                    </button>
+                  </div>
+                )}
 
                 {/* Botón Crear reserva — en la misma línea que el título */}
                 {activeSection === "agenda" && (
-                  <div style={{ position: "relative", flexShrink: 0 }} ref={menuRef}>
+                  <div
+                    style={{ position: "relative", flexShrink: 0 }}
+                    ref={menuRef}
+                  >
                     <button
                       className="topbar-cta primary"
                       onClick={() => setShowReservaMenu((v) => !v)}
@@ -2895,17 +3078,28 @@
                       onClick={() => setShowConfigMenu(!showConfigMenu)}
                       title="Configuración de la semana"
                       style={{
-                        display: "inline-flex", alignItems: "center", gap: "6px",
-                        padding: "6px 14px", borderRadius: "50px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "6px 14px",
+                        borderRadius: "50px",
                         border: "1.5px solid rgba(200,146,42,.5)",
-                        background: showConfigMenu ? "rgba(200,146,42,.25)" : "rgba(200,146,42,.1)",
+                        background: showConfigMenu
+                          ? "rgba(200,146,42,.25)"
+                          : "rgba(200,146,42,.1)",
                         color: "var(--do)",
-                        fontFamily: "var(--sans)", fontSize: "12px", fontWeight: 700,
-                        cursor: "pointer", whiteSpace: "nowrap",
-                        transition: "all .2s"
+                        fontFamily: "var(--sans)",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                        transition: "all .2s",
                       }}
                     >
-                      <span style={{ fontSize: "16px", lineHeight: 1 }}>⚙️</span> Semana
+                      <span style={{ fontSize: "16px", lineHeight: 1 }}>
+                        ⚙️
+                      </span>{" "}
+                      Semana
                     </button>
                     {showConfigMenu && (
                       <div
@@ -2947,10 +3141,16 @@
                             textAlign: "left",
                             transition: "background .15s",
                           }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,.06)")}
-                          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.background =
+                              "rgba(255,255,255,.06)")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.background = "transparent")
+                          }
                         >
-                          <span style={{ fontSize: "15px" }}>🔃</span> Transferir turnos fijos
+                          <span style={{ fontSize: "15px" }}>🔃</span>{" "}
+                          Transferir turnos fijos
                         </button>
                       </div>
                     )}
@@ -2997,7 +3197,8 @@
                         gap: "4px",
                       }}
                     >
-                      <span>SEMANA</span><span>ACTUAL</span>
+                      <span>SEMANA</span>
+                      <span>ACTUAL</span>
                     </button>
                     <button
                       onClick={nextWeek}
@@ -3097,20 +3298,24 @@
 
       /* Paleta de colores personalizables para etiquetas de turno */
       const PALETA_COLORES = [
+        /* bg = fondo del bloque; text = legible sobre ese bg; border = acento izquierdo */
+        /* ── OSCUROS (fondo oscuro, texto claro) ── */
         { id: "azul", bg: "#1E3A8A", text: "#DBEAFE", border: "#60A5FA" },
+        { id: "celeste", bg: "#0369A1", text: "#E0F2FE", border: "#38BDF8" },
         { id: "teal", bg: "#134E4A", text: "#CCFBF1", border: "#2DD4BF" },
         { id: "verde", bg: "#14532D", text: "#DCFCE7", border: "#4ADE80" },
         { id: "violeta", bg: "#4C1D95", text: "#EDE9FE", border: "#A78BFA" },
         { id: "rosa", bg: "#881337", text: "#FFE4E6", border: "#FB7185" },
+        { id: "rojo", bg: "#991B1B", text: "#FEE2E2", border: "#F87171" },
         { id: "naranja", bg: "#7C2D12", text: "#FFEDD5", border: "#FB923C" },
         { id: "ambar", bg: "#78350F", text: "#FEF3C7", border: "#FCD34D" },
+        { id: "marron", bg: "#44200C", text: "#FED7AA", border: "#C2773A" },
         { id: "pizarra", bg: "#1E293B", text: "#E2E8F0", border: "#94A3B8" },
-        /* +2 amarillos/naranjas */
-        { id: "dorado", bg: "#92400E", text: "#FEF9C3", border: "#FBBF24" },
-        { id: "mostaza", bg: "#713F12", text: "#FFF9C4", border: "#EAB308" },
-        /* +2 grises */
-        { id: "gris", bg: "#374151", text: "#F3F4F6", border: "#9CA3AF" },
         { id: "carbon", bg: "#1C1917", text: "#F5F5F4", border: "#78716C" },
+        /* ── CLAROS/VÍVIDOS (fondo claro, texto oscuro) ── */
+        { id: "amarillo", bg: "#FDE047", text: "#1C1100", border: "#CA8A04" },
+        { id: "beige", bg: "#D4C5A0", text: "#292524", border: "#8B7355" },
+        { id: "blanco", bg: "#F0EDEA", text: "#1C1917", border: "#B0A898" },
       ];
 
       /* Categorías de reservas personales */
@@ -3197,7 +3402,7 @@
       }
 
       function getWeekMon(fechaStr) {
-        const d = new Date(fechaStr + 'T12:00:00');
+        const d = new Date(fechaStr + "T12:00:00");
         const dow = d.getDay();
         d.setDate(d.getDate() + (dow === 0 ? -6 : 1 - dow));
         return d.toISOString().slice(0, 10);
@@ -3208,9 +3413,17 @@
         sesiones.forEach((s) => {
           if (!s.pacienteId || s.tipo === "reserva_personal") return;
           const tieneUrgente = !!s.alertaUrgente;
-          const tieneNotas = !!(s.notasAlertas?.clinica || s.notasAlertas?.admin || s.notasAlertas?.asistencia);
+          const tieneNotas = !!(
+            s.notasAlertas?.clinica ||
+            s.notasAlertas?.admin ||
+            s.notasAlertas?.asistencia
+          );
           const sinCalificar = s.estado === "pendiente" && s.tipo !== "AT";
-          const sinCobrar = !s.cobrado && s.tipo !== "AT" && s.estado !== "cancelo" && s.estado !== "reprogramo";
+          const sinCobrar =
+            !s.cobrado &&
+            s.tipo !== "AT" &&
+            s.estado !== "cancelo" &&
+            s.estado !== "reprogramo";
           if (tieneUrgente || tieneNotas || sinCalificar || sinCobrar) {
             const wm = getWeekMon(s.fecha);
             if (!map.has(s.pacienteId) || wm < map.get(s.pacienteId)) {
@@ -4439,13 +4652,38 @@
                               </>
                             ) : (
                               <>
-                                {(tieneAlertaUrgente(s) || (pacPendMinMap.has(s.pacienteId) && pacPendMinMap.get(s.pacienteId) < getWeekMon(s.fecha)) || tienePendientePago(s, hoyStr) || tieneNotasAlerta(s) || esTurnoPasadoSinCalificar(s)) && (
+                                {(tieneAlertaUrgente(s) ||
+                                  (pacPendMinMap.has(s.pacienteId) &&
+                                    pacPendMinMap.get(s.pacienteId) <
+                                      getWeekMon(s.fecha)) ||
+                                  tienePendientePago(s, hoyStr) ||
+                                  tieneNotasAlerta(s) ||
+                                  esTurnoPasadoSinCalificar(s)) && (
                                   <div className="ag-badges-top">
-                                    {(tieneAlertaUrgente(s) || (pacPendMinMap.has(s.pacienteId) && pacPendMinMap.get(s.pacienteId) < getWeekMon(s.fecha))) && (
-                                      <span className="ag-urgente-badge" title={tieneAlertaUrgente(s) ? "Alerta urgente — revisar antes del turno" : "Pendientes sin resolver de semanas anteriores"}>🚨</span>
+                                    {(tieneAlertaUrgente(s) ||
+                                      (pacPendMinMap.has(s.pacienteId) &&
+                                        pacPendMinMap.get(s.pacienteId) <
+                                          getWeekMon(s.fecha))) && (
+                                      <span
+                                        className="ag-urgente-badge"
+                                        title={
+                                          tieneAlertaUrgente(s)
+                                            ? "Alerta urgente — revisar antes del turno"
+                                            : "Pendientes sin resolver de semanas anteriores"
+                                        }
+                                      >
+                                        🚨
+                                      </span>
                                     )}
-                                    {(tienePendientePago(s, hoyStr) || tieneNotasAlerta(s) || esTurnoPasadoSinCalificar(s)) && (
-                                      <div className="ag-pago-alerta" title="Turno requiere atención">!</div>
+                                    {(tienePendientePago(s, hoyStr) ||
+                                      tieneNotasAlerta(s) ||
+                                      esTurnoPasadoSinCalificar(s)) && (
+                                      <div
+                                        className="ag-pago-alerta"
+                                        title="Turno requiere atención"
+                                      >
+                                        !
+                                      </div>
                                     )}
                                   </div>
                                 )}
@@ -4587,7 +4825,16 @@
                         {/* fila 1: órdenes */}
                         <div style={filaStyle}>
                           {t.ordenes > 0 && (
-                            <span title="Órdenes OS emitidas" style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "rgba(200,230,210,.85)", whiteSpace: "nowrap", cursor: "help" }}>
+                            <span
+                              title="Órdenes OS emitidas"
+                              style={{
+                                fontFamily: "var(--mono)",
+                                fontSize: "12px",
+                                color: "rgba(200,230,210,.85)",
+                                whiteSpace: "nowrap",
+                                cursor: "help",
+                              }}
+                            >
                               📋 ${Number(t.ordenes).toLocaleString("es-AR")}
                             </span>
                           )}
@@ -4595,7 +4842,16 @@
                         {/* fila 2: efectivo */}
                         <div style={filaStyle}>
                           {t.efectivo > 0 && (
-                            <span title="Cobrado en efectivo" style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "#7DCC90", whiteSpace: "nowrap", cursor: "help" }}>
+                            <span
+                              title="Cobrado en efectivo"
+                              style={{
+                                fontFamily: "var(--mono)",
+                                fontSize: "12px",
+                                color: "#7DCC90",
+                                whiteSpace: "nowrap",
+                                cursor: "help",
+                              }}
+                            >
                               💵 ${Number(t.efectivo).toLocaleString("es-AR")}
                             </span>
                           )}
@@ -4603,29 +4859,79 @@
                         {/* fila 3: transferencia */}
                         <div style={filaStyle}>
                           {t.transferencia > 0 && (
-                            <span title="Cobrado por transferencia" style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "#7AB8E0", whiteSpace: "nowrap", cursor: "help" }}>
-                              📱 ${Number(t.transferencia).toLocaleString("es-AR")}
+                            <span
+                              title="Cobrado por transferencia"
+                              style={{
+                                fontFamily: "var(--mono)",
+                                fontSize: "12px",
+                                color: "#7AB8E0",
+                                whiteSpace: "nowrap",
+                                cursor: "help",
+                              }}
+                            >
+                              📱 $
+                              {Number(t.transferencia).toLocaleString("es-AR")}
                             </span>
                           )}
                         </div>
                         {/* fila 4: pendiente */}
                         <div style={filaStyle}>
                           {t.pendiente > 0 && (
-                            <span title="Pendiente de cobro" style={{ fontFamily: "var(--mono)", fontSize: "12px", color: "#F0C860", whiteSpace: "nowrap", cursor: "help" }}>
+                            <span
+                              title="Pendiente de cobro"
+                              style={{
+                                fontFamily: "var(--mono)",
+                                fontSize: "12px",
+                                color: "#F0C860",
+                                whiteSpace: "nowrap",
+                                cursor: "help",
+                              }}
+                            >
                               ⏳ ${Number(t.pendiente).toLocaleString("es-AR")}
                             </span>
                           )}
                         </div>
                         {/* separador siempre a la misma altura */}
-                        <div style={{ width: "100%", borderTop: "1px solid rgba(200,146,42,.3)", margin: "4px 0 3px" }} />
+                        <div
+                          style={{
+                            width: "100%",
+                            borderTop: "1px solid rgba(200,146,42,.3)",
+                            margin: "4px 0 3px",
+                          }}
+                        />
                         {/* total del día */}
-                        <div style={{ height: "28px", display: "flex", alignItems: "center", width: "100%" }}>
+                        <div
+                          style={{
+                            height: "28px",
+                            display: "flex",
+                            alignItems: "center",
+                            width: "100%",
+                          }}
+                        >
                           {nada ? (
-                            <span style={{ fontFamily: "var(--mono)", fontSize: "13px", color: "rgba(255,255,255,.18)", width: "100%", textAlign: "center" }}>—</span>
+                            <span
+                              style={{
+                                fontFamily: "var(--mono)",
+                                fontSize: "13px",
+                                color: "rgba(255,255,255,.18)",
+                                width: "100%",
+                                textAlign: "center",
+                              }}
+                            >
+                              —
+                            </span>
                           ) : (
                             <span
                               title={`Saldo total del día: $${cobrado.toLocaleString("es-AR")} cobrado + $${Number(t.pendiente).toLocaleString("es-AR")} pendiente`}
-                              style={{ fontFamily: "var(--mono)", fontSize: "17px", fontWeight: "700", color: "var(--do)", whiteSpace: "nowrap", cursor: "help", textShadow: "0 1px 6px rgba(200,146,42,.35)" }}
+                              style={{
+                                fontFamily: "var(--mono)",
+                                fontSize: "17px",
+                                fontWeight: "700",
+                                color: "var(--do)",
+                                whiteSpace: "nowrap",
+                                cursor: "help",
+                                textShadow: "0 1px 6px rgba(200,146,42,.35)",
+                              }}
                             >
                               ∑ ${saldoDia.toLocaleString("es-AR")}
                             </span>
@@ -4645,18 +4951,68 @@
 
                   {/* ── FILA RESUMEN SEMANAL ── */}
                   {(() => {
-                    const semOrdenes = dailyTotals.reduce((s, t) => s + Number(t.ordenes), 0);
-                    const semEfectivo = dailyTotals.reduce((s, t) => s + Number(t.efectivo), 0);
-                    const semTransferencia = dailyTotals.reduce((s, t) => s + Number(t.transferencia), 0);
-                    const semPendiente = dailyTotals.reduce((s, t) => s + Number(t.pendiente), 0);
-                    const semTotal = semOrdenes + semEfectivo + semTransferencia + semPendiente;
+                    const semOrdenes = dailyTotals.reduce(
+                      (s, t) => s + Number(t.ordenes),
+                      0,
+                    );
+                    const semEfectivo = dailyTotals.reduce(
+                      (s, t) => s + Number(t.efectivo),
+                      0,
+                    );
+                    const semTransferencia = dailyTotals.reduce(
+                      (s, t) => s + Number(t.transferencia),
+                      0,
+                    );
+                    const semPendiente = dailyTotals.reduce(
+                      (s, t) => s + Number(t.pendiente),
+                      0,
+                    );
+                    const semTotal =
+                      semOrdenes +
+                      semEfectivo +
+                      semTransferencia +
+                      semPendiente;
                     if (semTotal === 0) return null;
-                    const DIV = <div style={{ width: "1px", alignSelf: "stretch", background: "rgba(200,146,42,.3)", flexShrink: 0, margin: "0 4px" }} />;
+                    const DIV = (
+                      <div
+                        style={{
+                          width: "1px",
+                          alignSelf: "stretch",
+                          background: "rgba(200,146,42,.3)",
+                          flexShrink: 0,
+                          margin: "0 4px",
+                        }}
+                      />
+                    );
                     const metricas = [
-                      semOrdenes > 0      && { label: "Órdenes OS",    value: semOrdenes,      icon: "📋", color: "rgba(200,230,210,.9)", title: "Total órdenes OS emitidas" },
-                      semEfectivo > 0     && { label: "Efectivo",       value: semEfectivo,     icon: "💵", color: "#7DCC90",             title: "Total cobrado en efectivo" },
-                      semTransferencia > 0 && { label: "Transferencia", value: semTransferencia, icon: "📱", color: "#7AB8E0",            title: "Total cobrado por transferencia" },
-                      semPendiente > 0    && { label: "Pendiente",      value: semPendiente,    icon: "⏳", color: "#F0C860",             title: "Total pendiente de cobro" },
+                      semOrdenes > 0 && {
+                        label: "Órdenes OS",
+                        value: semOrdenes,
+                        icon: "📋",
+                        color: "rgba(200,230,210,.9)",
+                        title: "Total órdenes OS emitidas",
+                      },
+                      semEfectivo > 0 && {
+                        label: "Efectivo",
+                        value: semEfectivo,
+                        icon: "💵",
+                        color: "#7DCC90",
+                        title: "Total cobrado en efectivo",
+                      },
+                      semTransferencia > 0 && {
+                        label: "Transferencia",
+                        value: semTransferencia,
+                        icon: "📱",
+                        color: "#7AB8E0",
+                        title: "Total cobrado por transferencia",
+                      },
+                      semPendiente > 0 && {
+                        label: "Pendiente",
+                        value: semPendiente,
+                        icon: "⏳",
+                        color: "#F0C860",
+                        title: "Total pendiente de cobro",
+                      },
                     ].filter(Boolean);
                     return (
                       <div
@@ -4674,15 +5030,24 @@
                         }}
                       >
                         {/* label semana */}
-                        <div style={{ display: "flex", alignItems: "center", paddingRight: "16px", flexShrink: 0 }}>
-                          <span style={{
-                            fontFamily: "var(--mono)",
-                            fontSize: "12px",
-                            color: "rgba(255,255,255,.35)",
-                            textTransform: "uppercase",
-                            letterSpacing: ".09em",
-                            whiteSpace: "nowrap",
-                          }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            paddingRight: "16px",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontFamily: "var(--mono)",
+                              fontSize: "12px",
+                              color: "rgba(255,255,255,.35)",
+                              textTransform: "uppercase",
+                              letterSpacing: ".09em",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
                             Semana
                           </span>
                         </div>
@@ -4703,23 +5068,27 @@
                                 flexShrink: 0,
                               }}
                             >
-                              <span style={{
-                                fontFamily: "var(--mono)",
-                                fontSize: "11px",
-                                color: "rgba(255,255,255,.3)",
-                                textTransform: "uppercase",
-                                letterSpacing: ".07em",
-                              }}>
+                              <span
+                                style={{
+                                  fontFamily: "var(--mono)",
+                                  fontSize: "11px",
+                                  color: "rgba(255,255,255,.3)",
+                                  textTransform: "uppercase",
+                                  letterSpacing: ".07em",
+                                }}
+                              >
                                 {m.label}
                               </span>
-                              <span style={{
-                                fontFamily: "var(--mono)",
-                                fontSize: "20px",
-                                fontWeight: 600,
-                                color: m.color,
-                                whiteSpace: "nowrap",
-                                lineHeight: 1.2,
-                              }}>
+                              <span
+                                style={{
+                                  fontFamily: "var(--mono)",
+                                  fontSize: "20px",
+                                  fontWeight: 600,
+                                  color: m.color,
+                                  whiteSpace: "nowrap",
+                                  lineHeight: 1.2,
+                                }}
+                              >
                                 {m.icon} ${m.value.toLocaleString("es-AR")}
                               </span>
                             </div>
@@ -4731,33 +5100,39 @@
 
                         {/* Gran total */}
                         {DIV}
-                        <div style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "flex-end",
-                          justifyContent: "center",
-                          gap: "3px",
-                          paddingLeft: "20px",
-                          flexShrink: 0,
-                        }}>
-                          <span style={{
-                            fontFamily: "var(--mono)",
-                            fontSize: "11px",
-                            color: "rgba(200,146,42,.6)",
-                            textTransform: "uppercase",
-                            letterSpacing: ".09em",
-                          }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "flex-end",
+                            justifyContent: "center",
+                            gap: "3px",
+                            paddingLeft: "20px",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontFamily: "var(--mono)",
+                              fontSize: "11px",
+                              color: "rgba(200,146,42,.6)",
+                              textTransform: "uppercase",
+                              letterSpacing: ".09em",
+                            }}
+                          >
                             Total producido semana
                           </span>
-                          <span style={{
-                            fontFamily: "var(--serif)",
-                            fontSize: "36px",
-                            fontWeight: 800,
-                            color: "var(--do)",
-                            whiteSpace: "nowrap",
-                            lineHeight: 1.1,
-                            textShadow: "0 2px 10px rgba(200,146,42,.4)",
-                          }}>
+                          <span
+                            style={{
+                              fontFamily: "var(--serif)",
+                              fontSize: "36px",
+                              fontWeight: 800,
+                              color: "var(--do)",
+                              whiteSpace: "nowrap",
+                              lineHeight: 1.1,
+                              textShadow: "0 2px 10px rgba(200,146,42,.4)",
+                            }}
+                          >
                             ${semTotal.toLocaleString("es-AR")}
                           </span>
                         </div>
@@ -5120,29 +5495,58 @@
               lunesPN.setDate(hoyPN.getDate() + diffLPN);
               lunesPN.setHours(0, 0, 0, 0);
               const lunesStrPN = lunesPN.toISOString().slice(0, 10);
-              const MESES_PN = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
-              const prevPend = (allSesiones || []).filter((s) =>
-                s.pacienteId === pac.id &&
-                s.id !== sesion.id &&
-                s.fecha < lunesStrPN &&
-                s.tipo !== "reserva_personal" &&
-                (s.alertaUrgente ||
-                 s.notasAlertas?.clinica || s.notasAlertas?.admin || s.notasAlertas?.asistencia ||
-                 (s.estado === "pendiente" && s.tipo !== "AT") ||
-                 (!s.cobrado && s.tipo !== "AT" && s.estado !== "cancelo" && s.estado !== "reprogramo"))
-              ).sort((a, b) => b.fecha.localeCompare(a.fecha));
+              const MESES_PN = [
+                "ene",
+                "feb",
+                "mar",
+                "abr",
+                "may",
+                "jun",
+                "jul",
+                "ago",
+                "sep",
+                "oct",
+                "nov",
+                "dic",
+              ];
+              const prevPend = (allSesiones || [])
+                .filter(
+                  (s) =>
+                    s.pacienteId === pac.id &&
+                    s.id !== sesion.id &&
+                    s.fecha < lunesStrPN &&
+                    s.tipo !== "reserva_personal" &&
+                    (s.alertaUrgente ||
+                      s.notasAlertas?.clinica ||
+                      s.notasAlertas?.admin ||
+                      s.notasAlertas?.asistencia ||
+                      (s.estado === "pendiente" && s.tipo !== "AT") ||
+                      (!s.cobrado &&
+                        s.tipo !== "AT" &&
+                        s.estado !== "cancelo" &&
+                        s.estado !== "reprogramo")),
+                )
+                .sort((a, b) => b.fecha.localeCompare(a.fecha));
               if (prevPend.length > 0) {
                 const fechas = prevPend.slice(0, 3).map((s) => {
                   const p = s.fecha.split("-");
                   return parseInt(p[2]) + " de " + MESES_PN[parseInt(p[1]) - 1];
-              });
-                const fechaTxt = fechas.length === 1
-                  ? "Turno del " + fechas[0]
-                  : "Turnos del " + fechas.slice(0, -1).join(", ") + " y " + fechas[fechas.length - 1];
+                });
+                const fechaTxt =
+                  fechas.length === 1
+                    ? "Turno del " + fechas[0]
+                    : "Turnos del " +
+                      fechas.slice(0, -1).join(", ") +
+                      " y " +
+                      fechas[fechas.length - 1];
                 initialState = {
                   ...initialState,
-                  notasAdmin: "Posee novedades de semanas anteriores · " + fechaTxt,
-                  notasAlertas: { ...(initialState.notasAlertas || {}), admin: true },
+                  notasAdmin:
+                    "Posee novedades de semanas anteriores · " + fechaTxt,
+                  notasAlertas: {
+                    ...(initialState.notasAlertas || {}),
+                    admin: true,
+                  },
                 };
               }
             }
@@ -5549,32 +5953,76 @@
           >
             <div className="modal-card" style={{ maxWidth: "520px" }}>
               <div className="modal-bar" />
-               <div className="modal-header">
-                 {confirmCancel ? (
-                   <>
-                     <span style={{ color: "rgba(255,255,255,.85)", fontSize: "13px", fontFamily: "var(--sans)", flex: 1 }}>
-                       ¿Salir sin guardar los cambios?
-                     </span>
-                     <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
-                       <button className="btn btn-danger" style={{ padding: "5px 14px", fontSize: "13px" }} onClick={doClose}>S&#237;, salir</button>
-                       <button className="btn btn-sec" style={{ padding: "5px 14px", fontSize: "13px" }} onClick={() => setConfirmCancel(false)}>No, quedarme</button>
-                     </div>
-                   </>
-                 ) : (
-                   <>
-                     <span className="modal-title">
-                       {isEditar ? "Edición de turno" : "Creación de turno"}
-                     </span>
-                     <div style={{ display: "flex", gap: "6px", alignItems: "center", flexShrink: 0 }}>
-                       {isEditar && (
-                         <button className="modal-icon-btn danger" onClick={() => onDelete(f)} title="Eliminar">&#128465;&#65039;</button>
-                       )}
-                       <button className="modal-icon-btn" onClick={handleSave} title="Guardar">&#128190;</button>
-                       <button className="modal-icon-btn" onClick={tryClose} title="Cerrar">✕</button>
-                     </div>
-                   </>
-                 )}
-               </div>
+              <div className="modal-header">
+                {confirmCancel ? (
+                  <>
+                    <span
+                      style={{
+                        color: "rgba(255,255,255,.85)",
+                        fontSize: "13px",
+                        fontFamily: "var(--sans)",
+                        flex: 1,
+                      }}
+                    >
+                      ¿Salir sin guardar los cambios?
+                    </span>
+                    <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+                      <button
+                        className="btn btn-danger"
+                        style={{ padding: "5px 14px", fontSize: "13px" }}
+                        onClick={doClose}
+                      >
+                        S&#237;, salir
+                      </button>
+                      <button
+                        className="btn btn-sec"
+                        style={{ padding: "5px 14px", fontSize: "13px" }}
+                        onClick={() => setConfirmCancel(false)}
+                      >
+                        No, quedarme
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <span className="modal-title">
+                      {isEditar ? "Edición de turno" : "Creación de turno"}
+                    </span>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "6px",
+                        alignItems: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {isEditar && (
+                        <button
+                          className="modal-icon-btn danger"
+                          onClick={() => onDelete(f)}
+                          title="Eliminar"
+                        >
+                          &#128465;&#65039;
+                        </button>
+                      )}
+                      <button
+                        className="modal-icon-btn"
+                        onClick={handleSave}
+                        title="Guardar"
+                      >
+                        &#128190;
+                      </button>
+                      <button
+                        className="modal-icon-btn"
+                        onClick={tryClose}
+                        title="Cerrar"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
               <div className="modal-body">
                 {/* ─── 0. PACIENTE ─── */}
                 <div
@@ -5884,9 +6332,9 @@
                                 height: "16px",
                                 borderRadius: "50%",
                                 background: c.bg,
-                                border: `2px solid ${sel ? "#fff" : "rgba(255,255,255,.12)"}`,
+                                border: `2px solid ${sel ? "#fff" : "transparent"}`,
                                 boxShadow: sel
-                                  ? `0 0 0 2px ${c.border}`
+                                  ? `0 0 0 2px rgba(255,255,255,.6)`
                                   : "none",
                                 cursor: "pointer",
                                 flexShrink: 0,
@@ -6656,29 +7104,72 @@
                           padding: "9px 14px",
                           borderRadius: "12px",
                           border: `2px solid ${f.alertaUrgente ? "rgba(239,68,68,.85)" : "rgba(239,68,68,.22)"}`,
-                          background: f.alertaUrgente ? "rgba(239,68,68,.16)" : "rgba(239,68,68,.04)",
+                          background: f.alertaUrgente
+                            ? "rgba(239,68,68,.16)"
+                            : "rgba(239,68,68,.04)",
                           cursor: "pointer",
                           marginBottom: "10px",
                           transition: "all .2s",
                           userSelect: "none",
                         }}
                       >
-                        <span style={{ fontSize: "20px", lineHeight: 1, flexShrink: 0 }}>🚨</span>
+                        <span
+                          style={{
+                            fontSize: "20px",
+                            lineHeight: 1,
+                            flexShrink: 0,
+                          }}
+                        >
+                          🚨
+                        </span>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontFamily: "var(--sans)", fontWeight: 700, fontSize: "13px", color: f.alertaUrgente ? "#FCA5A5" : "rgba(255,255,255,.45)", lineHeight: 1.3 }}>
+                          <div
+                            style={{
+                              fontFamily: "var(--sans)",
+                              fontWeight: 700,
+                              fontSize: "13px",
+                              color: f.alertaUrgente
+                                ? "#FCA5A5"
+                                : "rgba(255,255,255,.45)",
+                              lineHeight: 1.3,
+                            }}
+                          >
                             Alerta urgente
                           </div>
-                          <div style={{ fontFamily: "var(--mono)", fontSize: "9px", color: f.alertaUrgente ? "rgba(252,165,165,.65)" : "rgba(255,255,255,.22)", letterSpacing: ".05em", textTransform: "uppercase", marginTop: "2px" }}>
+                          <div
+                            style={{
+                              fontFamily: "var(--mono)",
+                              fontSize: "9px",
+                              color: f.alertaUrgente
+                                ? "rgba(252,165,165,.65)"
+                                : "rgba(255,255,255,.22)",
+                              letterSpacing: ".05em",
+                              textTransform: "uppercase",
+                              marginTop: "2px",
+                            }}
+                          >
                             Revisar antes del turno
                           </div>
                         </div>
-                        <div style={{
-                          width: "20px", height: "20px", borderRadius: "5px", flexShrink: 0,
-                          border: `2px solid ${f.alertaUrgente ? "rgba(239,68,68,.9)" : "rgba(239,68,68,.3)"}`,
-                          background: f.alertaUrgente ? "rgba(239,68,68,.8)" : "transparent",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          fontSize: "12px", color: "#fff", fontWeight: 900, transition: "all .15s",
-                        }}>
+                        <div
+                          style={{
+                            width: "20px",
+                            height: "20px",
+                            borderRadius: "5px",
+                            flexShrink: 0,
+                            border: `2px solid ${f.alertaUrgente ? "rgba(239,68,68,.9)" : "rgba(239,68,68,.3)"}`,
+                            background: f.alertaUrgente
+                              ? "rgba(239,68,68,.8)"
+                              : "transparent",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "12px",
+                            color: "#fff",
+                            fontWeight: 900,
+                            transition: "all .15s",
+                          }}
+                        >
                           {f.alertaUrgente ? "✓" : ""}
                         </div>
                       </div>
@@ -7089,7 +7580,6 @@
                     </div>
                   </div>
                 )}
-
               </div>
             </div>
           </div>,
@@ -7119,8 +7609,20 @@
               <div className="modal-header">
                 <span className="modal-title">Confirmar eliminación</span>
                 <div style={{ display: "flex", gap: "6px" }}>
-                  <button className="modal-icon-btn danger" onClick={onConfirm} title="Eliminar definitivamente">🗑️</button>
-                  <button className="modal-icon-btn" onClick={onClose} title="Cancelar">✕</button>
+                  <button
+                    className="modal-icon-btn danger"
+                    onClick={onConfirm}
+                    title="Eliminar definitivamente"
+                  >
+                    🗑️
+                  </button>
+                  <button
+                    className="modal-icon-btn"
+                    onClick={onClose}
+                    title="Cancelar"
+                  >
+                    ✕
+                  </button>
                 </div>
               </div>
               <div className="modal-body">
@@ -7262,32 +7764,76 @@
           >
             <div className="modal-card" style={{ maxWidth: "440px" }}>
               <div className="modal-bar" />
-               <div className="modal-header">
-                 {confirmCancel ? (
-                   <>
-                     <span style={{ color: "rgba(255,255,255,.85)", fontSize: "13px", fontFamily: "var(--sans)", flex: 1 }}>
-                       ¿Salir sin guardar los cambios?
-                     </span>
-                     <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
-                       <button className="btn btn-danger" style={{ padding: "5px 14px", fontSize: "13px" }} onClick={doClose}>S&#237;, salir</button>
-                       <button className="btn btn-sec" style={{ padding: "5px 14px", fontSize: "13px" }} onClick={() => setConfirmCancel(false)}>No, quedarme</button>
-                     </div>
-                   </>
-                 ) : (
-                   <>
-                     <span className="modal-title">
-                       {isEditar ? "Editar reserva" : "Reservar horario"}
-                     </span>
-                     <div style={{ display: "flex", gap: "6px", alignItems: "center", flexShrink: 0 }}>
-                       {isEditar && (
-                         <button className="modal-icon-btn danger" onClick={() => onDelete(f)} title="Eliminar">&#128465;&#65039;</button>
-                       )}
-                       <button className="modal-icon-btn" onClick={handleSave} title="Guardar">&#128190;</button>
-                       <button className="modal-icon-btn" onClick={tryClose} title="Cerrar">✕</button>
-                     </div>
-                   </>
-                 )}
-               </div>
+              <div className="modal-header">
+                {confirmCancel ? (
+                  <>
+                    <span
+                      style={{
+                        color: "rgba(255,255,255,.85)",
+                        fontSize: "13px",
+                        fontFamily: "var(--sans)",
+                        flex: 1,
+                      }}
+                    >
+                      ¿Salir sin guardar los cambios?
+                    </span>
+                    <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+                      <button
+                        className="btn btn-danger"
+                        style={{ padding: "5px 14px", fontSize: "13px" }}
+                        onClick={doClose}
+                      >
+                        S&#237;, salir
+                      </button>
+                      <button
+                        className="btn btn-sec"
+                        style={{ padding: "5px 14px", fontSize: "13px" }}
+                        onClick={() => setConfirmCancel(false)}
+                      >
+                        No, quedarme
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <span className="modal-title">
+                      {isEditar ? "Editar reserva" : "Reservar horario"}
+                    </span>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "6px",
+                        alignItems: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {isEditar && (
+                        <button
+                          className="modal-icon-btn danger"
+                          onClick={() => onDelete(f)}
+                          title="Eliminar"
+                        >
+                          &#128465;&#65039;
+                        </button>
+                      )}
+                      <button
+                        className="modal-icon-btn"
+                        onClick={handleSave}
+                        title="Guardar"
+                      >
+                        &#128190;
+                      </button>
+                      <button
+                        className="modal-icon-btn"
+                        onClick={tryClose}
+                        title="Cerrar"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
               <div className="modal-body">
                 {/* COLOR DE ETIQUETA */}
                 <div style={{ marginBottom: "14px" }}>
@@ -7348,8 +7894,10 @@
                             height: "20px",
                             borderRadius: "50%",
                             background: c.bg,
-                            border: `2px solid ${sel ? "#fff" : "rgba(255,255,255,.12)"}`,
-                            boxShadow: sel ? `0 0 0 2px ${c.border}` : "none",
+                            border: `2px solid ${sel ? "#fff" : "transparent"}`,
+                            boxShadow: sel
+                              ? `0 0 0 2px rgba(255,255,255,.6)`
+                              : "none",
                             cursor: "pointer",
                             flexShrink: 0,
                             transition: "all .15s",
@@ -7450,7 +7998,6 @@
                   onChange={(e) => upd("notas", e.target.value)}
                   placeholder="Observaciones..."
                 />
-
               </div>
             </div>
           </div>,
@@ -7488,7 +8035,10 @@
         const [showSubCoordinar, setShowSubCoordinar] = useState(false);
         const [coordManuales, setCoordManuales] = useState([]);
         const [modalNuevoCoord, setModalNuevoCoord] = useState(false);
-        const [coordDraft, setCoordDraft] = useState({ titulo: "", descripcion: "" });
+        const [coordDraft, setCoordDraft] = useState({
+          titulo: "",
+          descripcion: "",
+        });
         const [coordPendientes, setCoordPendientes] = useState([]);
         const [objetivosSemana, setObjetivosSemana] = useState([]);
         const [editandoObj, setEditandoObj] = useState(false);
@@ -7502,10 +8052,19 @@
         const [recordatoriosSemana, setRecordatoriosSemana] = useState([]);
         const [modalNuevoRec, setModalNuevoRec] = useState(false);
         const [modalEditRec, setModalEditRec] = useState(null);
-        const [recDraft, setRecDraft] = useState({ titulo: "", descripcion: "" });
-        const [recEditDraft, setRecEditDraft] = useState({ titulo: "", descripcion: "" });
+        const [recDraft, setRecDraft] = useState({
+          titulo: "",
+          descripcion: "",
+        });
+        const [recEditDraft, setRecEditDraft] = useState({
+          titulo: "",
+          descripcion: "",
+        });
         const [modalEditCoord, setModalEditCoord] = useState(null);
-        const [coordEditDraft, setCoordEditDraft] = useState({ titulo: "", descripcion: "" });
+        const [coordEditDraft, setCoordEditDraft] = useState({
+          titulo: "",
+          descripcion: "",
+        });
         const [confirmBorrar, setConfirmBorrar] = useState(null); // { fn, label }
         const [config, setConfig] = useState(
           () => getData("hgsp_config") || {},
@@ -7892,7 +8451,9 @@
           (c) => c.semanaKey === semanaKey && !c.resuelta,
         );
 
-        const coordManualesPendientes = coordManuales.filter((m) => !m.coordinado);
+        const coordManualesPendientes = coordManuales.filter(
+          (m) => !m.coordinado,
+        );
         const totalPendientes =
           novedadesItems.length +
           recordatoriosActivos.length +
@@ -8025,7 +8586,9 @@
           setConfirmBorrar({
             label: `¿Eliminar el recordatorio "${titulo}"? Esta acción no se puede deshacer.`,
             fn: () => {
-              const all = (getData("hgsp_recordatorios_semana") || []).filter((r) => r.id !== id);
+              const all = (getData("hgsp_recordatorios_semana") || []).filter(
+                (r) => r.id !== id,
+              );
               setData("hgsp_recordatorios_semana", all);
               loadData();
               showToast("🗑️ Recordatorio eliminado");
@@ -8034,7 +8597,10 @@
         }
 
         function abrirEditRec(r) {
-          setRecEditDraft({ titulo: r.titulo, descripcion: r.descripcion || "" });
+          setRecEditDraft({
+            titulo: r.titulo,
+            descripcion: r.descripcion || "",
+          });
           setModalEditRec(r.id);
         }
 
@@ -8043,7 +8609,11 @@
           const all = getData("hgsp_recordatorios_semana") || [];
           const idx = all.findIndex((r) => r.id === modalEditRec);
           if (idx < 0) return;
-          all[idx] = { ...all[idx], titulo: recEditDraft.titulo.trim(), descripcion: recEditDraft.descripcion.trim() };
+          all[idx] = {
+            ...all[idx],
+            titulo: recEditDraft.titulo.trim(),
+            descripcion: recEditDraft.descripcion.trim(),
+          };
           setData("hgsp_recordatorios_semana", all);
           setModalEditRec(null);
           loadData();
@@ -8055,7 +8625,9 @@
             label: `¿Eliminar el ítem de coordinación "${titulo}"? Esta acción no se puede deshacer.`,
             fn: () => {
               const semKeyCoord = `hgsp_coord_manuales_${semanaKey}`;
-              const all = (getData(semKeyCoord) || []).filter((x) => x.id !== id);
+              const all = (getData(semKeyCoord) || []).filter(
+                (x) => x.id !== id,
+              );
               setData(semKeyCoord, all);
               setCoordManuales(all);
               showToast("🗑️ Ítem eliminado");
@@ -8067,7 +8639,9 @@
           setConfirmBorrar({
             label: `¿Eliminar la coordinación pendiente de "${nombre}"? Esta acción no se puede deshacer.`,
             fn: () => {
-              const all = (getData("hgsp_coord_pendientes") || []).filter((c) => c.id !== id);
+              const all = (getData("hgsp_coord_pendientes") || []).filter(
+                (c) => c.id !== id,
+              );
               setData("hgsp_coord_pendientes", all);
               loadData();
               showToast("🗑️ Coordinación eliminada");
@@ -8076,7 +8650,10 @@
         }
 
         function abrirEditCoord(m) {
-          setCoordEditDraft({ titulo: m.titulo, descripcion: m.descripcion || "" });
+          setCoordEditDraft({
+            titulo: m.titulo,
+            descripcion: m.descripcion || "",
+          });
           setModalEditCoord(m.id);
         }
 
@@ -8086,7 +8663,11 @@
           const all = getData(semKeyCoord) || [];
           const idx = all.findIndex((x) => x.id === modalEditCoord);
           if (idx < 0) return;
-          all[idx] = { ...all[idx], titulo: coordEditDraft.titulo.trim(), descripcion: coordEditDraft.descripcion.trim() };
+          all[idx] = {
+            ...all[idx],
+            titulo: coordEditDraft.titulo.trim(),
+            descripcion: coordEditDraft.descripcion.trim(),
+          };
           setData(semKeyCoord, all);
           setCoordManuales(all);
           setModalEditCoord(null);
@@ -8119,7 +8700,11 @@
           all[idx] = { ...all[idx], coordinado: !all[idx].coordinado };
           setData(semKeyCoord, all);
           setCoordManuales([...all]);
-          showToast(all[idx].coordinado ? "✅ Marcado como coordinado" : "↩️ Desmarcado");
+          showToast(
+            all[idx].coordinado
+              ? "✅ Marcado como coordinado"
+              : "↩️ Desmarcado",
+          );
         }
 
         const pctBuenoGlobal =
@@ -9089,7 +9674,7 @@
                 marginBottom: "18px",
                 position: "relative",
                 overflow: "hidden",
-                marginTop: "14px"
+                marginTop: "14px",
               }}
             >
               <div
@@ -9119,7 +9704,9 @@
                   zIndex: 2,
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                >
                   <div
                     style={{
                       fontFamily: "var(--serif2)",
@@ -9133,11 +9720,28 @@
                     📋 Alertas de la semana
                   </div>
                   {totalPendientes > 0 ? (
-                    <span style={{ background: "var(--do)", color: "var(--vd)", borderRadius: "10px", padding: "1px 6px", fontSize: "12px", fontWeight: 800 }}>
+                    <span
+                      style={{
+                        background: "var(--do)",
+                        color: "var(--vd)",
+                        borderRadius: "10px",
+                        padding: "1px 6px",
+                        fontSize: "12px",
+                        fontWeight: 800,
+                      }}
+                    >
                       {totalPendientes}
                     </span>
                   ) : (
-                    <span style={{ color: "#7DCC90", fontSize: "16px", lineHeight: 1 }}>✓</span>
+                    <span
+                      style={{
+                        color: "#7DCC90",
+                        fontSize: "16px",
+                        lineHeight: 1,
+                      }}
+                    >
+                      ✓
+                    </span>
                   )}
                 </div>
                 <span
@@ -9158,77 +9762,275 @@
               {/* PANEL EXPANDIBLE */}
               {showNovedades && (
                 <div style={{ position: "relative", zIndex: 1 }}>
-
-
-
                   {/* ── SUB-BLOQUE 1: NOVEDADES ── */}
                   <div style={{ marginBottom: "6px" }}>
                     {/* Tab header */}
                     <div
-                      onClick={() => { const next = !showSubNovedades; setShowSubNovedades(next); if (next) { setShowSubRecordatorios(false); setShowSubCoordinar(false); } }}
+                      onClick={() => {
+                        const next = !showSubNovedades;
+                        setShowSubNovedades(next);
+                        if (next) {
+                          setShowSubRecordatorios(false);
+                          setShowSubCoordinar(false);
+                        }
+                      }}
                       style={{
-                        display: "flex", alignItems: "center", justifyContent: "space-between",
-                        padding: "9px 14px", cursor: "pointer", transition: "all .2s",
-                        borderRadius: showSubNovedades ? "12px 12px 0 0" : "12px",
-                        background: showSubNovedades ? "rgba(74,124,95,.3)" : "rgba(255,255,255,.04)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "9px 14px",
+                        cursor: "pointer",
+                        transition: "all .2s",
+                        borderRadius: showSubNovedades
+                          ? "12px 12px 0 0"
+                          : "12px",
+                        background: showSubNovedades
+                          ? "rgba(74,124,95,.3)"
+                          : "rgba(255,255,255,.04)",
                         border: `1.5px solid ${showSubNovedades ? "rgba(74,124,95,.55)" : "rgba(255,255,255,.1)"}`,
                         borderBottom: showSubNovedades ? "none" : undefined,
                       }}
                     >
-                      <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: showSubNovedades ? "#A8DDB8" : "rgba(200,146,42,.75)", textTransform: "uppercase", letterSpacing: ".07em", display: "flex", alignItems: "center", gap: "6px", fontWeight: 700 }}>
+                      <span
+                        style={{
+                          fontFamily: "var(--mono)",
+                          fontSize: "10px",
+                          color: showSubNovedades
+                            ? "#A8DDB8"
+                            : "rgba(200,146,42,.75)",
+                          textTransform: "uppercase",
+                          letterSpacing: ".07em",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          fontWeight: 700,
+                        }}
+                      >
                         {showSubNovedades ? "▼" : "▶"} ⚠️ Novedades
-                        {(novedadesItems.length + ordenesHistPendientes.length) > 0 && (
-                          <span style={{ background: "var(--do)", color: "var(--vd)", borderRadius: "10px", padding: "1px 6px", fontSize: "9px", fontWeight: 700 }}>
-                            {novedadesItems.length + ordenesHistPendientes.length}
+                        {novedadesItems.length + ordenesHistPendientes.length >
+                          0 && (
+                          <span
+                            style={{
+                              background: "var(--do)",
+                              color: "var(--vd)",
+                              borderRadius: "10px",
+                              padding: "1px 6px",
+                              fontSize: "9px",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {novedadesItems.length +
+                              ordenesHistPendientes.length}
                           </span>
                         )}
                       </span>
                     </div>
                     {/* Content area — fondo verde más claro */}
                     {showSubNovedades && (
-                      <div style={{ background: "rgba(42,77,56,.45)", border: "1.5px solid rgba(74,124,95,.55)", borderTop: "none", borderRadius: "0 0 12px 12px", padding: "12px" }}>
-                        {novedadesItems.length === 0 && ordenesHistPendientes.length === 0 ? (
-                          <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.3)", padding: "4px 6px" }}>
+                      <div
+                        style={{
+                          background: "rgba(42,77,56,.45)",
+                          border: "1.5px solid rgba(74,124,95,.55)",
+                          borderTop: "none",
+                          borderRadius: "0 0 12px 12px",
+                          padding: "12px",
+                        }}
+                      >
+                        {novedadesItems.length === 0 &&
+                        ordenesHistPendientes.length === 0 ? (
+                          <div
+                            style={{
+                              fontFamily: "var(--mono)",
+                              fontSize: "11px",
+                              color: "rgba(255,255,255,.3)",
+                              padding: "4px 6px",
+                            }}
+                          >
                             Sin novedades esta semana.
                           </div>
                         ) : (
                           <>
                             {novedadesItems.map((n, i) => {
-                              const sesObj = weekSes.find((s) => s.id === n.sesionId);
+                              const sesObj = weekSes.find(
+                                (s) => s.id === n.sesionId,
+                              );
                               const estadoIcon =
-                                n.estado === "cancelo" ? "❌"
-                                : n.estado === "inasistencia" ? "🚫"
-                                : n.estado === "reprogramo" ? "🔄"
-                                : n.estado === "pendiente" ? "⏳" : "✅";
+                                n.estado === "cancelo"
+                                  ? "❌"
+                                  : n.estado === "inasistencia"
+                                    ? "🚫"
+                                    : n.estado === "reprogramo"
+                                      ? "🔄"
+                                      : n.estado === "pendiente"
+                                        ? "⏳"
+                                        : "✅";
                               const estadoLabel =
-                                n.estado === "cancelo" ? "Canceló"
-                                : n.estado === "inasistencia" ? "Inasistencia"
-                                : n.estado === "reprogramo" ? "Reprogramó"
-                                : n.estado === "pendiente" ? "Sin confirmar" : "Asistió";
+                                n.estado === "cancelo"
+                                  ? "Canceló"
+                                  : n.estado === "inasistencia"
+                                    ? "Inasistencia"
+                                    : n.estado === "reprogramo"
+                                      ? "Reprogramó"
+                                      : n.estado === "pendiente"
+                                        ? "Sin confirmar"
+                                        : "Asistió";
                               return (
-                                <div key={i} style={{ background: "rgba(255,255,255,.05)", border: "1px solid rgba(200,146,42,.2)", borderLeft: "3px solid var(--do)", borderRadius: "10px", padding: "10px 14px", marginBottom: "8px" }}>
-                                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                                    <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(200,146,42,.2)", border: "1.5px solid rgba(200,146,42,.5)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--mono)", fontSize: "9px", color: "var(--do)", fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
+                                <div
+                                  key={i}
+                                  style={{
+                                    background: "rgba(255,255,255,.05)",
+                                    border: "1px solid rgba(200,146,42,.2)",
+                                    borderLeft: "3px solid var(--do)",
+                                    borderRadius: "10px",
+                                    padding: "10px 14px",
+                                    marginBottom: "8px",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "8px",
+                                      marginBottom: "8px",
+                                    }}
+                                  >
+                                    <div
+                                      style={{
+                                        width: "22px",
+                                        height: "22px",
+                                        borderRadius: "50%",
+                                        background: "rgba(200,146,42,.2)",
+                                        border:
+                                          "1.5px solid rgba(200,146,42,.5)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontFamily: "var(--mono)",
+                                        fontSize: "9px",
+                                        color: "var(--do)",
+                                        fontWeight: 700,
+                                        flexShrink: 0,
+                                      }}
+                                    >
+                                      {i + 1}
+                                    </div>
                                     <div style={{ flex: 1 }}>
-                                      <span style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,.9)" }}>{n.pacNombre}</span>
-                                      <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.35)", marginLeft: "8px" }}>{estadoIcon} {estadoLabel}</span>
-                                      <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.25)", marginLeft: "8px" }}>{n.fecha} {n.hora}</span>
+                                      <span
+                                        style={{
+                                          fontFamily: "var(--sans)",
+                                          fontSize: "13px",
+                                          fontWeight: 700,
+                                          color: "rgba(255,255,255,.9)",
+                                        }}
+                                      >
+                                        {n.pacNombre}
+                                      </span>
+                                      <span
+                                        style={{
+                                          fontFamily: "var(--mono)",
+                                          fontSize: "10px",
+                                          color: "rgba(255,255,255,.35)",
+                                          marginLeft: "8px",
+                                        }}
+                                      >
+                                        {estadoIcon} {estadoLabel}
+                                      </span>
+                                      <span
+                                        style={{
+                                          fontFamily: "var(--mono)",
+                                          fontSize: "10px",
+                                          color: "rgba(255,255,255,.25)",
+                                          marginLeft: "8px",
+                                        }}
+                                      >
+                                        {n.fecha} {n.hora}
+                                      </span>
                                     </div>
                                     <button
-                                      onClick={(e) => { e.stopPropagation(); sesObj && setModalTurno({ mode: "editar", sesion: sesObj, fecha: sesObj.fecha, hora: sesObj.horaInicio }); }}
-                                      style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.3)", padding: "2px 6px", borderRadius: "6px" }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        sesObj &&
+                                          setModalTurno({
+                                            mode: "editar",
+                                            sesion: sesObj,
+                                            fecha: sesObj.fecha,
+                                            hora: sesObj.horaInicio,
+                                          });
+                                      }}
+                                      style={{
+                                        background: "none",
+                                        border: "none",
+                                        cursor: "pointer",
+                                        fontFamily: "var(--mono)",
+                                        fontSize: "10px",
+                                        color: "rgba(255,255,255,.3)",
+                                        padding: "2px 6px",
+                                        borderRadius: "6px",
+                                      }}
                                       title="Abrir turno"
-                                    >Abrir →</button>
+                                    >
+                                      Abrir →
+                                    </button>
                                   </div>
-                                  <div style={{ display: "flex", flexDirection: "column", gap: "5px", paddingLeft: "30px" }}>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      gap: "5px",
+                                      paddingLeft: "30px",
+                                    }}
+                                  >
                                     {n.items.map((it, j) => (
-                                      <div key={j} style={{ display: "flex", alignItems: "center", gap: "8px" }} onClick={(e) => e.stopPropagation()}>
+                                      <div
+                                        key={j}
+                                        style={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "8px",
+                                        }}
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
                                         {it.campo !== null ? (
-                                          <div onClick={() => resolverItem(n.sesionId, it.campo)} title="Marcar como resuelto" style={{ width: "18px", height: "18px", borderRadius: "5px", border: "2px solid var(--do)", background: "rgba(200,146,42,.1)", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s" }} />
+                                          <div
+                                            onClick={() =>
+                                              resolverItem(n.sesionId, it.campo)
+                                            }
+                                            title="Marcar como resuelto"
+                                            style={{
+                                              width: "18px",
+                                              height: "18px",
+                                              borderRadius: "5px",
+                                              border: "2px solid var(--do)",
+                                              background: "rgba(200,146,42,.1)",
+                                              cursor: "pointer",
+                                              flexShrink: 0,
+                                              display: "flex",
+                                              alignItems: "center",
+                                              justifyContent: "center",
+                                              transition: "all .15s",
+                                            }}
+                                          />
                                         ) : (
-                                          <span style={{ fontSize: "11px", flexShrink: 0 }}>⚠️</span>
+                                          <span
+                                            style={{
+                                              fontSize: "11px",
+                                              flexShrink: 0,
+                                            }}
+                                          >
+                                            ⚠️
+                                          </span>
                                         )}
-                                        <span style={{ fontFamily: "var(--mono)", fontSize: "11px", color: it.campo ? "var(--do)" : "rgba(255,200,80,.8)" }}>{it.texto}</span>
+                                        <span
+                                          style={{
+                                            fontFamily: "var(--mono)",
+                                            fontSize: "11px",
+                                            color: it.campo
+                                              ? "var(--do)"
+                                              : "rgba(255,200,80,.8)",
+                                          }}
+                                        >
+                                          {it.texto}
+                                        </span>
                                       </div>
                                     ))}
                                   </div>
@@ -9236,25 +10038,127 @@
                               );
                             })}
                             {ordenesHistPendientes.length > 0 && (
-                              <div style={{ marginTop: novedadesItems.length > 0 ? "8px" : "0" }}>
-                                <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(200,146,42,.65)", textTransform: "uppercase", letterSpacing: ".07em", marginBottom: "8px", paddingLeft: "2px" }}>
+                              <div
+                                style={{
+                                  marginTop:
+                                    novedadesItems.length > 0 ? "8px" : "0",
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    fontFamily: "var(--mono)",
+                                    fontSize: "10px",
+                                    color: "rgba(200,146,42,.65)",
+                                    textTransform: "uppercase",
+                                    letterSpacing: ".07em",
+                                    marginBottom: "8px",
+                                    paddingLeft: "2px",
+                                  }}
+                                >
                                   🏥 Órdenes OS pendientes de emitir
                                 </div>
                                 {ordenesHistPendientes.map((o, i) => {
-                                  const sesObj = sesiones.find((s) => s.id === o.sesionId);
-                                  const estadoIcon = o.estado === "cancelo" ? "❌" : o.estado === "inasistencia" ? "🚫" : "🔄";
+                                  const sesObj = sesiones.find(
+                                    (s) => s.id === o.sesionId,
+                                  );
+                                  const estadoIcon =
+                                    o.estado === "cancelo"
+                                      ? "❌"
+                                      : o.estado === "inasistencia"
+                                        ? "🚫"
+                                        : "🔄";
                                   return (
-                                    <div key={o.sesionId} style={{ background: "rgba(255,255,255,.05)", border: "1px solid rgba(200,146,42,.2)", borderLeft: "3px solid #7AB8E0", borderRadius: "10px", padding: "10px 14px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "10px" }}>
-                                      <div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "rgba(122,184,224,.15)", border: "1.5px solid rgba(122,184,224,.4)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--mono)", fontSize: "9px", color: "#7AB8E0", fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
+                                    <div
+                                      key={o.sesionId}
+                                      style={{
+                                        background: "rgba(255,255,255,.05)",
+                                        border: "1px solid rgba(200,146,42,.2)",
+                                        borderLeft: "3px solid #7AB8E0",
+                                        borderRadius: "10px",
+                                        padding: "10px 14px",
+                                        marginBottom: "8px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "10px",
+                                      }}
+                                    >
+                                      <div
+                                        style={{
+                                          width: "22px",
+                                          height: "22px",
+                                          borderRadius: "50%",
+                                          background: "rgba(122,184,224,.15)",
+                                          border:
+                                            "1.5px solid rgba(122,184,224,.4)",
+                                          display: "flex",
+                                          alignItems: "center",
+                                          justifyContent: "center",
+                                          fontFamily: "var(--mono)",
+                                          fontSize: "9px",
+                                          color: "#7AB8E0",
+                                          fontWeight: 700,
+                                          flexShrink: 0,
+                                        }}
+                                      >
+                                        {i + 1}
+                                      </div>
                                       <div style={{ flex: 1 }}>
-                                        <span style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,.9)" }}>{o.pacNombre}</span>
-                                        {o.obraSocial && <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.35)", marginLeft: "8px" }}>· {o.obraSocial}</span>}
-                                        <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.25)", marginLeft: "8px" }}>{estadoIcon} {o.fecha} {o.hora}</span>
+                                        <span
+                                          style={{
+                                            fontFamily: "var(--sans)",
+                                            fontSize: "13px",
+                                            fontWeight: 700,
+                                            color: "rgba(255,255,255,.9)",
+                                          }}
+                                        >
+                                          {o.pacNombre}
+                                        </span>
+                                        {o.obraSocial && (
+                                          <span
+                                            style={{
+                                              fontFamily: "var(--mono)",
+                                              fontSize: "10px",
+                                              color: "rgba(255,255,255,.35)",
+                                              marginLeft: "8px",
+                                            }}
+                                          >
+                                            · {o.obraSocial}
+                                          </span>
+                                        )}
+                                        <span
+                                          style={{
+                                            fontFamily: "var(--mono)",
+                                            fontSize: "10px",
+                                            color: "rgba(255,255,255,.25)",
+                                            marginLeft: "8px",
+                                          }}
+                                        >
+                                          {estadoIcon} {o.fecha} {o.hora}
+                                        </span>
                                       </div>
                                       <button
-                                        onClick={() => sesObj && setModalTurno({ mode: "editar", sesion: sesObj, fecha: sesObj.fecha, hora: sesObj.horaInicio })}
-                                        style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.3)", padding: "2px 6px", borderRadius: "6px" }}
-                                      >Abrir →</button>
+                                        onClick={() =>
+                                          sesObj &&
+                                          setModalTurno({
+                                            mode: "editar",
+                                            sesion: sesObj,
+                                            fecha: sesObj.fecha,
+                                            hora: sesObj.horaInicio,
+                                          })
+                                        }
+                                        style={{
+                                          background: "none",
+                                          border: "none",
+                                          cursor: "pointer",
+                                          fontFamily: "var(--mono)",
+                                          fontSize: "10px",
+                                          color: "rgba(255,255,255,.3)",
+                                          padding: "2px 6px",
+                                          borderRadius: "6px",
+                                        }}
+                                      >
+                                        Abrir →
+                                      </button>
                                     </div>
                                   );
                                 })}
@@ -9270,56 +10174,237 @@
                   <div style={{ marginBottom: "6px" }}>
                     {/* Tab header */}
                     <div
-                      onClick={() => { const next = !showSubRecordatorios; setShowSubRecordatorios(next); if (next) { setShowSubNovedades(false); setShowSubCoordinar(false); } }}
+                      onClick={() => {
+                        const next = !showSubRecordatorios;
+                        setShowSubRecordatorios(next);
+                        if (next) {
+                          setShowSubNovedades(false);
+                          setShowSubCoordinar(false);
+                        }
+                      }}
                       style={{
-                        display: "flex", alignItems: "center", justifyContent: "space-between",
-                        padding: "9px 14px", cursor: "pointer", transition: "all .2s",
-                        borderRadius: showSubRecordatorios ? "12px 12px 0 0" : "12px",
-                        background: showSubRecordatorios ? "rgba(74,124,95,.3)" : "rgba(255,255,255,.04)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "9px 14px",
+                        cursor: "pointer",
+                        transition: "all .2s",
+                        borderRadius: showSubRecordatorios
+                          ? "12px 12px 0 0"
+                          : "12px",
+                        background: showSubRecordatorios
+                          ? "rgba(74,124,95,.3)"
+                          : "rgba(255,255,255,.04)",
                         border: `1.5px solid ${showSubRecordatorios ? "rgba(74,124,95,.55)" : "rgba(255,255,255,.1)"}`,
                         borderBottom: showSubRecordatorios ? "none" : undefined,
                       }}
                     >
-                      <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: showSubRecordatorios ? "#A8DDB8" : "rgba(200,146,42,.75)", textTransform: "uppercase", letterSpacing: ".07em", display: "flex", alignItems: "center", gap: "6px", fontWeight: 700 }}>
+                      <span
+                        style={{
+                          fontFamily: "var(--mono)",
+                          fontSize: "10px",
+                          color: showSubRecordatorios
+                            ? "#A8DDB8"
+                            : "rgba(200,146,42,.75)",
+                          textTransform: "uppercase",
+                          letterSpacing: ".07em",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          fontWeight: 700,
+                        }}
+                      >
                         {showSubRecordatorios ? "▼" : "▶"} 📌 Recordatorios
                         {recordatoriosActivos.length > 0 && (
-                          <span style={{ background: "var(--do)", color: "var(--vd)", borderRadius: "10px", padding: "1px 6px", fontSize: "9px", fontWeight: 700 }}>
+                          <span
+                            style={{
+                              background: "var(--do)",
+                              color: "var(--vd)",
+                              borderRadius: "10px",
+                              padding: "1px 6px",
+                              fontSize: "9px",
+                              fontWeight: 700,
+                            }}
+                          >
                             {recordatoriosActivos.length}
                           </span>
                         )}
                       </span>
                       <button
-                        onClick={(e) => { e.stopPropagation(); setRecDraft({ titulo: "", descripcion: "" }); setModalNuevoRec(true); }}
-                        style={{ padding: "3px 10px", borderRadius: "50px", border: "1.5px solid rgba(200,146,42,.4)", background: "rgba(200,146,42,.1)", color: "var(--do)", fontFamily: "var(--sans)", fontSize: "11px", fontWeight: 700, cursor: "pointer" }}
-                      >+ Agregar</button>
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setRecDraft({ titulo: "", descripcion: "" });
+                          setModalNuevoRec(true);
+                        }}
+                        style={{
+                          padding: "3px 10px",
+                          borderRadius: "50px",
+                          border: "1.5px solid rgba(200,146,42,.4)",
+                          background: "rgba(200,146,42,.1)",
+                          color: "var(--do)",
+                          fontFamily: "var(--sans)",
+                          fontSize: "11px",
+                          fontWeight: 700,
+                          cursor: "pointer",
+                        }}
+                      >
+                        + Agregar
+                      </button>
                     </div>
                     {/* Content area */}
                     {showSubRecordatorios && (
-                      <div style={{ background: "rgba(42,77,56,.45)", border: "1.5px solid rgba(74,124,95,.55)", borderTop: "none", borderRadius: "0 0 12px 12px", padding: "12px" }}>
+                      <div
+                        style={{
+                          background: "rgba(42,77,56,.45)",
+                          border: "1.5px solid rgba(74,124,95,.55)",
+                          borderTop: "none",
+                          borderRadius: "0 0 12px 12px",
+                          padding: "12px",
+                        }}
+                      >
                         {(() => {
-                          const todosRec = recordatoriosSemana.filter((r) => r.semana === semanaKey);
-                          if (todosRec.length === 0) return (
-                            <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.3)", padding: "4px 6px" }}>
-                              Sin recordatorios esta semana.
-                            </div>
+                          const todosRec = recordatoriosSemana.filter(
+                            (r) => r.semana === semanaKey,
                           );
+                          if (todosRec.length === 0)
+                            return (
+                              <div
+                                style={{
+                                  fontFamily: "var(--mono)",
+                                  fontSize: "11px",
+                                  color: "rgba(255,255,255,.3)",
+                                  padding: "4px 6px",
+                                }}
+                              >
+                                Sin recordatorios esta semana.
+                              </div>
+                            );
                           return todosRec.map((r) => (
-                            <div key={r.id} style={{ background: r.resuelto ? "rgba(125,204,144,.07)" : "rgba(255,255,255,.05)", border: `1px solid ${r.resuelto ? "rgba(125,204,144,.2)" : "rgba(200,146,42,.2)"}`, borderLeft: `3px solid ${r.resuelto ? "#7DCC90" : "var(--vc)"}`, borderRadius: "10px", padding: "10px 14px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "10px", opacity: r.resuelto ? 0.65 : 1, transition: "opacity .2s" }}>
+                            <div
+                              key={r.id}
+                              style={{
+                                background: r.resuelto
+                                  ? "rgba(125,204,144,.07)"
+                                  : "rgba(255,255,255,.05)",
+                                border: `1px solid ${r.resuelto ? "rgba(125,204,144,.2)" : "rgba(200,146,42,.2)"}`,
+                                borderLeft: `3px solid ${r.resuelto ? "#7DCC90" : "var(--vc)"}`,
+                                borderRadius: "10px",
+                                padding: "10px 14px",
+                                marginBottom: "8px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "10px",
+                                opacity: r.resuelto ? 0.65 : 1,
+                                transition: "opacity .2s",
+                              }}
+                            >
                               {/* Checkbox */}
                               <div
                                 onClick={() => resolverRecordatorio(r.id)}
-                                title={r.resuelto ? "Desmarcar" : "Marcar como ocupado"}
-                                style={{ width: "20px", height: "20px", borderRadius: "5px", border: `2.5px solid ${r.resuelto ? "#7DCC90" : "var(--do)"}`, background: r.resuelto ? "rgba(125,204,144,.25)" : "rgba(200,146,42,.1)", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s", color: "#7DCC90", fontSize: "13px", fontWeight: 700 }}
-                              >{r.resuelto ? "✓" : ""}</div>
+                                title={
+                                  r.resuelto
+                                    ? "Desmarcar"
+                                    : "Marcar como ocupado"
+                                }
+                                style={{
+                                  width: "20px",
+                                  height: "20px",
+                                  borderRadius: "5px",
+                                  border: `2.5px solid ${r.resuelto ? "#7DCC90" : "var(--do)"}`,
+                                  background: r.resuelto
+                                    ? "rgba(125,204,144,.25)"
+                                    : "rgba(200,146,42,.1)",
+                                  cursor: "pointer",
+                                  flexShrink: 0,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  transition: "all .15s",
+                                  color: "#7DCC90",
+                                  fontSize: "13px",
+                                  fontWeight: 700,
+                                }}
+                              >
+                                {r.resuelto ? "✓" : ""}
+                              </div>
                               {/* Contenido */}
                               <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,.9)", lineHeight: 1.3, textDecoration: r.resuelto ? "line-through" : "none" }}>{r.titulo}</div>
-                                {r.descripcion && <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.4)", marginTop: "2px", lineHeight: 1.4 }}>{r.descripcion}</div>}
+                                <div
+                                  style={{
+                                    fontFamily: "var(--sans)",
+                                    fontSize: "13px",
+                                    fontWeight: 700,
+                                    color: "rgba(255,255,255,.9)",
+                                    lineHeight: 1.3,
+                                    textDecoration: r.resuelto
+                                      ? "line-through"
+                                      : "none",
+                                  }}
+                                >
+                                  {r.titulo}
+                                </div>
+                                {r.descripcion && (
+                                  <div
+                                    style={{
+                                      fontFamily: "var(--mono)",
+                                      fontSize: "11px",
+                                      color: "rgba(255,255,255,.4)",
+                                      marginTop: "2px",
+                                      lineHeight: 1.4,
+                                    }}
+                                  >
+                                    {r.descripcion}
+                                  </div>
+                                )}
                               </div>
                               {/* Acciones */}
-                              <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
-                                <button onClick={() => abrirEditRec(r)} title="Editar" style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1.5px solid rgba(200,146,42,.3)", background: "rgba(200,146,42,.08)", color: "var(--do)", cursor: "pointer", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center" }}>✏️</button>
-                                <button onClick={() => eliminarRecordatorio(r.id, r.titulo)} title="Eliminar" style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1.5px solid rgba(200,80,80,.3)", background: "rgba(200,80,80,.08)", color: "#FF8888", cursor: "pointer", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center" }}>🗑️</button>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  gap: "4px",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                <button
+                                  onClick={() => abrirEditRec(r)}
+                                  title="Editar"
+                                  style={{
+                                    width: "28px",
+                                    height: "28px",
+                                    borderRadius: "8px",
+                                    border: "1.5px solid rgba(200,146,42,.3)",
+                                    background: "rgba(200,146,42,.08)",
+                                    color: "var(--do)",
+                                    cursor: "pointer",
+                                    fontSize: "13px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                  }}
+                                >
+                                  ✏️
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    eliminarRecordatorio(r.id, r.titulo)
+                                  }
+                                  title="Eliminar"
+                                  style={{
+                                    width: "28px",
+                                    height: "28px",
+                                    borderRadius: "8px",
+                                    border: "1.5px solid rgba(200,80,80,.3)",
+                                    background: "rgba(200,80,80,.08)",
+                                    color: "#FF8888",
+                                    cursor: "pointer",
+                                    fontSize: "13px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                  }}
+                                >
+                                  🗑️
+                                </button>
                               </div>
                             </div>
                           ));
@@ -9332,76 +10417,352 @@
                   <div style={{ marginBottom: "4px" }}>
                     {/* Tab header */}
                     <div
-                      onClick={() => { const next = !showSubCoordinar; setShowSubCoordinar(next); if (next) { setShowSubNovedades(false); setShowSubRecordatorios(false); } }}
+                      onClick={() => {
+                        const next = !showSubCoordinar;
+                        setShowSubCoordinar(next);
+                        if (next) {
+                          setShowSubNovedades(false);
+                          setShowSubRecordatorios(false);
+                        }
+                      }}
                       style={{
-                        display: "flex", alignItems: "center", justifyContent: "space-between",
-                        padding: "9px 14px", cursor: "pointer", transition: "all .2s",
-                        borderRadius: showSubCoordinar ? "12px 12px 0 0" : "12px",
-                        background: showSubCoordinar ? "rgba(74,124,95,.3)" : "rgba(255,255,255,.04)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "9px 14px",
+                        cursor: "pointer",
+                        transition: "all .2s",
+                        borderRadius: showSubCoordinar
+                          ? "12px 12px 0 0"
+                          : "12px",
+                        background: showSubCoordinar
+                          ? "rgba(74,124,95,.3)"
+                          : "rgba(255,255,255,.04)",
                         border: `1.5px solid ${showSubCoordinar ? "rgba(74,124,95,.55)" : "rgba(255,255,255,.1)"}`,
                         borderBottom: showSubCoordinar ? "none" : undefined,
                       }}
                     >
-                      <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: showSubCoordinar ? "#A8DDB8" : "rgba(200,146,42,.75)", textTransform: "uppercase", letterSpacing: ".07em", display: "flex", alignItems: "center", gap: "6px", fontWeight: 700 }}>
+                      <span
+                        style={{
+                          fontFamily: "var(--mono)",
+                          fontSize: "10px",
+                          color: showSubCoordinar
+                            ? "#A8DDB8"
+                            : "rgba(200,146,42,.75)",
+                          textTransform: "uppercase",
+                          letterSpacing: ".07em",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          fontWeight: 700,
+                        }}
+                      >
                         {showSubCoordinar ? "▼" : "▶"} 🔄 Coordinar
-                        {(coordSemana.length + coordManualesPendientes.length) > 0 && (
-                          <span style={{ background: "var(--do)", color: "var(--vd)", borderRadius: "10px", padding: "1px 6px", fontSize: "9px", fontWeight: 700 }}>
-                            {coordSemana.length + coordManualesPendientes.length}
+                        {coordSemana.length + coordManualesPendientes.length >
+                          0 && (
+                          <span
+                            style={{
+                              background: "var(--do)",
+                              color: "var(--vd)",
+                              borderRadius: "10px",
+                              padding: "1px 6px",
+                              fontSize: "9px",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {coordSemana.length +
+                              coordManualesPendientes.length}
                           </span>
                         )}
                       </span>
                       <button
-                        onClick={(e) => { e.stopPropagation(); setCoordDraft({ titulo: "", descripcion: "" }); setModalNuevoCoord(true); }}
-                        style={{ padding: "3px 10px", borderRadius: "50px", border: "1.5px solid rgba(200,146,42,.4)", background: "rgba(200,146,42,.1)", color: "var(--do)", fontFamily: "var(--sans)", fontSize: "11px", fontWeight: 700, cursor: "pointer" }}
-                      >+ Agregar</button>
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCoordDraft({ titulo: "", descripcion: "" });
+                          setModalNuevoCoord(true);
+                        }}
+                        style={{
+                          padding: "3px 10px",
+                          borderRadius: "50px",
+                          border: "1.5px solid rgba(200,146,42,.4)",
+                          background: "rgba(200,146,42,.1)",
+                          color: "var(--do)",
+                          fontFamily: "var(--sans)",
+                          fontSize: "11px",
+                          fontWeight: 700,
+                          cursor: "pointer",
+                        }}
+                      >
+                        + Agregar
+                      </button>
                     </div>
                     {/* Content area */}
                     {showSubCoordinar && (
-                      <div style={{ background: "rgba(42,77,56,.45)", border: "1.5px solid rgba(74,124,95,.55)", borderTop: "none", borderRadius: "0 0 12px 12px", padding: "12px" }}>
-                        {(coordSemana.length + coordManuales.length) === 0 ? (
-                          <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.3)", padding: "4px 6px" }}>
+                      <div
+                        style={{
+                          background: "rgba(42,77,56,.45)",
+                          border: "1.5px solid rgba(74,124,95,.55)",
+                          borderTop: "none",
+                          borderRadius: "0 0 12px 12px",
+                          padding: "12px",
+                        }}
+                      >
+                        {coordSemana.length + coordManuales.length === 0 ? (
+                          <div
+                            style={{
+                              fontFamily: "var(--mono)",
+                              fontSize: "11px",
+                              color: "rgba(255,255,255,.3)",
+                              padding: "4px 6px",
+                            }}
+                          >
                             Sin pacientes a coordinar esta semana.
                           </div>
                         ) : (
                           <>
                             {coordSemana.map((c) => {
-                              const pac = pacientes.find((p) => p.id === c.pacienteId);
-                              const nombre = pac ? `${pac.nombre} ${pac.apellido}` : "Paciente no encontrado";
+                              const pac = pacientes.find(
+                                (p) => p.id === c.pacienteId,
+                              );
+                              const nombre = pac
+                                ? `${pac.nombre} ${pac.apellido}`
+                                : "Paciente no encontrado";
                               return (
-                                <div key={c.id} style={{ background: "rgba(255,255,255,.05)", border: "1px solid rgba(200,146,42,.2)", borderLeft: "3px solid var(--do)", borderRadius: "10px", padding: "10px 14px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "12px" }}>
-                                  <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "rgba(200,146,42,.2)", border: "2px solid rgba(200,146,42,.4)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--serif)", fontSize: "14px", color: "var(--do)", fontWeight: 700, flexShrink: 0 }}>
+                                <div
+                                  key={c.id}
+                                  style={{
+                                    background: "rgba(255,255,255,.05)",
+                                    border: "1px solid rgba(200,146,42,.2)",
+                                    borderLeft: "3px solid var(--do)",
+                                    borderRadius: "10px",
+                                    padding: "10px 14px",
+                                    marginBottom: "8px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "12px",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      width: "36px",
+                                      height: "36px",
+                                      borderRadius: "50%",
+                                      background: "rgba(200,146,42,.2)",
+                                      border: "2px solid rgba(200,146,42,.4)",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      fontFamily: "var(--serif)",
+                                      fontSize: "14px",
+                                      color: "var(--do)",
+                                      fontWeight: 700,
+                                      flexShrink: 0,
+                                    }}
+                                  >
                                     {pac ? pac.nombre.charAt(0) : "?"}
                                   </div>
                                   <div style={{ flex: 1 }}>
-                                    <div style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,.9)" }}>{nombre}</div>
-                                    <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.4)", marginTop: "2px" }}>
-                                      🔄 Turno flotante · {pac?.frecuencia || "—"} · {pac?.diasHorarios?.map((h) => h.dia).join(", ") || "sin horario fijo"}
+                                    <div
+                                      style={{
+                                        fontFamily: "var(--sans)",
+                                        fontSize: "13px",
+                                        fontWeight: 700,
+                                        color: "rgba(255,255,255,.9)",
+                                      }}
+                                    >
+                                      {nombre}
+                                    </div>
+                                    <div
+                                      style={{
+                                        fontFamily: "var(--mono)",
+                                        fontSize: "10px",
+                                        color: "rgba(255,255,255,.4)",
+                                        marginTop: "2px",
+                                      }}
+                                    >
+                                      🔄 Turno flotante ·{" "}
+                                      {pac?.frecuencia || "—"} ·{" "}
+                                      {pac?.diasHorarios
+                                        ?.map((h) => h.dia)
+                                        .join(", ") || "sin horario fijo"}
                                     </div>
                                   </div>
-                                  <div style={{ display: "flex", gap: "4px", flexShrink: 0, alignItems: "center" }}>
-                                    <div onClick={() => resolverCoord(c.id)} title="Marcar como coordinado" style={{ width: "20px", height: "20px", borderRadius: "5px", border: "2.5px solid #7DCC90", background: "rgba(125,204,144,.1)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s" }} />
-                                    <button onClick={() => eliminarCoordAuto(c.id, nombre)} title="Eliminar" style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1.5px solid rgba(200,80,80,.3)", background: "rgba(200,80,80,.08)", color: "#FF8888", cursor: "pointer", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center" }}>🗑️</button>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      gap: "4px",
+                                      flexShrink: 0,
+                                      alignItems: "center",
+                                    }}
+                                  >
+                                    <div
+                                      onClick={() => resolverCoord(c.id)}
+                                      title="Marcar como coordinado"
+                                      style={{
+                                        width: "20px",
+                                        height: "20px",
+                                        borderRadius: "5px",
+                                        border: "2.5px solid #7DCC90",
+                                        background: "rgba(125,204,144,.1)",
+                                        cursor: "pointer",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        transition: "all .15s",
+                                      }}
+                                    />
+                                    <button
+                                      onClick={() =>
+                                        eliminarCoordAuto(c.id, nombre)
+                                      }
+                                      title="Eliminar"
+                                      style={{
+                                        width: "28px",
+                                        height: "28px",
+                                        borderRadius: "8px",
+                                        border:
+                                          "1.5px solid rgba(200,80,80,.3)",
+                                        background: "rgba(200,80,80,.08)",
+                                        color: "#FF8888",
+                                        cursor: "pointer",
+                                        fontSize: "13px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                      }}
+                                    >
+                                      🗑️
+                                    </button>
                                   </div>
                                 </div>
                               );
                             })}
                             {coordManuales.map((m) => (
-                              <div key={m.id} style={{ background: m.coordinado ? "rgba(125,204,144,.07)" : "rgba(255,255,255,.05)", border: `1px solid ${m.coordinado ? "rgba(125,204,144,.2)" : "rgba(200,146,42,.2)"}`, borderLeft: `3px solid ${m.coordinado ? "#7DCC90" : "var(--vc)"}`, borderRadius: "10px", padding: "10px 14px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "10px", opacity: m.coordinado ? 0.65 : 1, transition: "opacity .2s" }}>
+                              <div
+                                key={m.id}
+                                style={{
+                                  background: m.coordinado
+                                    ? "rgba(125,204,144,.07)"
+                                    : "rgba(255,255,255,.05)",
+                                  border: `1px solid ${m.coordinado ? "rgba(125,204,144,.2)" : "rgba(200,146,42,.2)"}`,
+                                  borderLeft: `3px solid ${m.coordinado ? "#7DCC90" : "var(--vc)"}`,
+                                  borderRadius: "10px",
+                                  padding: "10px 14px",
+                                  marginBottom: "8px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "10px",
+                                  opacity: m.coordinado ? 0.65 : 1,
+                                  transition: "opacity .2s",
+                                }}
+                              >
                                 {/* Checkbox coordinado */}
                                 <div
                                   onClick={() => resolverCoordManual(m.id)}
-                                  title={m.coordinado ? "Desmarcar" : "Marcar como coordinado"}
-                                  style={{ width: "20px", height: "20px", borderRadius: "5px", border: `2.5px solid ${m.coordinado ? "#7DCC90" : "#7DCC90"}`, background: m.coordinado ? "rgba(125,204,144,.25)" : "rgba(125,204,144,.1)", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", transition: "all .15s", color: "#7DCC90", fontSize: "13px", fontWeight: 700 }}
-                                >{m.coordinado ? "✓" : ""}</div>
+                                  title={
+                                    m.coordinado
+                                      ? "Desmarcar"
+                                      : "Marcar como coordinado"
+                                  }
+                                  style={{
+                                    width: "20px",
+                                    height: "20px",
+                                    borderRadius: "5px",
+                                    border: `2.5px solid ${m.coordinado ? "#7DCC90" : "#7DCC90"}`,
+                                    background: m.coordinado
+                                      ? "rgba(125,204,144,.25)"
+                                      : "rgba(125,204,144,.1)",
+                                    cursor: "pointer",
+                                    flexShrink: 0,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    transition: "all .15s",
+                                    color: "#7DCC90",
+                                    fontSize: "13px",
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  {m.coordinado ? "✓" : ""}
+                                </div>
                                 {/* Contenido */}
                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                  <div style={{ fontFamily: "var(--sans)", fontSize: "13px", fontWeight: 700, color: "rgba(255,255,255,.9)", lineHeight: 1.3, textDecoration: m.coordinado ? "line-through" : "none" }}>{m.titulo}</div>
-                                  {m.descripcion && <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.4)", marginTop: "2px", lineHeight: 1.4 }}>{m.descripcion}</div>}
+                                  <div
+                                    style={{
+                                      fontFamily: "var(--sans)",
+                                      fontSize: "13px",
+                                      fontWeight: 700,
+                                      color: "rgba(255,255,255,.9)",
+                                      lineHeight: 1.3,
+                                      textDecoration: m.coordinado
+                                        ? "line-through"
+                                        : "none",
+                                    }}
+                                  >
+                                    {m.titulo}
+                                  </div>
+                                  {m.descripcion && (
+                                    <div
+                                      style={{
+                                        fontFamily: "var(--mono)",
+                                        fontSize: "11px",
+                                        color: "rgba(255,255,255,.4)",
+                                        marginTop: "2px",
+                                        lineHeight: 1.4,
+                                      }}
+                                    >
+                                      {m.descripcion}
+                                    </div>
+                                  )}
                                 </div>
                                 {/* Acciones */}
-                                <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
-                                  <button onClick={() => abrirEditCoord(m)} title="Editar" style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1.5px solid rgba(200,146,42,.3)", background: "rgba(200,146,42,.08)", color: "var(--do)", cursor: "pointer", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center" }}>✏️</button>
-                                  <button onClick={() => eliminarCoordManual(m.id, m.titulo)} title="Eliminar" style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1.5px solid rgba(200,80,80,.3)", background: "rgba(200,80,80,.08)", color: "#FF8888", cursor: "pointer", fontSize: "13px", display: "flex", alignItems: "center", justifyContent: "center" }}>🗑️</button>
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    gap: "4px",
+                                    flexShrink: 0,
+                                  }}
+                                >
+                                  <button
+                                    onClick={() => abrirEditCoord(m)}
+                                    title="Editar"
+                                    style={{
+                                      width: "28px",
+                                      height: "28px",
+                                      borderRadius: "8px",
+                                      border: "1.5px solid rgba(200,146,42,.3)",
+                                      background: "rgba(200,146,42,.08)",
+                                      color: "var(--do)",
+                                      cursor: "pointer",
+                                      fontSize: "13px",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                    }}
+                                  >
+                                    ✏️
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      eliminarCoordManual(m.id, m.titulo)
+                                    }
+                                    title="Eliminar"
+                                    style={{
+                                      width: "28px",
+                                      height: "28px",
+                                      borderRadius: "8px",
+                                      border: "1.5px solid rgba(200,80,80,.3)",
+                                      background: "rgba(200,80,80,.08)",
+                                      color: "#FF8888",
+                                      cursor: "pointer",
+                                      fontSize: "13px",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                    }}
+                                  >
+                                    🗑️
+                                  </button>
                                 </div>
                               </div>
                             ))}
@@ -9410,7 +10771,6 @@
                       </div>
                     )}
                   </div>
-
                 </div>
               )}
             </div>
@@ -9426,11 +10786,24 @@
                 flexWrap: "wrap",
               }}
             >
-
               {vista === "semanal" && (
                 <>
                   {semanaActivada && (
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", padding: "6px 14px", borderRadius: "50px", border: "2px solid rgba(125,204,144,.35)", background: "rgba(125,204,144,.08)", fontFamily: "var(--mono)", fontSize: "11px", color: "#7DCC90", fontWeight: 700 }}>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        padding: "6px 14px",
+                        borderRadius: "50px",
+                        border: "2px solid rgba(125,204,144,.35)",
+                        background: "rgba(125,204,144,.08)",
+                        fontFamily: "var(--mono)",
+                        fontSize: "11px",
+                        color: "#7DCC90",
+                        fontWeight: 700,
+                      }}
+                    >
                       ✓ Semana activada
                     </span>
                   )}
@@ -9609,35 +10982,52 @@
             </div>
 
             {/* PESTAÑA SELECTOR DE VISTA — sobre LUN+MAR */}
-            <div style={{ paddingLeft: "56px", marginBottom: "-2px", position: "relative", zIndex: 10 }}>
-              <div style={{
-                display: "inline-flex",
-                alignItems: "center",
-                background: "var(--vd)",
-                borderRadius: "14px 14px 0 0",
-                padding: "3px",
-                border: "1.5px solid rgba(200,146,42,.4)",
-                borderBottom: "2px solid var(--vd)",
-                boxShadow: "0 -3px 10px rgba(30,61,43,.18)",
-                gap: "1px",
-              }}>
-                {[["semanal","📅","Semanal"],["mensual","🗓️","Mensual"]].map(([v, icon, lbl]) => (
-                  <button key={v} onClick={() => setVista(v)} style={{
-                    padding: "4px 16px",
-                    borderRadius: "50px",
-                    border: "none",
-                    background: vista === v ? "var(--do)" : "transparent",
-                    color: vista === v ? "var(--vd)" : "rgba(255,255,255,.52)",
-                    fontFamily: "var(--mono)",
-                    fontSize: "10px",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    transition: "all .18s",
-                    textTransform: "uppercase",
-                    letterSpacing: ".06em",
-                    whiteSpace: "nowrap",
-                    lineHeight: 1,
-                  }}>
+            <div
+              style={{
+                paddingLeft: "56px",
+                marginBottom: "-2px",
+                position: "relative",
+                zIndex: 10,
+              }}
+            >
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  background: "var(--vd)",
+                  borderRadius: "14px 14px 0 0",
+                  padding: "3px",
+                  border: "1.5px solid rgba(200,146,42,.4)",
+                  borderBottom: "2px solid var(--vd)",
+                  boxShadow: "0 -3px 10px rgba(30,61,43,.18)",
+                  gap: "1px",
+                }}
+              >
+                {[
+                  ["semanal", "📅", "Semanal"],
+                  ["mensual", "🗓️", "Mensual"],
+                ].map(([v, icon, lbl]) => (
+                  <button
+                    key={v}
+                    onClick={() => setVista(v)}
+                    style={{
+                      padding: "4px 16px",
+                      borderRadius: "50px",
+                      border: "none",
+                      background: vista === v ? "var(--do)" : "transparent",
+                      color:
+                        vista === v ? "var(--vd)" : "rgba(255,255,255,.52)",
+                      fontFamily: "var(--mono)",
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      transition: "all .18s",
+                      textTransform: "uppercase",
+                      letterSpacing: ".06em",
+                      whiteSpace: "nowrap",
+                      lineHeight: 1,
+                    }}
+                  >
                     {icon} {lbl}
                   </button>
                 ))}
@@ -9774,7 +11164,10 @@
               ReactDOM.createPortal(
                 <div
                   className="modal-overlay"
-                  onClick={() => { setModalConfirmActivar(false); setPinActivar(""); }}
+                  onClick={() => {
+                    setModalConfirmActivar(false);
+                    setPinActivar("");
+                  }}
                 >
                   <div
                     className="modal-card"
@@ -9793,12 +11186,31 @@
                       <div style={{ display: "flex", gap: "6px" }}>
                         <button
                           className="modal-icon-btn"
-                          onClick={() => { setModalConfirmActivar(false); setPinActivar(""); activarSemana(); }}
+                          onClick={() => {
+                            setModalConfirmActivar(false);
+                            setPinActivar("");
+                            activarSemana();
+                          }}
                           title="Confirmar"
                           disabled={pinActivar !== "123"}
-                          style={{ opacity: pinActivar === "123" ? 1 : 0.35, cursor: pinActivar === "123" ? "pointer" : "not-allowed" }}
-                        >✓</button>
-                        <button className="modal-icon-btn" onClick={() => { setModalConfirmActivar(false); setPinActivar(""); }} title="Cancelar">✕</button>
+                          style={{
+                            opacity: pinActivar === "123" ? 1 : 0.35,
+                            cursor:
+                              pinActivar === "123" ? "pointer" : "not-allowed",
+                          }}
+                        >
+                          ✓
+                        </button>
+                        <button
+                          className="modal-icon-btn"
+                          onClick={() => {
+                            setModalConfirmActivar(false);
+                            setPinActivar("");
+                          }}
+                          title="Cancelar"
+                        >
+                          ✕
+                        </button>
                       </div>
                     </div>
                     <div style={{ padding: "20px 24px 24px" }}>
@@ -9846,7 +11258,16 @@
                       </div>
 
                       <div style={{ marginBottom: "20px" }}>
-                        <div style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "rgba(255,255,255,.6)", marginBottom: "8px", textTransform: "uppercase", letterSpacing: ".05em" }}>
+                        <div
+                          style={{
+                            fontFamily: "var(--mono)",
+                            fontSize: "11px",
+                            color: "rgba(255,255,255,.6)",
+                            marginBottom: "8px",
+                            textTransform: "uppercase",
+                            letterSpacing: ".05em",
+                          }}
+                        >
                           Confirmación de seguridad
                         </div>
                         <input
@@ -9855,12 +11276,16 @@
                           placeholder="Escribe 123 para confirmar"
                           value={pinActivar}
                           onChange={(e) => setPinActivar(e.target.value)}
-                          style={{ width: "100%", boxSizing: "border-box", textAlign: "center", letterSpacing: "2px", fontWeight: "bold" }}
+                          style={{
+                            width: "100%",
+                            boxSizing: "border-box",
+                            textAlign: "center",
+                            letterSpacing: "2px",
+                            fontWeight: "bold",
+                          }}
                           autoFocus
                         />
                       </div>
-
-
                     </div>
                   </div>
                 </div>,
@@ -9889,8 +11314,23 @@
                     <div className="modal-header">
                       <span className="modal-title">📌 Nuevo recordatorio</span>
                       <div style={{ display: "flex", gap: "6px" }}>
-                        <button className="modal-icon-btn" onClick={guardarRecordatorio} title="Guardar">💾</button>
-                        <button className="modal-icon-btn" onClick={() => { setModalNuevoRec(false); setRecDraft({ titulo: "", descripcion: "" }); }} title="Cancelar">✕</button>
+                        <button
+                          className="modal-icon-btn"
+                          onClick={guardarRecordatorio}
+                          title="Guardar"
+                        >
+                          💾
+                        </button>
+                        <button
+                          className="modal-icon-btn"
+                          onClick={() => {
+                            setModalNuevoRec(false);
+                            setRecDraft({ titulo: "", descripcion: "" });
+                          }}
+                          title="Cancelar"
+                        >
+                          ✕
+                        </button>
                       </div>
                     </div>
                     <div style={{ padding: "20px 24px 24px" }}>
@@ -9951,7 +11391,6 @@
                           }))
                         }
                       />
-
                     </div>
                   </div>
                 </div>,
@@ -9961,44 +11400,107 @@
             {/* MODAL NUEVO ÍTEM DE COORDINACIÓN */}
             {modalNuevoCoord &&
               ReactDOM.createPortal(
-                <div className="modal-overlay" onClick={() => setModalNuevoCoord(false)}>
+                <div
+                  className="modal-overlay"
+                  onClick={() => setModalNuevoCoord(false)}
+                >
                   <div
                     className="modal-card"
                     style={{ maxWidth: "420px" }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div style={{ height: "4px", background: "linear-gradient(90deg,var(--do),#E8B84B)", borderRadius: "var(--r) var(--r) 0 0" }} />
+                    <div
+                      style={{
+                        height: "4px",
+                        background: "linear-gradient(90deg,var(--do),#E8B84B)",
+                        borderRadius: "var(--r) var(--r) 0 0",
+                      }}
+                    />
                     <div className="modal-header">
-                      <span className="modal-title">🔄 Nuevo ítem de coordinación</span>
+                      <span className="modal-title">
+                        🔄 Nuevo ítem de coordinación
+                      </span>
                       <div style={{ display: "flex", gap: "6px" }}>
-                        <button className="modal-icon-btn" onClick={guardarCoordManual} title="Guardar">💾</button>
-                        <button className="modal-icon-btn" onClick={() => { setModalNuevoCoord(false); setCoordDraft({ titulo: "", descripcion: "" }); }} title="Cancelar">✕</button>
+                        <button
+                          className="modal-icon-btn"
+                          onClick={guardarCoordManual}
+                          title="Guardar"
+                        >
+                          💾
+                        </button>
+                        <button
+                          className="modal-icon-btn"
+                          onClick={() => {
+                            setModalNuevoCoord(false);
+                            setCoordDraft({ titulo: "", descripcion: "" });
+                          }}
+                          title="Cancelar"
+                        >
+                          ✕
+                        </button>
                       </div>
                     </div>
                     <div style={{ padding: "20px 24px 24px" }}>
-                      <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "4px" }}>
+                      <div
+                        style={{
+                          fontFamily: "var(--mono)",
+                          fontSize: "10px",
+                          color: "rgba(255,255,255,.4)",
+                          textTransform: "uppercase",
+                          letterSpacing: ".06em",
+                          marginBottom: "4px",
+                        }}
+                      >
                         Título *
                       </div>
                       <input
                         className="modal-input"
-                        style={{ width: "100%", boxSizing: "border-box", marginBottom: "14px" }}
+                        style={{
+                          width: "100%",
+                          boxSizing: "border-box",
+                          marginBottom: "14px",
+                        }}
                         placeholder="Ej: Coordinar con Valeria turno para el hijo"
                         value={coordDraft.titulo}
-                        onChange={(e) => setCoordDraft((d) => ({ ...d, titulo: e.target.value }))}
-                        onKeyDown={(e) => e.key === "Enter" && guardarCoordManual()}
+                        onChange={(e) =>
+                          setCoordDraft((d) => ({
+                            ...d,
+                            titulo: e.target.value,
+                          }))
+                        }
+                        onKeyDown={(e) =>
+                          e.key === "Enter" && guardarCoordManual()
+                        }
                         autoFocus
                       />
-                      <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "4px" }}>
+                      <div
+                        style={{
+                          fontFamily: "var(--mono)",
+                          fontSize: "10px",
+                          color: "rgba(255,255,255,.4)",
+                          textTransform: "uppercase",
+                          letterSpacing: ".06em",
+                          marginBottom: "4px",
+                        }}
+                      >
                         Descripción (opcional)
                       </div>
                       <input
                         className="modal-input"
-                        style={{ width: "100%", boxSizing: "border-box", marginBottom: "20px" }}
+                        style={{
+                          width: "100%",
+                          boxSizing: "border-box",
+                          marginBottom: "20px",
+                        }}
                         placeholder="Detalles adicionales..."
                         value={coordDraft.descripcion}
-                        onChange={(e) => setCoordDraft((d) => ({ ...d, descripcion: e.target.value }))}
+                        onChange={(e) =>
+                          setCoordDraft((d) => ({
+                            ...d,
+                            descripcion: e.target.value,
+                          }))
+                        }
                       />
-
                     </div>
                   </div>
                 </div>,
@@ -10008,21 +11510,61 @@
             {/* MODAL CONFIRMAR BORRADO */}
             {confirmBorrar &&
               ReactDOM.createPortal(
-                <div className="modal-overlay" onClick={() => setConfirmBorrar(null)}>
-                  <div className="modal-card" style={{ maxWidth: "380px" }} onClick={(e) => e.stopPropagation()}>
-                    <div style={{ height: "4px", background: "linear-gradient(90deg,#C84040,#E87070)", borderRadius: "var(--r) var(--r) 0 0" }} />
+                <div
+                  className="modal-overlay"
+                  onClick={() => setConfirmBorrar(null)}
+                >
+                  <div
+                    className="modal-card"
+                    style={{ maxWidth: "380px" }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div
+                      style={{
+                        height: "4px",
+                        background: "linear-gradient(90deg,#C84040,#E87070)",
+                        borderRadius: "var(--r) var(--r) 0 0",
+                      }}
+                    />
                     <div className="modal-header">
-                      <span className="modal-title" style={{ color: "#FF8888" }}>🗑️ Confirmar eliminación</span>
+                      <span
+                        className="modal-title"
+                        style={{ color: "#FF8888" }}
+                      >
+                        🗑️ Confirmar eliminación
+                      </span>
                       <div style={{ display: "flex", gap: "6px" }}>
-                        <button className="modal-icon-btn danger" onClick={() => { confirmBorrar.fn(); setConfirmBorrar(null); }} title="Eliminar">🗑️</button>
-                        <button className="modal-icon-btn" onClick={() => setConfirmBorrar(null)} title="Cancelar">✕</button>
+                        <button
+                          className="modal-icon-btn danger"
+                          onClick={() => {
+                            confirmBorrar.fn();
+                            setConfirmBorrar(null);
+                          }}
+                          title="Eliminar"
+                        >
+                          🗑️
+                        </button>
+                        <button
+                          className="modal-icon-btn"
+                          onClick={() => setConfirmBorrar(null)}
+                          title="Cancelar"
+                        >
+                          ✕
+                        </button>
                       </div>
                     </div>
                     <div style={{ padding: "20px 24px 24px" }}>
-                      <div style={{ color: "rgba(255,255,255,.82)", fontFamily: "var(--sans)", fontSize: "14px", lineHeight: 1.6, marginBottom: "22px" }}>
+                      <div
+                        style={{
+                          color: "rgba(255,255,255,.82)",
+                          fontFamily: "var(--sans)",
+                          fontSize: "14px",
+                          lineHeight: 1.6,
+                          marginBottom: "22px",
+                        }}
+                      >
                         {confirmBorrar.label}
                       </div>
-
                     </div>
                   </div>
                 </div>,
@@ -10032,44 +11574,102 @@
             {/* MODAL EDITAR RECORDATORIO */}
             {modalEditRec &&
               ReactDOM.createPortal(
-                <div className="modal-overlay" onClick={() => setModalEditRec(null)}>
+                <div
+                  className="modal-overlay"
+                  onClick={() => setModalEditRec(null)}
+                >
                   <div
                     className="modal-card"
                     style={{ maxWidth: "420px" }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div style={{ height: "4px", background: "linear-gradient(90deg,var(--do),#E8B84B)", borderRadius: "var(--r) var(--r) 0 0" }} />
+                    <div
+                      style={{
+                        height: "4px",
+                        background: "linear-gradient(90deg,var(--do),#E8B84B)",
+                        borderRadius: "var(--r) var(--r) 0 0",
+                      }}
+                    />
                     <div className="modal-header">
-                      <span className="modal-title">✏️ Editar recordatorio</span>
+                      <span className="modal-title">
+                        ✏️ Editar recordatorio
+                      </span>
                       <div style={{ display: "flex", gap: "6px" }}>
-                        <button className="modal-icon-btn" onClick={guardarEditRec} title="Guardar">💾</button>
-                        <button className="modal-icon-btn" onClick={() => setModalEditRec(null)} title="Cancelar">✕</button>
+                        <button
+                          className="modal-icon-btn"
+                          onClick={guardarEditRec}
+                          title="Guardar"
+                        >
+                          💾
+                        </button>
+                        <button
+                          className="modal-icon-btn"
+                          onClick={() => setModalEditRec(null)}
+                          title="Cancelar"
+                        >
+                          ✕
+                        </button>
                       </div>
                     </div>
                     <div style={{ padding: "20px 24px 24px" }}>
-                      <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "4px" }}>
+                      <div
+                        style={{
+                          fontFamily: "var(--mono)",
+                          fontSize: "10px",
+                          color: "rgba(255,255,255,.4)",
+                          textTransform: "uppercase",
+                          letterSpacing: ".06em",
+                          marginBottom: "4px",
+                        }}
+                      >
                         Título *
                       </div>
                       <input
                         className="modal-input"
-                        style={{ width: "100%", boxSizing: "border-box", marginBottom: "14px" }}
+                        style={{
+                          width: "100%",
+                          boxSizing: "border-box",
+                          marginBottom: "14px",
+                        }}
                         placeholder="Título del recordatorio"
                         value={recEditDraft.titulo}
-                        onChange={(e) => setRecEditDraft((d) => ({ ...d, titulo: e.target.value }))}
+                        onChange={(e) =>
+                          setRecEditDraft((d) => ({
+                            ...d,
+                            titulo: e.target.value,
+                          }))
+                        }
                         onKeyDown={(e) => e.key === "Enter" && guardarEditRec()}
                         autoFocus
                       />
-                      <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "4px" }}>
+                      <div
+                        style={{
+                          fontFamily: "var(--mono)",
+                          fontSize: "10px",
+                          color: "rgba(255,255,255,.4)",
+                          textTransform: "uppercase",
+                          letterSpacing: ".06em",
+                          marginBottom: "4px",
+                        }}
+                      >
                         Descripción (opcional)
                       </div>
                       <input
                         className="modal-input"
-                        style={{ width: "100%", boxSizing: "border-box", marginBottom: "20px" }}
+                        style={{
+                          width: "100%",
+                          boxSizing: "border-box",
+                          marginBottom: "20px",
+                        }}
                         placeholder="Detalles adicionales..."
                         value={recEditDraft.descripcion}
-                        onChange={(e) => setRecEditDraft((d) => ({ ...d, descripcion: e.target.value }))}
+                        onChange={(e) =>
+                          setRecEditDraft((d) => ({
+                            ...d,
+                            descripcion: e.target.value,
+                          }))
+                        }
                       />
-
                     </div>
                   </div>
                 </div>,
@@ -10079,44 +11679,104 @@
             {/* MODAL EDITAR COORDINACIÓN MANUAL */}
             {modalEditCoord &&
               ReactDOM.createPortal(
-                <div className="modal-overlay" onClick={() => setModalEditCoord(null)}>
+                <div
+                  className="modal-overlay"
+                  onClick={() => setModalEditCoord(null)}
+                >
                   <div
                     className="modal-card"
                     style={{ maxWidth: "420px" }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div style={{ height: "4px", background: "linear-gradient(90deg,var(--do),#E8B84B)", borderRadius: "var(--r) var(--r) 0 0" }} />
+                    <div
+                      style={{
+                        height: "4px",
+                        background: "linear-gradient(90deg,var(--do),#E8B84B)",
+                        borderRadius: "var(--r) var(--r) 0 0",
+                      }}
+                    />
                     <div className="modal-header">
-                      <span className="modal-title">✏️ Editar ítem de coordinación</span>
+                      <span className="modal-title">
+                        ✏️ Editar ítem de coordinación
+                      </span>
                       <div style={{ display: "flex", gap: "6px" }}>
-                        <button className="modal-icon-btn" onClick={guardarEditCoord} title="Guardar">💾</button>
-                        <button className="modal-icon-btn" onClick={() => setModalEditCoord(null)} title="Cancelar">✕</button>
+                        <button
+                          className="modal-icon-btn"
+                          onClick={guardarEditCoord}
+                          title="Guardar"
+                        >
+                          💾
+                        </button>
+                        <button
+                          className="modal-icon-btn"
+                          onClick={() => setModalEditCoord(null)}
+                          title="Cancelar"
+                        >
+                          ✕
+                        </button>
                       </div>
                     </div>
                     <div style={{ padding: "20px 24px 24px" }}>
-                      <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "4px" }}>
+                      <div
+                        style={{
+                          fontFamily: "var(--mono)",
+                          fontSize: "10px",
+                          color: "rgba(255,255,255,.4)",
+                          textTransform: "uppercase",
+                          letterSpacing: ".06em",
+                          marginBottom: "4px",
+                        }}
+                      >
                         Título *
                       </div>
                       <input
                         className="modal-input"
-                        style={{ width: "100%", boxSizing: "border-box", marginBottom: "14px" }}
+                        style={{
+                          width: "100%",
+                          boxSizing: "border-box",
+                          marginBottom: "14px",
+                        }}
                         placeholder="Título del ítem"
                         value={coordEditDraft.titulo}
-                        onChange={(e) => setCoordEditDraft((d) => ({ ...d, titulo: e.target.value }))}
-                        onKeyDown={(e) => e.key === "Enter" && guardarEditCoord()}
+                        onChange={(e) =>
+                          setCoordEditDraft((d) => ({
+                            ...d,
+                            titulo: e.target.value,
+                          }))
+                        }
+                        onKeyDown={(e) =>
+                          e.key === "Enter" && guardarEditCoord()
+                        }
                         autoFocus
                       />
-                      <div style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "rgba(255,255,255,.4)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: "4px" }}>
+                      <div
+                        style={{
+                          fontFamily: "var(--mono)",
+                          fontSize: "10px",
+                          color: "rgba(255,255,255,.4)",
+                          textTransform: "uppercase",
+                          letterSpacing: ".06em",
+                          marginBottom: "4px",
+                        }}
+                      >
                         Descripción (opcional)
                       </div>
                       <input
                         className="modal-input"
-                        style={{ width: "100%", boxSizing: "border-box", marginBottom: "20px" }}
+                        style={{
+                          width: "100%",
+                          boxSizing: "border-box",
+                          marginBottom: "20px",
+                        }}
                         placeholder="Detalles adicionales..."
                         value={coordEditDraft.descripcion}
-                        onChange={(e) => setCoordEditDraft((d) => ({ ...d, descripcion: e.target.value }))}
+                        onChange={(e) =>
+                          setCoordEditDraft((d) => ({
+                            ...d,
+                            descripcion: e.target.value,
+                          }))
+                        }
                       />
-
                     </div>
                   </div>
                 </div>,
@@ -10225,8 +11885,10 @@
         if (p.vencimientoCredencial) {
           const diff =
             (new Date(p.vencimientoCredencial) - new Date()) / 86400000;
-          if (diff < 30 && diff > 0) alerts.push({ tipo: "warn", texto: "Credencial vence pronto" });
-          if (diff <= 0) alerts.push({ tipo: "warn", texto: "Credencial vencida" });
+          if (diff < 30 && diff > 0)
+            alerts.push({ tipo: "warn", texto: "Credencial vence pronto" });
+          if (diff <= 0)
+            alerts.push({ tipo: "warn", texto: "Credencial vencida" });
         }
         const sesiones = getData("hgsp_sesiones").filter(
           (s) => s.pacienteId === p.id,
@@ -10234,13 +11896,15 @@
         const cobros = getData("hgsp_cobros").filter(
           (c) => c.pacienteId === p.id && !c.cobrado,
         );
-        if (cobros.length > 0) alerts.push({ tipo: "warn", texto: "Cobros pendientes" });
+        if (cobros.length > 0)
+          alerts.push({ tipo: "warn", texto: "Cobros pendientes" });
         if (sesiones.length > 0) {
           const ultima = sesiones.sort((a, b) =>
             b.fecha.localeCompare(a.fecha),
           )[0];
           const diff2 = (new Date() - new Date(ultima.fecha)) / 86400000;
-          if (diff2 > 30) alerts.push({ tipo: "warn", texto: ">30 días sin sesión" });
+          if (diff2 > 30)
+            alerts.push({ tipo: "warn", texto: ">30 días sin sesión" });
         }
         const hoyPA = new Date();
         const diaSemPA = hoyPA.getDay();
@@ -10249,15 +11913,36 @@
         lunesActual.setDate(hoyPA.getDate() + diffLunes);
         lunesActual.setHours(0, 0, 0, 0);
         const lunesStr = lunesActual.toISOString().slice(0, 10);
-        const MESES_PA = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+        const MESES_PA = [
+          "ene",
+          "feb",
+          "mar",
+          "abr",
+          "may",
+          "jun",
+          "jul",
+          "ago",
+          "sep",
+          "oct",
+          "nov",
+          "dic",
+        ];
         sesiones.forEach((s) => {
           if (s.fecha < lunesStr) {
             const tieneUrgente = !!s.alertaUrgente;
-            const tieneNota = !!(s.notasAlertas?.clinica || s.notasAlertas?.admin || s.notasAlertas?.asistencia);
+            const tieneNota = !!(
+              s.notasAlertas?.clinica ||
+              s.notasAlertas?.admin ||
+              s.notasAlertas?.asistencia
+            );
             if (tieneUrgente || tieneNota) {
               const parts = s.fecha.split("-");
-              const fechaTxt = parseInt(parts[2]) + " de " + MESES_PA[parseInt(parts[1]) - 1];
-              alerts.push({ tipo: "urgente", texto: "Tiene pendiente en el turno del " + fechaTxt });
+              const fechaTxt =
+                parseInt(parts[2]) + " de " + MESES_PA[parseInt(parts[1]) - 1];
+              alerts.push({
+                tipo: "urgente",
+                texto: "Tiene pendiente en el turno del " + fechaTxt,
+              });
             }
           }
         });
@@ -10444,18 +12129,59 @@
               <div className="modal-header">
                 {confirmCancel ? (
                   <>
-                    <span style={{ color: "rgba(255,255,255,.85)", fontSize: "13px", fontFamily: "var(--sans)", flex: 1 }}>¿Salir sin guardar los cambios?</span>
+                    <span
+                      style={{
+                        color: "rgba(255,255,255,.85)",
+                        fontSize: "13px",
+                        fontFamily: "var(--sans)",
+                        flex: 1,
+                      }}
+                    >
+                      ¿Salir sin guardar los cambios?
+                    </span>
                     <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
-                      <button className="btn btn-danger" style={{ padding: "5px 14px", fontSize: "13px" }} onClick={doClose}>S&#237;, salir</button>
-                      <button className="btn btn-sec" style={{ padding: "5px 14px", fontSize: "13px" }} onClick={() => setConfirmCancel(false)}>No, quedarme</button>
+                      <button
+                        className="btn btn-danger"
+                        style={{ padding: "5px 14px", fontSize: "13px" }}
+                        onClick={doClose}
+                      >
+                        S&#237;, salir
+                      </button>
+                      <button
+                        className="btn btn-sec"
+                        style={{ padding: "5px 14px", fontSize: "13px" }}
+                        onClick={() => setConfirmCancel(false)}
+                      >
+                        No, quedarme
+                      </button>
                     </div>
                   </>
                 ) : (
                   <>
-                    <span className="modal-title">{paciente ? "Editar paciente" : "Nuevo paciente"}</span>
-                    <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                      <button className="modal-icon-btn" onClick={handleSave} title="Guardar">💾</button>
-                      <button className="modal-icon-btn" onClick={tryClose} title="Cerrar">✕</button>
+                    <span className="modal-title">
+                      {paciente ? "Editar paciente" : "Nuevo paciente"}
+                    </span>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "6px",
+                        alignItems: "center",
+                      }}
+                    >
+                      <button
+                        className="modal-icon-btn"
+                        onClick={handleSave}
+                        title="Guardar"
+                      >
+                        💾
+                      </button>
+                      <button
+                        className="modal-icon-btn"
+                        onClick={tryClose}
+                        title="Cerrar"
+                      >
+                        ✕
+                      </button>
                     </div>
                   </>
                 )}
@@ -11370,7 +13096,6 @@
                   </div>
                 )}
               </div>
-
             </div>
           </div>,
           document.body,
@@ -11407,8 +13132,20 @@
               <div className="modal-header">
                 <span className="modal-title">Dar de baja</span>
                 <div style={{ display: "flex", gap: "6px" }}>
-                  <button className="modal-icon-btn danger" onClick={handleConfirm} title="Confirmar baja">🗑️</button>
-                  <button className="modal-icon-btn" onClick={onClose} title="Cancelar">✕</button>
+                  <button
+                    className="modal-icon-btn danger"
+                    onClick={handleConfirm}
+                    title="Confirmar baja"
+                  >
+                    🗑️
+                  </button>
+                  <button
+                    className="modal-icon-btn"
+                    onClick={onClose}
+                    title="Cancelar"
+                  >
+                    ✕
+                  </button>
                 </div>
               </div>
               <div className="modal-body">
@@ -11436,7 +13173,6 @@
                   onChange={(e) => setDetalle(e.target.value)}
                   placeholder="Comentarios adicionales..."
                 />
-
               </div>
             </div>
           </div>,
@@ -11567,8 +13303,28 @@
                     </button>
                   ) : (
                     <>
-                      <button className="btn btn-p" onClick={() => onReactivar(p.id)}>Reactivar</button>
-                      <button className="btn" style={{ background: '#7A2800', border: '2px solid #D9534F', color: '#FFD0B8', borderRadius: '50px', fontWeight: 700, fontFamily: 'var(--sans)', padding: '6px 14px', cursor: 'pointer' }} onClick={() => onEliminar(p)}>⛔ Eliminar</button>
+                      <button
+                        className="btn btn-p"
+                        onClick={() => onReactivar(p.id)}
+                      >
+                        Reactivar
+                      </button>
+                      <button
+                        className="btn"
+                        style={{
+                          background: "#7A2800",
+                          border: "2px solid #D9534F",
+                          color: "#FFD0B8",
+                          borderRadius: "50px",
+                          fontWeight: 700,
+                          fontFamily: "var(--sans)",
+                          padding: "6px 14px",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => onEliminar(p)}
+                      >
+                        ⛔ Eliminar
+                      </button>
                     </>
                   )}
                 </div>
@@ -11626,7 +13382,14 @@
                       }}
                     >
                       {pacAlerts(p).map((a, i) => (
-                        <div key={i} className={a.tipo === "urgente" ? "alert-urgente" : "alert-warn"}>
+                        <div
+                          key={i}
+                          className={
+                            a.tipo === "urgente"
+                              ? "alert-urgente"
+                              : "alert-warn"
+                          }
+                        >
                           {a.tipo === "urgente" ? "🚨" : "⚠️"} {a.texto}
                         </div>
                       ))}
@@ -12165,13 +13928,17 @@
       /* ═══════════════════════════════════════ */
       /* SECCIÓN PACIENTES (PRINCIPAL)          */
       /* ═══════════════════════════════════════ */
-      function SeccionPacientes() {
+      function SeccionPacientes({
+        search,
+        setSearch,
+        vistaCards,
+        setVistaCards,
+        openNuevo,
+      }) {
         const [pacientes, setPacientes] = useState([]);
-        const [search, setSearch] = useState("");
         const [filtroEstado, setFiltroEstado] = useState("activos");
         const [filtroTipo, setFiltroTipo] = useState("todos");
         const [filtroCobertura, setFiltroCobertura] = useState("todos");
-        const [vistaCards, setVistaCards] = useState(false);
         const [modalOpen, setModalOpen] = useState(false);
         const [editPac, setEditPac] = useState(null);
         const [bajaModal, setBajaModal] = useState(null);
@@ -12184,6 +13951,13 @@
         useEffect(() => {
           loadPacientes();
         }, []);
+
+        useEffect(() => {
+          if (openNuevo) {
+            setEditPac(null);
+            setModalOpen(true);
+          }
+        }, [openNuevo]);
 
         function savePaciente(p) {
           const all = getData("hgsp_pacientes");
@@ -12224,12 +13998,15 @@
         }
 
         function eliminarPaciente(id) {
-          const all = getData('hgsp_pacientes');
-          setData('hgsp_pacientes', all.filter((x) => x.id !== id));
+          const all = getData("hgsp_pacientes");
+          setData(
+            "hgsp_pacientes",
+            all.filter((x) => x.id !== id),
+          );
           loadPacientes();
           setElimModal(null);
           setPerfilPac(null);
-          showToast('Paciente eliminado definitivamente');
+          showToast("Paciente eliminado definitivamente");
         }
 
         /* FILTRADO */
@@ -12285,57 +14062,16 @@
                 reactivar(id);
                 setPerfilPac(null);
               }}
-              onEliminar={(p) => { setElimModal(p); setPerfilPac(null); }}
+              onEliminar={(p) => {
+                setElimModal(p);
+                setPerfilPac(null);
+              }}
             />
           );
         }
 
         return (
           <div>
-            <div className="page-header">
-              <div className="page-header-icon">🌿</div>
-              <div>
-                <div className="page-header-title">Pacientes</div>
-                <div className="page-header-sub">
-                  ABM completo con perfil detallado, filtros y baja lógica
-                </div>
-              </div>
-            </div>
-
-            {/* TOOLBAR */}
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                alignItems: "center",
-                marginBottom: "14px",
-                flexWrap: "wrap",
-              }}
-            >
-              <SearchInput
-                placeholder="Buscar por nombre, apellido o DNI..."
-                value={search}
-                onChange={setSearch}
-              />
-              <button
-                className="btn btn-g"
-                onClick={() => {
-                  setEditPac(null);
-                  setModalOpen(true);
-                }}
-              >
-                + Nuevo paciente
-              </button>
-              <button
-                className="btn btn-sec"
-                style={{ padding: "8px 14px", fontSize: "20px" }}
-                onClick={() => setVistaCards((v) => !v)}
-                title={vistaCards ? "Vista tabla" : "Vista cards"}
-              >
-                {vistaCards ? "☰" : "▦"}
-              </button>
-            </div>
-
             {/* FILTROS */}
             <div
               style={{
@@ -12457,12 +14193,24 @@
                                 {alerts.length > 0 && (
                                   <span
                                     style={{
-                                      color: alerts.some((a) => a.tipo === "urgente") ? "#FCA5A5" : "#D9534F",
+                                      color: alerts.some(
+                                        (a) => a.tipo === "urgente",
+                                      )
+                                        ? "#FCA5A5"
+                                        : "#D9534F",
                                       fontSize: "11px",
                                     }}
                                   >
-                                    {alerts.some((a) => a.tipo === "urgente") ? "🚨" : "⚠️"}{" "}
-                                    {(alerts.find((a) => a.tipo === "urgente") || alerts[0]).texto}
+                                    {alerts.some((a) => a.tipo === "urgente")
+                                      ? "🚨"
+                                      : "⚠️"}{" "}
+                                    {
+                                      (
+                                        alerts.find(
+                                          (a) => a.tipo === "urgente",
+                                        ) || alerts[0]
+                                      ).texto
+                                    }
                                   </span>
                                 )}
                               </div>
@@ -12522,8 +14270,21 @@
                                 </span>
                               ) : (
                                 <>
-                                  <span className="act-link" title="Reactivar" onClick={() => reactivar(p.id)}>↩️</span>
-                                  <span className="act-link" title="Eliminar definitivamente" style={{ color: "#D9534F" }} onClick={() => setElimModal(p)}>⛔</span>
+                                  <span
+                                    className="act-link"
+                                    title="Reactivar"
+                                    onClick={() => reactivar(p.id)}
+                                  >
+                                    ↩️
+                                  </span>
+                                  <span
+                                    className="act-link"
+                                    title="Eliminar definitivamente"
+                                    style={{ color: "#D9534F" }}
+                                    onClick={() => setElimModal(p)}
+                                  >
+                                    ⛔
+                                  </span>
                                 </>
                               )}
                             </div>
@@ -12605,21 +14366,70 @@
                       {alerts.length > 0 && (
                         <div style={{ fontSize: "11px", marginTop: "6px" }}>
                           {alerts.some((a) => a.tipo === "urgente") && (
-                            <div style={{ color: "#FCA5A5", marginBottom: "2px" }}>
-                              🚨 {alerts.filter((a) => a.tipo === "urgente").map((a) => a.texto).join(" · ")}
+                            <div
+                              style={{ color: "#FCA5A5", marginBottom: "2px" }}
+                            >
+                              🚨{" "}
+                              {alerts
+                                .filter((a) => a.tipo === "urgente")
+                                .map((a) => a.texto)
+                                .join(" · ")}
                             </div>
                           )}
                           {alerts.some((a) => a.tipo === "warn") && (
                             <div style={{ color: "#FFD0B8" }}>
-                              ⚠️ {alerts.filter((a) => a.tipo === "warn").map((a) => a.texto).join(" · ")}
+                              ⚠️{" "}
+                              {alerts
+                                .filter((a) => a.tipo === "warn")
+                                .map((a) => a.texto)
+                                .join(" · ")}
                             </div>
                           )}
                         </div>
                       )}
                       {!p.activo && (
-                        <div style={{ display: 'flex', gap: '8px', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid rgba(255,255,255,.1)' }} onClick={(e) => e.stopPropagation()}>
-                          <button className='btn btn-p' style={{ flex: 1, fontSize: '12px', padding: '5px 10px' }} onClick={(e) => { e.stopPropagation(); reactivar(p.id); }}>↩️ Reactivar</button>
-                          <button className='btn' style={{ fontSize: '12px', padding: '5px 10px', background: '#7A2800', border: '2px solid #D9534F', color: '#FFD0B8', borderRadius: '50px', fontWeight: 700 }} onClick={(e) => { e.stopPropagation(); setElimModal(p); }}>⛔</button>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "8px",
+                            marginTop: "10px",
+                            paddingTop: "10px",
+                            borderTop: "1px solid rgba(255,255,255,.1)",
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            className="btn btn-p"
+                            style={{
+                              flex: 1,
+                              fontSize: "12px",
+                              padding: "5px 10px",
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              reactivar(p.id);
+                            }}
+                          >
+                            ↩️ Reactivar
+                          </button>
+                          <button
+                            className="btn"
+                            style={{
+                              fontSize: "12px",
+                              padding: "5px 10px",
+                              background: "#7A2800",
+                              border: "2px solid #D9534F",
+                              color: "#FFD0B8",
+                              borderRadius: "50px",
+                              fontWeight: 700,
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setElimModal(p);
+                            }}
+                          >
+                            ⛔
+                          </button>
                         </div>
                       )}
                     </div>
@@ -12645,20 +14455,100 @@
               onConfirm={darDeBaja}
             />
             {elimModal && (
-              <div style={{ position: 'fixed', inset: 0, background: 'rgba(30,61,43,.65)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ background: 'var(--vd)', border: '2px solid rgba(200,146,42,.4)', borderRadius: 'var(--r)', width: '380px', overflow: 'hidden', boxShadow: '0 12px 40px rgba(0,0,0,.5)' }}>
-                  <div style={{ height: '4px', background: 'linear-gradient(90deg,#D9534F,#FF8A80)' }} />
-                  <div style={{ padding: '24px' }}>
-                    <div style={{ fontFamily: 'var(--serif)', fontSize: '18px', color: '#FCA5A5', marginBottom: '12px' }}>⛔ Eliminar paciente</div>
-                    <p style={{ color: 'rgba(255,255,255,.8)', fontSize: '14px', marginBottom: '8px' }}>
-                      Vas a eliminar definitivamente a <strong style={{ color: 'var(--do)' }}>{elimModal.nombre} {elimModal.apellido}</strong>.
+              <div
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  background: "rgba(30,61,43,.65)",
+                  zIndex: 2000,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  style={{
+                    background: "var(--vd)",
+                    border: "2px solid rgba(200,146,42,.4)",
+                    borderRadius: "var(--r)",
+                    width: "380px",
+                    overflow: "hidden",
+                    boxShadow: "0 12px 40px rgba(0,0,0,.5)",
+                  }}
+                >
+                  <div
+                    style={{
+                      height: "4px",
+                      background: "linear-gradient(90deg,#D9534F,#FF8A80)",
+                    }}
+                  />
+                  <div style={{ padding: "24px" }}>
+                    <div
+                      style={{
+                        fontFamily: "var(--serif)",
+                        fontSize: "18px",
+                        color: "#FCA5A5",
+                        marginBottom: "12px",
+                      }}
+                    >
+                      ⛔ Eliminar paciente
+                    </div>
+                    <p
+                      style={{
+                        color: "rgba(255,255,255,.8)",
+                        fontSize: "14px",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      Vas a eliminar definitivamente a{" "}
+                      <strong style={{ color: "var(--do)" }}>
+                        {elimModal.nombre} {elimModal.apellido}
+                      </strong>
+                      .
                     </p>
-                    <p style={{ color: 'rgba(255,255,255,.55)', fontSize: '12px', marginBottom: '20px' }}>
-                      Esta accion no se puede deshacer. El registro se borrara de forma permanente.
+                    <p
+                      style={{
+                        color: "rgba(255,255,255,.55)",
+                        fontSize: "12px",
+                        marginBottom: "20px",
+                      }}
+                    >
+                      Esta accion no se puede deshacer. El registro se borrara
+                      de forma permanente.
                     </p>
-                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                      <button className='btn' style={{ borderColor: 'rgba(255,255,255,.2)', color: 'rgba(255,255,255,.7)', background: 'transparent', borderRadius: '50px' }} onClick={() => setElimModal(null)}>Cancelar</button>
-                      <button className='btn' style={{ background: '#7A2800', border: '2px solid #D9534F', color: '#FFD0B8', borderRadius: '50px', fontWeight: 700, fontFamily: 'var(--sans)' }} onClick={() => eliminarPaciente(elimModal.id)}>Eliminar definitivamente</button>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "10px",
+                        justifyContent: "flex-end",
+                      }}
+                    >
+                      <button
+                        className="btn"
+                        style={{
+                          borderColor: "rgba(255,255,255,.2)",
+                          color: "rgba(255,255,255,.7)",
+                          background: "transparent",
+                          borderRadius: "50px",
+                        }}
+                        onClick={() => setElimModal(null)}
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        className="btn"
+                        style={{
+                          background: "#7A2800",
+                          border: "2px solid #D9534F",
+                          color: "#FFD0B8",
+                          borderRadius: "50px",
+                          fontWeight: 700,
+                          fontFamily: "var(--sans)",
+                        }}
+                        onClick={() => eliminarPaciente(elimModal.id)}
+                      >
+                        Eliminar definitivamente
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -19689,6 +21579,9 @@
         const [baseDate, setBaseDate] = useState(new Date());
         const [vista, setVista] = useState("semanal");
         const [modalConfirmActivar, setModalConfirmActivar] = useState(false);
+        const [pacSearch, setPacSearch] = useState("");
+        const [pacVistaCards, setPacVistaCards] = useState(false);
+        const [pacOpenNuevo, setPacOpenNuevo] = useState(0);
 
         const hoyStr = new Date().toISOString().slice(0, 10);
 
@@ -19731,7 +21624,15 @@
             case "agenda":
               return <SeccionAgenda {...agendaProps} />;
             case "pacientes":
-              return <SeccionPacientes />;
+              return (
+                <SeccionPacientes
+                  search={pacSearch}
+                  setSearch={setPacSearch}
+                  vistaCards={pacVistaCards}
+                  setVistaCards={setPacVistaCards}
+                  openNuevo={pacOpenNuevo}
+                />
+              );
             case "facturacion":
               return <SeccionFacturacion />;
             case "planillas_at":
@@ -19770,6 +21671,13 @@
               goHoy={goHoy}
               vista={vista}
               onCargarTurnosFijos={() => setModalConfirmActivar(true)}
+              pacientesBar={{
+                search: pacSearch,
+                setSearch: setPacSearch,
+                vistaCards: pacVistaCards,
+                setVistaCards: setPacVistaCards,
+                onNuevo: () => setPacOpenNuevo((c) => c + 1),
+              }}
             />
             <div className="app-layout">
               <Sidebar
