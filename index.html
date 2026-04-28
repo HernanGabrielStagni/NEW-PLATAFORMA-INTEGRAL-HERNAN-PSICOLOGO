@@ -13944,6 +13944,10 @@
         const [bajaModal, setBajaModal] = useState(null);
         const [elimModal, setElimModal] = useState(null);
         const [perfilPac, setPerfilPac] = useState(null);
+        const [sortCol, setSortCol] = useState(null);
+        const [sortDir, setSortDir] = useState("asc");
+        const [popoverCol, setPopoverCol] = useState(null);
+        const popoverRef = useRef(null);
 
         function loadPacientes() {
           setPacientes(getData("hgsp_pacientes"));
@@ -13958,6 +13962,15 @@
             setModalOpen(true);
           }
         }, [openNuevo]);
+
+        useEffect(() => {
+          if (!popoverCol) return;
+          function handle(e) {
+            if (popoverRef.current && !popoverRef.current.contains(e.target)) setPopoverCol(null);
+          }
+          document.addEventListener("mousedown", handle);
+          return () => document.removeEventListener("mousedown", handle);
+        }, [popoverCol]);
 
         function savePaciente(p) {
           const all = getData("hgsp_pacientes");
@@ -14009,6 +14022,30 @@
           showToast("Paciente eliminado definitivamente");
         }
 
+        function toggleSort(col) {
+          if (sortCol === col) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+          else { setSortCol(col); setSortDir("asc"); }
+        }
+
+        function colStats(col, data) {
+          const counts = {};
+          data.forEach((p) => {
+            let key;
+            if (col === "tipo") {
+              key = p.tipo === "psicologia" ? "Psicología" : p.tipo === "AT" ? "AT" : p.tipo === "ambos" ? "Ambos" : (p.tipo || "Sin tipo");
+            } else if (col === "cobertura") {
+              key = p.cobertura === "particular" ? "Particular" : p.cobertura === "obra_social" ? "Obra Social" : p.cobertura === "mixto" ? "Mixto" : "Sin cobertura";
+            } else if (col === "frecuencia") {
+              key = p.frecuencia ? p.frecuencia.charAt(0).toUpperCase() + p.frecuencia.slice(1) : "Sin frecuencia";
+            }
+            if (key) counts[key] = (counts[key] || 0) + 1;
+          });
+          const total = data.length || 1;
+          return Object.entries(counts)
+            .sort((a, b) => b[1] - a[1])
+            .map(([label, count]) => ({ label, count, pct: Math.round((count / total) * 100) }));
+        }
+
         /* FILTRADO */
         let filtered = pacientes;
         if (filtroEstado === "activos")
@@ -14033,6 +14070,26 @@
               `${p.nombre} ${p.apellido}`.toLowerCase().includes(q) ||
               p.dni.includes(q),
           );
+        }
+
+        /* ORDENAMIENTO */
+        if (sortCol) {
+          const freqOrd = { semanal: 0, quincenal: 1, mensual: 2, intensiva: 3 };
+          filtered = [...filtered].sort((a, b) => {
+            let va, vb;
+            switch (sortCol) {
+              case "nombre": va = `${a.apellido} ${a.nombre}`.toLowerCase(); vb = `${b.apellido} ${b.nombre}`.toLowerCase(); break;
+              case "dni": va = parseInt(a.dni || "0", 10); vb = parseInt(b.dni || "0", 10); break;
+              case "cobertura": va = (a.cobertura || "").toLowerCase(); vb = (b.cobertura || "").toLowerCase(); break;
+              case "frecuencia": va = freqOrd[a.frecuencia] ?? 99; vb = freqOrd[b.frecuencia] ?? 99; break;
+              case "tipo": va = (a.tipo || "").toLowerCase(); vb = (b.tipo || "").toLowerCase(); break;
+              case "estado": va = a.activo ? 0 : 1; vb = b.activo ? 0 : 1; break;
+              default: va = ""; vb = "";
+            }
+            if (va < vb) return sortDir === "asc" ? -1 : 1;
+            if (va > vb) return sortDir === "asc" ? 1 : -1;
+            return 0;
+          });
         }
 
         const activos = pacientes.filter((p) => p.activo).length;
@@ -14126,25 +14183,67 @@
               </select>
             </div>
 
-            {/* BADGES RESUMEN */}
-            <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
-              <Badge type="ok">Activos: {activos}</Badge>
-              <Badge type="warn">AT: {atCount}</Badge>
-              <Badge type="error">Inactivos: {inactivos}</Badge>
-            </div>
-
             {/* VISTA TABLA */}
             {!vistaCards && (
               <div className="tbl-wrap">
                 <table className="tbl">
                   <thead>
                     <tr>
-                      <th>Paciente</th>
-                      <th>DNI</th>
-                      <th>Cobertura</th>
-                      <th>Frecuencia</th>
-                      <th>Tipo</th>
-                      <th>Estado</th>
+                      {/* Headers sortables — click ordena, icono 📊 abre stats */}
+                      {[
+                        { col: "nombre", label: "Paciente", stats: false },
+                        { col: "dni", label: "DNI", stats: false },
+                        { col: "cobertura", label: "Cobertura", stats: true },
+                        { col: "frecuencia", label: "Frecuencia", stats: true },
+                        { col: "tipo", label: "Tipo", stats: true },
+                        { col: "estado", label: "Estado", stats: false },
+                      ].map(({ col, label, stats }) => (
+                        <th key={col} style={{ position: "relative", whiteSpace: "nowrap" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                            <span
+                              onClick={() => toggleSort(col)}
+                              style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "4px", userSelect: "none" }}
+                              title={`Ordenar por ${label}`}
+                            >
+                              {label}
+                              <span style={{ fontSize: "9px", opacity: sortCol === col ? 1 : 0.35, color: sortCol === col ? "var(--do)" : "inherit" }}>
+                                {sortCol === col ? (sortDir === "asc" ? "▲" : "▼") : "↕"}
+                              </span>
+                            </span>
+                            {stats && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setPopoverCol(popoverCol === col ? null : col); }}
+                                title={`Estadísticas por ${label}`}
+                                style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "11px", padding: "0 1px", lineHeight: 1, color: popoverCol === col ? "var(--do)" : "rgba(255,255,255,.45)", transition: "color .15s" }}
+                              >
+                                📊
+                              </button>
+                            )}
+                          </div>
+                          {/* POPOVER DE ESTADÍSTICAS */}
+                          {popoverCol === col && (
+                            <div
+                              ref={popoverRef}
+                              style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, zIndex: 400, background: "var(--vd)", border: "2px solid var(--vm)", borderRadius: "14px", padding: "14px 16px", minWidth: "200px", boxShadow: "0 8px 28px rgba(0,0,0,.45)", fontFamily: "var(--sans)" }}
+                            >
+                              <div style={{ fontFamily: "var(--mono)", fontSize: "9px", color: "rgba(255,255,255,.35)", letterSpacing: ".1em", textTransform: "uppercase", marginBottom: "10px" }}>
+                                {label} · {filtered.length} pacientes
+                              </div>
+                              {colStats(col, filtered).map(({ label: lbl, count, pct }) => (
+                                <div key={lbl} style={{ marginBottom: "8px" }}>
+                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "3px" }}>
+                                    <span style={{ fontSize: "12px", color: "rgba(255,255,255,.78)", fontWeight: 600 }}>{lbl}</span>
+                                    <span style={{ fontFamily: "var(--mono)", fontSize: "11px", color: "var(--do)", fontWeight: 700 }}>{count} <span style={{ color: "rgba(255,255,255,.3)", fontWeight: 400 }}>({pct}%)</span></span>
+                                  </div>
+                                  <div style={{ background: "rgba(255,255,255,.1)", borderRadius: "4px", height: "5px" }}>
+                                    <div style={{ width: `${pct}%`, background: "linear-gradient(90deg, var(--do), #E8B84B)", borderRadius: "4px", height: "100%", transition: "width .3s" }} />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </th>
+                      ))}
                       <th>Acciones</th>
                     </tr>
                   </thead>
