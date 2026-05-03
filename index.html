@@ -3998,11 +3998,36 @@
                           : "—";
                         const est =
                           ESTADOS_LABEL[s.estado] || ESTADOS_LABEL.pendiente;
-                        const monto = s.montoCobrado
-                          ? `$${Number(s.montoCobrado).toLocaleString("es-AR")}`
-                          : s.montoParticular
-                            ? `$${Number(s.montoParticular).toLocaleString("es-AR")}`
-                            : "—";
+                        // Usar modalidadPago del turno para mostrar el monto correcto.
+                        const monto = (() => {
+                          if (
+                            !s.montoCobrado &&
+                            !s.montoParticular &&
+                            !s.coseguroMonto
+                          )
+                            return "—";
+                          if (s.modalidadPago === "particular") {
+                            const m =
+                              Number(s.montoParticular) ||
+                              Number(s.montoCobrado) ||
+                              0;
+                            return m > 0
+                              ? `$${m.toLocaleString("es-AR")}`
+                              : "—";
+                          }
+                          if (s.modalidadPago === "obra_social") {
+                            const m =
+                              Number(s.coseguroMonto) ||
+                              Number(s.montoCobrado) ||
+                              0;
+                            return m > 0
+                              ? `$${m.toLocaleString("es-AR")}`
+                              : "OS";
+                          }
+                          // Legacy: usar montoCobrado si existe
+                          const m = Number(s.montoCobrado) || 0;
+                          return m > 0 ? `$${m.toLocaleString("es-AR")}` : "—";
+                        })();
                         return (
                           <tr
                             key={s.id}
@@ -5764,28 +5789,37 @@
             return;
           }
           const ses = buildSesionFinal();
-          // Crear cobro en hgsp_cobros si corresponde y no existe aún
+          // Crear o actualizar cobro en hgsp_cobros si corresponde.
           if (ses.cobrado && onSaveCobro) {
-            const yaExiste = getData("hgsp_cobros").some(
+            const cobrosActuales = getData("hgsp_cobros");
+            const existente = cobrosActuales.find(
               (c) => c.sesionId === ses.id,
             );
-            if (!yaExiste) {
-              onSaveCobro({
-                id: genId(),
-                pacienteId: ses.pacienteId,
-                sesionId: ses.id,
-                fecha: ses.fecha,
-                concepto:
-                  ses.modalidadPago === "particular"
-                    ? "particular"
-                    : "coseguro",
-                monto: ses.montoCobrado,
-                cobrado: true,
-                metodoPago:
-                  ses.modalidadPago === "particular"
-                    ? ses.metodoPagoParticular
-                    : ses.metodoPagoOS,
-              });
+            const nuevoCobro = {
+              id: existente?.id || genId(),
+              pacienteId: ses.pacienteId,
+              sesionId: ses.id,
+              fecha: ses.fecha,
+              concepto:
+                ses.modalidadPago === "particular"
+                  ? "particular"
+                  : "coseguro",
+              monto: ses.montoCobrado,
+              cobrado: true,
+              metodoPago:
+                ses.modalidadPago === "particular"
+                  ? ses.metodoPagoParticular
+                  : ses.metodoPagoOS,
+            };
+            if (!existente) {
+              onSaveCobro(nuevoCobro);
+            } else if (
+              existente.monto !== nuevoCobro.monto ||
+              existente.concepto !== nuevoCobro.concepto ||
+              existente.metodoPago !== nuevoCobro.metodoPago
+            ) {
+              // Actualizar el cobro existente si cambió la modalidad o el monto
+              onSaveCobro({ ...nuevoCobro, _update: true });
             }
           }
           onSave(ses);
@@ -8274,22 +8308,40 @@
           };
           daySes.forEach((s) => {
             const pac = pacientes.find((p) => p.id === s.pacienteId);
-            const tieneOS = !!(
-              pac?.obraSocial &&
+
+            // Determinar modalidad efectiva: el turno manda sobre el perfil del paciente.
+            // Si el turno tiene modalidadPago explicito, ese es el criterio.
+            // Si no (sesion legacy), caer en el perfil del paciente.
+            const modalidadEfectiva =
+              s.modalidadPago ||
+              (pac?.obraSocial &&
               pac.obraSocial !== "" &&
               pac.obraSocial.toLowerCase() !== "ninguna"
-            );
-            const coseguroMonto = tieneOS ? Number(pac?.coseguro) || 0 : 0;
+                ? "obra_social"
+                : "particular");
+            const tieneOS = modalidadEfectiva === "obra_social";
 
             if (s.estado === "asistio") {
-              if (tieneOS) {
+              if (modalidadEfectiva === "obra_social") {
+                // Cobro como obra social: sumar orden + coseguro
                 const ord = Number(valorOrdenDe(s)) || 0;
                 if (ord > 0) ordenes += ord;
-                if (coseguroMonto > 0)
-                  addCobro(coseguroMonto, s.metodoPago, s.cobrado);
+                const coseguroMonto =
+                  Number(s.coseguroMonto) || Number(pac?.coseguro) || 0;
+                if (coseguroMonto > 0) {
+                  const metodo = s.metodoPagoOS || s.metodoPago || "efectivo";
+                  addCobro(
+                    coseguroMonto,
+                    metodo,
+                    s.coseguroAbonado ?? s.cobrado,
+                  );
+                }
               } else {
-                const monto = valorParticularDe(s);
-                addCobro(monto, s.metodoPago, s.cobrado);
+                // Cobro como particular
+                const monto = Number(s.montoParticular) || valorParticularDe(s);
+                const metodo =
+                  s.metodoPagoParticular || s.metodoPago || "efectivo";
+                addCobro(monto, metodo, s.particularAbonado ?? s.cobrado);
               }
             } else if (s.cobroCancel) {
               if (tieneOS) {
@@ -8461,8 +8513,18 @@
         }
         function saveCobro(c) {
           const all = getData("hgsp_cobros");
-          all.push(c);
-          setData("hgsp_cobros", all);
+          if (c._update) {
+            const { _update, ...cobroLimpio } = c;
+            setData(
+              "hgsp_cobros",
+              all.map((actual) =>
+                actual.id === cobroLimpio.id ? cobroLimpio : actual,
+              ),
+            );
+          } else {
+            all.push(c);
+            setData("hgsp_cobros", all);
+          }
           loadData();
         }
 
@@ -13687,14 +13749,30 @@
                 (() => {
                   /* ── Helpers de columna ── */
                   const DIAS_ABREV = ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"];
+                  const cobroDeSesion = (s) =>
+                    cobros.find((c) => c.sesionId === s.id);
+
                   function cobroCell(s) {
                     if (s.estado === "asistio") {
+                      const cobro = cobroDeSesion(s);
+                      if (cobro) {
+                        const m = Number(cobro.monto) || 0;
+                        return m > 0
+                          ? `$${m.toLocaleString("es-AR")}`
+                          : "—";
+                      }
                       if (s.modalidadPago === "particular") {
-                        const m = Number(s.montoParticular) || 0;
+                        const m =
+                          Number(s.montoParticular) ||
+                          Number(s.montoCobrado) ||
+                          0;
                         return m > 0 ? `$${m.toLocaleString("es-AR")}` : "—";
                       }
                       if (s.modalidadPago === "obra_social") {
-                        const m = Number(s.coseguroMonto) || 0;
+                        const m =
+                          Number(s.coseguroMonto) ||
+                          Number(s.montoCobrado) ||
+                          0;
                         return m > 0 ? `$${m.toLocaleString("es-AR")}` : "OS";
                       }
                       const m = Number(s.montoCobrado) || 0;
@@ -13728,6 +13806,8 @@
                   }
                   function pendienteCell(s) {
                     if (s.estado === "asistio") {
+                      const cobro = cobroDeSesion(s);
+                      if (cobro) return cobro.cobrado ? "✅" : "⏳";
                       if (
                         s.modalidadPago === "particular" &&
                         !s.particularAbonado
